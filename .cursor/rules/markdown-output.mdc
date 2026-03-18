@@ -1,0 +1,75 @@
+---
+description: Markdown output quality — all `.md` files produced by agents must pass markdownlint-cli2
+globs: "**/*.md"
+alwaysApply: true
+---
+
+# Markdown Output Quality Rules
+
+All `.md` files created or modified by any agent MUST comply with the
+project's `.markdownlint-cli2.jsonc` configuration. Do NOT modify the
+lint config to work around violations — fix the content instead.
+
+## Key Rules to Follow
+
+### Headings (MD001, MD003, MD022, MD025)
+
+- Use ATX-style headings (`#`, `##`, `###`).
+- Heading levels must increment by one (no jumping from `#` to `###`).
+- Surround every heading with blank lines (one blank line before AND after).
+- Only one top-level `# Heading` per file.
+
+### Blank Lines (MD012, MD022, MD031, MD032)
+
+- No multiple consecutive blank lines.
+- Blank line before and after headings.
+- Blank line before and after fenced code blocks.
+- Blank line before and after lists.
+
+### Lists (MD004, MD005, MD007, MD030, MD032)
+
+- Use `-` (dash) for unordered list markers, consistently.
+- Indent nested lists by 2 spaces.
+- Surround lists with blank lines.
+- Ordered lists use `1.` numbering.
+
+### Code Blocks (MD031, MD040, MD046, MD048)
+
+- Use fenced code blocks (triple backticks), not indented blocks.
+- Always specify a language identifier after opening backticks
+  (e.g., ` ```rust `, ` ```json `, ` ```text `).
+- If content is not code and has no specific language, use ` ```text `.
+- Surround fenced code blocks with blank lines.
+
+### Spacing and Whitespace (MD009, MD010, MD047)
+
+- No trailing spaces at end of lines.
+- No hard tabs — use spaces only.
+- Files must end with a single newline.
+
+### Links and Images (MD042, MD051, MD052)
+
+- No empty links `[text]()`.
+- Link fragments must match an existing heading anchor in the target.
+
+### Tables
+
+- Use `|` pipes for table columns, with `---` separator rows.
+- Ensure consistent column count across all rows.
+
+## Self-Check Before Finishing
+
+When producing or editing `.md` files, verify:
+
+1. Every heading has blank lines above and below.
+2. Every code block has a language tag and blank lines around it.
+3. No trailing whitespace or consecutive blank lines.
+4. File ends with exactly one newline.
+5. List items use `-` with consistent indentation.
+
+## Project-Specific Overrides
+
+- **MD013 (line-length) is DISABLED** — spec files contain wide tables;
+  do not manually wrap long table rows.
+- **MD024 (no-duplicate-heading)** uses `siblings_only: true` — same heading
+  text is allowed at different nesting levels.

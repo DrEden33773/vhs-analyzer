@@ -80,3 +80,4 @@ When files disagree, follow:
 - Phase specs are frozen after Stage B completion; changes require explicit user approval.
 - Use `tree-sitter-vhs` grammar.js as the ground-truth reference for VHS tape language syntax.
 - Completed phase execution records are archived in `trace/<phase>/`. Root `STATUS.yaml` and `EXECUTION_TRACKER.md` only contain the current execution state.
+- All `.md` files produced by any agent MUST pass `markdownlint-cli2`. See `.cursor/rules/markdown-output.mdc` for compliance details and `.markdownlint-cli2.jsonc` for the rule configuration.
