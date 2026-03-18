@@ -73,31 +73,53 @@ test_scenarios:
 
 batches:
   batch1:
-    name: "Lexer (WS-1)"
+    name: "SyntaxKind + Lexer (WS-1)"
     work_packages: [WS-1]
-    requirements: [LEX-001, LEX-002, LEX-003, LEX-004, LEX-005, LEX-006, LEX-007, LEX-008, LEX-009, LEX-010, LEX-011, LEX-012]
+    requirements: [PAR-001, LEX-001, LEX-002, LEX-003, LEX-004, LEX-005, LEX-006, LEX-007, LEX-008, LEX-009, LEX-010, LEX-011, LEX-012]
     test_ids: "T-LEX-*"
+    crate: vhs-analyzer-core
     status: not_started
   batch2:
-    name: "Parser (WS-2)"
+    name: "Parser + Typed AST (WS-2)"
     work_packages: [WS-2]
-    requirements: [PAR-001, PAR-002, PAR-003, PAR-004, PAR-005, PAR-006, PAR-007]
+    requirements: [PAR-002, PAR-003, PAR-004, PAR-005, PAR-006, PAR-007]
     test_ids: "T-PAR-*"
+    crate: vhs-analyzer-core
     depends_on: [batch1]
     status: not_started
   batch3:
-    name: "LSP Core (WS-3)"
+    name: "Formatting (WS-5)"
+    work_packages: [WS-5]
+    requirements: [FMT-001, FMT-002, FMT-003, FMT-004, FMT-005, FMT-006, FMT-007, FMT-008, FMT-009]
+    test_ids: "T-FMT-*"
+    crate: vhs-analyzer-core
+    depends_on: [batch2]
+    milestone: "vhs-analyzer-core crate complete"
+    status: not_started
+  batch4:
+    name: "LSP Core + Diagnostics (WS-3)"
     work_packages: [WS-3]
     requirements: [LSP-001, LSP-002, LSP-003, LSP-004, LSP-005, LSP-006, LSP-007, LSP-008]
     test_ids: "T-LSP-*"
-    depends_on: [batch2]
+    crate: vhs-analyzer-lsp
+    depends_on: [batch3]
     status: not_started
-  batch4:
-    name: "Hover + Formatting (WS-4 + WS-5)"
-    work_packages: [WS-4, WS-5]
-    requirements: [HOV-001, HOV-002, HOV-003, HOV-004, HOV-005, HOV-006, FMT-001, FMT-002, FMT-003, FMT-004, FMT-005, FMT-006, FMT-007, FMT-008, FMT-009]
-    test_ids: "T-HOV-*, T-FMT-*"
-    depends_on: [batch2]
+  batch5:
+    name: "Hover (WS-4)"
+    work_packages: [WS-4]
+    requirements: [HOV-001, HOV-002, HOV-003, HOV-004, HOV-005, HOV-006]
+    test_ids: "T-HOV-*"
+    crate: vhs-analyzer-lsp
+    depends_on: [batch4]
+    milestone: "vhs-analyzer-lsp crate complete"
+    status: not_started
+  batch6:
+    name: "Integration + Closeout"
+    work_packages: []
+    requirements: []
+    test_ids: "T-INT-001"
+    crate: both
+    depends_on: [batch5]
     status: not_started
 
 builder_progress:

@@ -13,21 +13,22 @@ Completed: —
 | Architect Stage B | Claude | Completed | 2026-03-18 | 7 frozen specs, 42 reqs, 105 test scenarios |
 | Builder | Builder | Not Started | — | Lexer, Parser, LSP Core, Hover, Formatting |
 
-## 2. Builder Batch Plan
+## 2. Builder Batch Plan (Crate-Aligned, 6 Batches)
 
-| Batch | Name | WP | Requirements | Depends On | Status |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Lexer | WS-1 | LEX-001 through LEX-012 | — | not started |
-| 2 | Parser | WS-2 | PAR-001 through PAR-007 | Batch 1 | not started |
-| 3 | LSP Core | WS-3 | LSP-001 through LSP-008 | Batch 2 | not started |
-| 4 | Hover + Formatting | WS-4 + WS-5 | HOV-001 through HOV-006, FMT-001 through FMT-009 | Batch 2 | not started |
+| Batch | Name | WP | Crate | Requirements | Depends On | Milestone | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | SyntaxKind + Lexer | WS-1 | core | PAR-001, LEX-001~012 | — | — | not started |
+| 2 | Parser + Typed AST | WS-2 | core | PAR-002~007 | B1 | — | not started |
+| 3 | Formatting | WS-5 | core | FMT-001~009 | B2 | core crate complete | not started |
+| 4 | LSP Core + Diagnostics | WS-3 | lsp | LSP-001~008 | B3 | — | not started |
+| 5 | Hover | WS-4 | lsp | HOV-001~006 | B4 | lsp crate complete | not started |
+| 6 | Integration + Closeout | — | both | T-INT-001 | B5 | Phase 1 complete | not started |
 
 ## 3. Dependency Constraints
 
-- Batch 1 (Lexer) is independent — no dependencies.
-- Batch 2 (Parser) depends on Batch 1.
-- Batch 3 (LSP Core) depends on Batch 2.
-- Batch 4 (Hover + Formatting) depends on Batch 2; MAY run partially in parallel with Batch 3.
+- B1 → B2 → B3 → B4 → B5 → B6 (strictly sequential).
+- B1-B3 complete `vhs-analyzer-core` crate. B4-B5 complete `vhs-analyzer-lsp` crate.
+- B6 MUST be last (integration test + closeout).
 
 ## 4. Stage A Design Decisions Log
 
