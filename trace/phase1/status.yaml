@@ -1,0 +1,42 @@
+phase: phase1_lsp_foundation
+status: not_started
+started_at: null
+completed_at: null
+
+spec_files:
+  - spec/phase1/README.md
+  - spec/phase1/SPEC_LEXER.md
+  - spec/phase1/SPEC_PARSER.md
+  - spec/phase1/SPEC_LSP_CORE.md
+  - spec/phase1/SPEC_HOVER.md
+  - spec/phase1/SPEC_FORMATTING.md
+  - spec/phase1/SPEC_TEST_MATRIX.md
+  - spec/phase1/SPEC_TRACEABILITY.md
+
+requirement_ids: {}
+
+test_scenarios: null
+
+batches:
+  batch1:
+    name: "Lexer (WS-1)"
+    work_packages: [WS-1]
+    requirements: []
+    status: not_started
+  batch2:
+    name: "Parser (WS-2)"
+    work_packages: [WS-2]
+    requirements: []
+    status: not_started
+  batch3:
+    name: "LSP Core (WS-3)"
+    work_packages: [WS-3]
+    requirements: []
+    status: not_started
+  batch4:
+    name: "Hover + Formatting (WS-4 + WS-5)"
+    work_packages: [WS-4, WS-5]
+    requirements: []
+    status: not_started
+
+builder_progress: {}

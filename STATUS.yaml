@@ -1,0 +1,51 @@
+schema_version: 2
+updated_at: "2026-03-18"
+project:
+  name: vhs-analyzer
+  phase: pre_phase1_initialization
+  status: not_started
+
+authority_order:
+  - spec
+  - status_yaml
+  - execution_tracker
+  - roadmap
+  - readme
+
+ownership:
+  scout:
+    scope:
+      - market_research
+      - competitive_analysis
+      - roadmap_drafting
+  architect:
+    scope:
+      - ast_node_definitions
+      - lsp_protocol_subset
+      - validation_matrix
+      - extension_api_design
+  builder:
+    scope:
+      - rust_lsp_implementation
+      - typescript_extension
+      - tests_and_refactors
+      - ci_cd_configuration
+      - non_strategic_doc_sync
+
+phases:
+  pre_phase1:
+    status: completed
+    completed_at: "2026-03-18"
+    description: "Project initialization — monorepo scaffolding, Cargo workspace, toolchain"
+  phase1:
+    status: not_started
+    description: "LSP Foundation — Architect Stage A/B, then Builder implements Lexer, Parser, LSP Core, Hover, Formatting"
+  phase2:
+    status: not_started
+    description: "Intelligence & Diagnostics — Autocomplete, Semantic Validation, Safety Check Engine"
+  phase3:
+    status: not_started
+    description: "VSCode Extension Client — LSP client, Live Preview, CodeLens, Platform VSIX packaging"
+
+next_execution_targets:
+  - phase1_architect_stage_a

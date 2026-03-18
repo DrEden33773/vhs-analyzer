@@ -1,0 +1,14 @@
+[package]
+name = "vhs-analyzer-core"
+description = "VHS tape language core: lexer, parser, and lossless syntax tree (rowan)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+rowan = "0.16"
+
+[lints]
+workspace = true

@@ -1,0 +1,17 @@
+[workspace]
+resolver = "3"
+members = ["crates/vhs-analyzer-core", "crates/vhs-analyzer-lsp"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+repository = "https://github.com/DrEden33773/vhs-analyzer"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
