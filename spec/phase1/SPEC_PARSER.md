@@ -2,10 +2,16 @@
 
 **Phase:** 1 — LSP Foundation
 **Work Stream:** WS-2 (Parser)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** WS-1 (SPEC_LEXER.md)
 **Last Updated:** 2026-03-18
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-18.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -360,11 +366,58 @@ Each `parse_*_command` function:
 4. Consumes remaining tokens until `NEWLINE` or `EOF`.
 5. Calls `p.finish_node()`.
 
-## 9. Freeze Candidates
+## 9. Resolved Design Decisions
 
-| ID | Item | Options Under Consideration |
-| --- | --- | --- |
-| **FC-PAR-01** | Should parse errors be stored in the tree (as node properties) or as a side-channel Vec? | Side-channel (recommended, rust-analyzer pattern) vs. In-tree (simpler access) |
-| **FC-PAR-02** | Should the typed AST layer be hand-written or macro-generated (like rust-analyzer's `ast::generated`)? | Hand-written (simpler for small grammar) vs. Macro/codegen (scales better) |
-| **FC-PAR-03** | Handling of multi-line commands — VHS does not support line continuation; should the parser strictly enforce one-command-per-line? | Strict (reject multi-line) vs. Lenient (accept but warn) |
-| **FC-PAR-04** | Should `COPY_COMMAND` include an optional string child (per VHS README) or be argument-less (per grammar.js)? | Linked to FC-LEX-02 |
+All Freeze Candidates from Stage A have been closed with definitive decisions.
+
+### FC-PAR-01 — Parse Error Storage (RESOLVED: Side-channel Vec)
+
+**Decision:** Parse errors MUST be stored as a side-channel `Vec<ParseError>`
+in the `Parse` struct, NOT as properties within the green tree.
+
+**Rationale:** This follows the proven rust-analyzer pattern. The green tree
+(`GreenNode`) is an immutable, interned data structure optimized for sharing
+and cheap cloning. Embedding errors in the tree would prevent interning and
+complicate the API. A side-channel `Vec<ParseError>` with `TextRange` offsets
+allows O(1) error collection during parsing and clean separation between
+the tree structure (always valid) and error reporting. The `Parse` struct
+(§7) owns both the `GreenNode` and the error list, providing a unified API.
+
+### FC-PAR-02 — Typed AST Layer Strategy (RESOLVED: Hand-written for Phase 1)
+
+**Decision:** The typed AST layer SHOULD be hand-written in Phase 1. Each AST
+node type is a newtype wrapper around `SyntaxNode` with accessor methods.
+
+**Rationale:** The VHS grammar has ~20 command types with simple, fixed
+structures. Hand-written accessors are easy to review, require no build-time
+codegen, and add no proc-macro dependencies. rust-analyzer's codegen approach
+is justified by its ~200+ node kinds — VHS is 10x smaller. If Phase 2
+significantly expands the grammar, a codegen approach MAY be introduced, but
+this is not expected given VHS's design stability. Per Rust Best Practices
+(Apollo handbook): prefer simplicity over abstraction when the domain is small.
+
+### FC-PAR-03 — One-Command-Per-Line Enforcement (RESOLVED: Strict)
+
+**Decision:** The parser MUST strictly enforce one command per line. `NEWLINE`
+tokens are command terminators. Any tokens remaining after a complete command
+parse and before the next `NEWLINE` MUST be wrapped in an `ERROR` node.
+
+**Rationale:** VHS does not support line continuation or multi-line commands
+(verified against VHS README 2026-03-18). Every command in the VHS
+specification occupies exactly one logical line. Strict enforcement:
+(1) simplifies the parser's top-level loop (iterate over lines),
+(2) guarantees error localization per PAR-004 (errors cannot span lines),
+(3) matches user expectations from VHS runtime behavior. A lenient approach
+would mask genuine errors and provide no benefit.
+
+### FC-PAR-04 — COPY_COMMAND Optional String Argument (RESOLVED: MUST include)
+
+**Decision:** `COPY_COMMAND` MUST include an optional `STRING` child token.
+The parser production is: `CopyCommand = 'Copy' String?`
+
+**Rationale:** The VHS README (verified 2026-03-18) documents `Copy "text"`
+with an explicit string argument: `Copy "https://github.com/charmbracelet"`.
+The tree-sitter-vhs grammar.js has not been updated to reflect this, but the
+VHS README is the behavioral ground truth. The parser MUST accept both
+`Copy` (standalone, clipboard operation) and `Copy "text"` (copy literal text).
+The ungrammar in §5 has been updated accordingly.

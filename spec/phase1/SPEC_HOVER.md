@@ -2,10 +2,16 @@
 
 **Phase:** 1 — LSP Foundation
 **Work Stream:** WS-4 (Hover)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** WS-2 (SPEC_PARSER.md), WS-3 (SPEC_LSP_CORE.md)
 **Last Updated:** 2026-03-18
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-18.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -237,10 +243,69 @@ Set the font size for the terminal in pixels.
 
 ```
 
-## 7. Freeze Candidates
+## 7. Resolved Design Decisions
 
-| ID | Item | Options Under Consideration |
-| --- | --- | --- |
-| **FC-HOV-01** | Should hover documentation be embedded in Rust source code or loaded from an external file (e.g., `hover_docs.toml`)? | Embedded (recommended for Phase 1) vs. External (easier to edit) |
-| **FC-HOV-02** | Should the hover provider include links to VHS documentation website? | Yes (richer) vs. No (some clients render links poorly) |
-| **FC-HOV-03** | Level of detail for repeatable key commands — should each key (Backspace, Enter, etc.) have unique hover content or share a template? | Unique (richer) vs. Template with key name substitution (less maintenance) |
+All Freeze Candidates from Stage A have been closed with definitive decisions.
+
+### FC-HOV-01 — Hover Documentation Storage (RESOLVED: Embedded match expression)
+
+**Decision:** Hover documentation MUST be embedded in Rust source code as a
+`match` expression on `SyntaxKind`, returning `&'static str` Markdown content.
+
+**Rationale:** The VHS command set is small and stable (~27 commands + ~19
+settings = ~46 entries). A `match` expression is:
+(1) zero-dependency — no TOML/JSON parser needed,
+(2) compiler-checked — a missing arm causes a compile error,
+(3) zero-allocation — returns `&'static str` references,
+(4) inline-friendly — the Rust compiler can optimize the match into a jump
+table. Per Rust Best Practices (Apollo handbook, Chapter 3): avoid unnecessary
+heap allocation; prefer static data for fixed-size lookup tables.
+Phase 2 MAY migrate to `include_str!()` with an embedded TOML file if the
+documentation grows significantly (e.g., context-sensitive multi-paragraph docs).
+
+### FC-HOV-02 — Links in Hover Content (RESOLVED: MUST NOT include in Phase 1)
+
+**Decision:** Hover content MUST NOT include clickable links to the VHS
+documentation website in Phase 1.
+
+**Rationale:** LSP hover rendering varies across editors. VSCode renders
+Markdown links well, but Neovim's built-in LSP client, Helix, and other
+editors may render `[text](url)` as raw text or strip links entirely. Including
+non-functional links degrades the experience for non-VSCode users. Phase 2
+MAY add links as a configurable option, guarded by a client capability check
+(`general.markdown.allowedTags` in LSP 3.17).
+
+### FC-HOV-03 — Repeatable Key Hover Content (RESOLVED: Template + unique descriptions)
+
+**Decision:** Repeatable key commands (Backspace, Enter, Down, etc.) MUST use
+a shared template for syntax and examples, with per-key unique brief
+descriptions.
+
+**Template structure:**
+
+```text
+**{KeyName}**
+
+{UniqueDescription}
+
+**Syntax:**
+{KeyName}[@<speed>] [<count>]
+
+**Example:**
+{KeyName} 5
+{KeyName}@100ms 3
+```
+
+**Per-key unique descriptions (examples):**
+
+- `Backspace` → "Delete the character before the cursor"
+- `Enter` → "Press the Enter/Return key"
+- `Down` → "Press the Down arrow key"
+- `ScrollUp` → "Scroll the terminal viewport up by rows"
+
+**Rationale:** All 13 repeatable key commands share identical syntax
+(`Key[@time] [count]`). A template avoids maintaining 13 nearly-identical
+Markdown strings. The per-key unique description provides meaningful
+differentiation. The Builder SHOULD implement this as a helper function
+`fn key_hover(name: &str, description: &str) -> String` that fills the
+template.

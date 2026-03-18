@@ -2,10 +2,16 @@
 
 **Phase:** 1 — LSP Foundation
 **Work Stream:** WS-3 (LSP Core)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** WS-2 (SPEC_PARSER.md)
 **Last Updated:** 2026-03-18
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-18.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -97,6 +103,16 @@ and future Phase 2 features).
 | **Owner** | Architect → Builder |
 | **Statement** | The server SHOULD use the `tracing` crate for structured logging. Log output SHOULD be directed to stderr (not stdout, which is the LSP transport). The `tower-lsp-server` `Client::log_message()` method SHOULD be used to send log messages to the LSP client for debugging. |
 | **Verification** | Logs appear on stderr during operation; `window/logMessage` notifications arrive at the client. |
+
+### LSP-008 — Parse-Error Diagnostics
+
+| Field | Value |
+| --- | --- |
+| **ID** | LSP-008 |
+| **Priority** | P1 (SHOULD) |
+| **Owner** | Architect → Builder |
+| **Statement** | After each `didOpen` and `didChange`, the server SHOULD publish parse errors as LSP diagnostics via `client.publish_diagnostics()`. Each `ParseError` SHOULD be mapped to a `Diagnostic` with `severity: DiagnosticSeverity::Error` and `source: Some("vhs-analyzer")`. On `didClose`, the server SHOULD clear diagnostics by publishing an empty list. This is a server-initiated notification (`textDocument/publishDiagnostics`) and does NOT require advertising `diagnosticProvider` as a server capability. |
+| **Verification** | Open a file with syntax errors; verify diagnostics appear. Fix the errors; verify diagnostics clear. Close the file; verify diagnostics are removed. |
 
 ## 4. Design Options Analysis
 
@@ -228,11 +244,69 @@ async fn main() {
 }
 ```
 
-## 8. Freeze Candidates
+## 8. Resolved Design Decisions
 
-| ID | Item | Options Under Consideration |
-| --- | --- | --- |
-| **FC-LSP-01** | Should `DashMap` be a hard dependency, or should we use `tokio::sync::RwLock<HashMap>` for fewer deps? | `DashMap` (recommended) vs. `RwLock<HashMap>` (simpler deps) |
-| **FC-LSP-02** | Should `textDocument/didSave` be handled in Phase 1 (e.g., to trigger diagnostics refresh)? | Yes (proactive) vs. No (defer to Phase 2) |
-| **FC-LSP-03** | Should the server send `textDocument/publishDiagnostics` for parse errors in Phase 1, or defer all diagnostics to Phase 2? | Phase 1 parse errors only vs. Defer entirely to Phase 2 |
-| **FC-LSP-04** | MSRV policy — `tower-lsp-server` 0.23 requires MSRV 1.85; should we pin this or track stable? | Pin MSRV 1.85 vs. Track latest stable |
+All Freeze Candidates from Stage A have been closed with definitive decisions.
+
+### FC-LSP-01 — Document State Container (RESOLVED: MUST use DashMap)
+
+**Decision:** The document state store MUST use `DashMap<Url, DocumentState>`
+from the `dashmap` crate.
+
+**Rationale:** A language server handles concurrent requests (e.g., hover while
+the user is typing). `DashMap` provides per-entry (shard-level) locking: editing
+document A does not block hover on document B. `tokio::sync::RwLock<HashMap>`
+would impose a global lock — all reads block during any write. The `dashmap`
+crate is mature (11M+ downloads), has minimal transitive dependencies, and is
+the standard choice for concurrent maps in Rust async services. Per the Rust
+Async Patterns skill: "Prefer channels over shared state when possible" — but
+for a key-value document store, `DashMap` is the correct abstraction (channels
+would add unnecessary indirection). Per Rust Best Practices: the extra
+dependency is justified by the concurrency guarantee.
+
+### FC-LSP-02 — didSave Handling in Phase 1 (RESOLVED: MUST NOT handle)
+
+**Decision:** The server MUST NOT implement a `textDocument/didSave` handler in
+Phase 1. The default no-op behavior from `tower-lsp-server` is sufficient.
+
+**Rationale:** In Phase 1, the server re-parses on every `didChange` (full
+sync). There is no additional work to trigger on save. Phase 2 MAY add a
+`didSave` handler to trigger heavier diagnostics (e.g., file existence checks,
+`Require` dependency validation) that are too expensive to run on every
+keystroke. Adding a no-op handler now would be dead code.
+
+### FC-LSP-03 — Parse-Error Diagnostics in Phase 1 (RESOLVED: SHOULD publish)
+
+**Decision:** The server SHOULD publish parse errors as LSP diagnostics via
+`client.publish_diagnostics()` after each `didChange` and `didOpen`.
+
+**Contract details:**
+
+- Each `ParseError` from the parser MUST be mapped to an LSP `Diagnostic`
+  with `severity: Error` and `source: "vhs-analyzer"`.
+- The `Diagnostic.range` MUST correspond to the `ParseError.range`.
+- On `didClose`, the server MUST clear diagnostics for the closed document
+  by publishing an empty diagnostics list.
+- This does NOT require advertising `diagnosticProvider` as a capability.
+  `textDocument/publishDiagnostics` is a server-initiated notification.
+
+**Rationale:** Parse errors are a direct, zero-cost output of the Phase 1
+parser. NOT publishing them would mean the user sees no feedback for syntax
+errors — a poor experience for an LSP that already has the error information.
+This is NOT Phase 2 semantic diagnostics (which cover invalid paths, missing
+requires, destructive commands, etc.). This is Phase 1 syntax error reporting.
+Per Rust Async Patterns: the `publish_diagnostics` call is non-blocking
+(fire-and-forget notification via the `Client` handle).
+
+### FC-LSP-04 — MSRV Policy (RESOLVED: Pin MSRV 1.85)
+
+**Decision:** The project MUST pin MSRV (Minimum Supported Rust Version) to
+1.85 in `Cargo.toml` via `rust-version = "1.85"`.
+
+**Rationale:** `tower-lsp-server` v0.23.0 requires MSRV 1.85 (verified on
+crates.io 2026-03-18). Pinning prevents accidental use of newer features
+that would break builds on the minimum version. Rust 1.85 is the current
+stable release and provides native `async fn` in traits (stabilized in 1.75),
+`let-else` (1.65), and all modern features needed by the project. Tracking
+"latest stable" without a pin risks CI breakage when contributors use
+different Rust versions.

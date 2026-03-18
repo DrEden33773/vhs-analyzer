@@ -2,9 +2,15 @@
 
 **Phase:** 1 — LSP Foundation
 **Work Stream:** WS-1 (Lexer)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Last Updated:** 2026-03-18
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-18.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -308,14 +314,74 @@ pub fn lex(source: &str) -> Vec<Token>;
 - For empty input `""`, `lex()` returns an empty `Vec<Token>` (the lossless property holds vacuously).
 - No `EOF` token is emitted by the lexer; the parser injects it as a virtual sentinel.
 
-## 7. Freeze Candidates
+## 7. Resolved Design Decisions
 
-The following items require explicit resolution in Stage B before implementation:
+All Freeze Candidates from Stage A have been closed with definitive decisions.
 
-| ID | Item | Options Under Consideration |
-| --- | --- | --- |
-| **FC-LEX-01** | Should `ScrollUp`/`ScrollDown`/`Screenshot` keywords be included despite absence from grammar.js? | Include (VHS README is behavioral truth) vs. Exclude (strict grammar.js adherence) |
-| **FC-LEX-02** | Should `Copy` accept a string argument (per VHS README) or remain argument-less (per grammar.js)? | Follow README vs. Follow grammar.js — affects whether `COPY_KW` is a standalone command or prefix |
-| **FC-LEX-03** | Should unterminated string literals be a single `STRING` token or split into `ERROR` + partial tokens? | Single `STRING` (simpler, parser reports error) vs. Split (more granular error) |
-| **FC-LEX-04** | Should `true`/`false` be lexed as `BOOLEAN` tokens or as `IDENT` matching keyword text? | Dedicated `BOOLEAN` kind vs. Keyword tokens `TRUE_KW`/`FALSE_KW` |
-| **FC-LEX-05** | Exact disambiguation rule for PATH vs. IDENT when only a dot is present (e.g., `demo.gif` vs. `file.unknown`) | Allowlist of known extensions vs. Any-dot-triggers-PATH |
+### FC-LEX-01 — ScrollUp/ScrollDown/Screenshot Keywords (RESOLVED: MUST include)
+
+**Decision:** MUST include `SCROLLUP_KW`, `SCROLLDOWN_KW`, and `SCREENSHOT_KW`
+as keyword token kinds.
+
+**Rationale:** The VHS README (verified 2026-03-18) is the authoritative
+behavioral specification. `ScrollUp` and `ScrollDown` were added in VHS v0.11.0
+(March 2026) and are documented with the standard `Key[@time] [count]` syntax.
+`Screenshot` accepts a path argument. The `tree-sitter-vhs` grammar.js has not
+yet been updated to include these commands (last updated November 2025), but
+the VHS README takes precedence per project convention (ROADMAP.md §2.2.1).
+The lexer MUST recognize these keywords; ignoring them would cause false
+`IDENT` tokens and break hover/completion for valid VHS commands.
+
+### FC-LEX-02 — Copy Command String Argument (RESOLVED: MUST follow VHS README)
+
+**Decision:** The `COPY_KW` token remains a simple keyword token. Whether `Copy`
+accepts an optional string argument is a parser-level concern (see FC-PAR-04).
+At the lexer level, no change is required — `Copy` is always lexed as `COPY_KW`,
+and any following string is lexed as `STRING`.
+
+**Rationale:** The VHS README documents `Copy "text"` with an explicit string
+argument (e.g., `Copy "https://github.com/charmbracelet"`). The lexer is
+stateless and does not need to know about argument structure. This is resolved
+at the parser level in FC-PAR-04.
+
+### FC-LEX-03 — Unterminated String Literals (RESOLVED: Single STRING token)
+
+**Decision:** Unterminated string literals MUST be emitted as a single `STRING`
+token covering all text from the opening delimiter to the end of the line
+(or EOF). The parser is responsible for reporting the "unterminated string"
+error.
+
+**Rationale:** A single `STRING` token preserves the lossless property (LEX-001)
+with minimal complexity. Splitting into `ERROR` + partial tokens would
+complicate both the lexer and hover provider without improving error recovery
+quality — the parser already isolates errors per-line (PAR-004). This matches
+the rust-analyzer pattern where the lexer is lenient and the parser provides
+semantic error reporting.
+
+### FC-LEX-04 — Boolean Token Kind (RESOLVED: Dedicated BOOLEAN kind)
+
+**Decision:** `true` and `false` MUST be lexed as `BOOLEAN` tokens, not as
+keyword tokens (`TRUE_KW`/`FALSE_KW`) and not as `IDENT`.
+
+**Rationale:** Boolean values are literals, not commands or setting names. Using
+a dedicated `BOOLEAN` kind aligns with the semantic role of these tokens (they
+appear only as values for `Set CursorBlink`). This also simplifies hover: a
+`BOOLEAN` token in a setting context can provide "Boolean value: true/false"
+documentation. Using keyword tokens would conflate value literals with command
+keywords in the `SyntaxKind` enum.
+
+### FC-LEX-05 — PATH vs. IDENT Disambiguation (RESOLVED: Extension allowlist)
+
+**Decision:** The lexer MUST use an extension allowlist to distinguish `PATH`
+from `IDENT`. A bare word containing a `.` followed by a recognized extension
+is emitted as `PATH`. A bare word containing `/` is always `PATH`. All other
+bare words are `IDENT`.
+
+**Recognized extensions:** `gif`, `mp4`, `webm`, `tape`, `png`, `txt`, `ascii`,
+`svg`, `jpg`, `jpeg`.
+
+**Rationale:** VHS uses a finite set of file formats for `Output` and
+`Screenshot` paths. An allowlist avoids false positives (e.g., `file.unknown`
+should not be `PATH`) while covering all practical VHS use cases. The
+allowlist is easily extensible if VHS adds new output formats. Bare words
+with `/` are unambiguously paths (e.g., `./out/demo.gif`, `frames/`).

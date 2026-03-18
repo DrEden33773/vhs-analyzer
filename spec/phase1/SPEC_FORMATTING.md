@@ -2,10 +2,16 @@
 
 **Phase:** 1 — LSP Foundation
 **Work Stream:** WS-5 (Formatting)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** WS-2 (SPEC_PARSER.md)
 **Last Updated:** 2026-03-18
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-18.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -214,11 +220,56 @@ The formatter operates in a single pass over the syntax tree's token stream
 (`SyntaxNode::descendants_with_tokens()`) and builds edits by comparing
 actual whitespace against expected whitespace at each position.
 
-## 6. Freeze Candidates
+## 6. Resolved Design Decisions
 
-| ID | Item | Options Under Consideration |
-| --- | --- | --- |
-| **FC-FMT-01** | Should the formatter enforce a specific ordering of directives (e.g., `Output` first, then `Set`, then `Require`, then commands)? | Enforce order (opinionated) vs. Preserve order (conservative) |
-| **FC-FMT-02** | Should `Set` commands be grouped and sorted alphabetically? | Yes (cleaner) vs. No (preserve user intent) |
-| **FC-FMT-03** | Should the `@` in `Type@500ms` be formatted as `Type @500ms` (with space) or `Type@500ms` (no space, matching VHS convention)? | No space (recommended, matches VHS docs) vs. Space (more readable) |
-| **FC-FMT-04** | Should the formatter add a blank line between the settings section and the command section if none exists? | Yes (opinionated) vs. No (only normalize existing blanks) |
+All Freeze Candidates from Stage A have been closed with definitive decisions.
+
+### FC-FMT-01 — Directive Ordering (RESOLVED: MUST NOT enforce)
+
+**Decision:** The formatter MUST NOT reorder directives. User-specified
+directive order MUST be preserved.
+
+**Rationale:** VHS does not mandate a specific directive order (though the
+convention is Output → Set → Require → commands). Enforcing order would:
+(1) create large, confusing diffs when formatting for the first time,
+(2) break intentional ordering (e.g., a user may place `Require` after
+`Output` for readability), (3) go beyond the formatter's responsibility
+(whitespace normalization, not structural transformation). A linter rule in
+Phase 2 MAY warn about non-conventional ordering as a diagnostic, but the
+formatter MUST NOT move lines.
+
+### FC-FMT-02 — Set Command Sorting (RESOLVED: MUST NOT sort)
+
+**Decision:** The formatter MUST NOT sort `Set` commands alphabetically.
+User-specified order of `Set` commands MUST be preserved.
+
+**Rationale:** Some users order `Set` commands by importance (e.g., `Shell`
+first, then visual settings). Others group related settings (dimensions
+together, font settings together). Alphabetical sorting would destroy
+intentional grouping. The formatter's scope is whitespace normalization only.
+
+### FC-FMT-03 — Duration Punctuation Spacing (RESOLVED: No space)
+
+**Decision:** The `@` in duration overrides MUST have no surrounding spaces.
+Canonical form: `Type@500ms "text"`, NOT `Type @500ms "text"` or
+`Type@ 500ms "text"`.
+
+**Rationale:** The VHS README consistently uses `Type@500ms` without spaces
+(verified 2026-03-18). This is also specified in FMT-004: "No space MUST
+appear between `@` and its time value in duration overrides." The `@` is a
+tight-binding operator connecting the command to its speed override, analogous
+to `trait@version` in Rust. This decision makes FMT-004 unambiguous.
+
+### FC-FMT-04 — Auto-Insert Blank Lines (RESOLVED: MUST NOT auto-insert)
+
+**Decision:** The formatter MUST NOT insert blank lines that are not already
+present in the source. It MUST only normalize existing blank lines (collapse
+consecutive blank lines to one, per FMT-005).
+
+**Rationale:** Auto-inserting blank lines between "settings section" and
+"commands section" requires the formatter to understand semantic sections —
+a responsibility beyond whitespace normalization. It would also produce
+unexpected diffs for users who prefer compact files with no blank lines.
+FMT-005 already handles the case where a user has too many blank lines.
+The formatter is conservative: it removes excess whitespace but never adds
+structural whitespace.
