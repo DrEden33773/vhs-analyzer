@@ -11,3 +11,9 @@ pub mod syntax;
 
 /// Hand-written lexical analysis for VHS source text.
 pub mod lexer;
+
+/// Rowan-based lossless parser for VHS source text.
+pub mod parser;
+
+/// Typed AST wrappers over the rowan syntax tree.
+pub mod ast;

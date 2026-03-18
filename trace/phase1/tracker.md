@@ -1,7 +1,7 @@
 # Phase 1 Execution Tracker
 
 Phase: LSP Foundation (Lexer, Parser, tower-lsp-server, Hover, Formatting)
-Status: In Progress — Batch 1 complete, Builder in progress
+Status: In Progress — Batch 2 complete, Builder in progress
 Started: 2026-03-18
 Completed: —
 
@@ -11,14 +11,14 @@ Completed: —
 | --- | --- | --- | --- | --- |
 | Architect Stage A | Claude | Completed | 2026-03-18 | 6 exploratory specs, 41 reqs, 17 FC identified |
 | Architect Stage B | Claude | Completed | 2026-03-18 | 7 frozen specs, 42 reqs, 105 test scenarios |
-| Builder | Builder | In Progress | — | Batch 1 complete — Lexer, Parser, LSP Core, Hover, Formatting |
+| Builder | Builder | In Progress | — | Batch 2 complete — Parser + Typed AST; LSP Core, Hover, Formatting remain |
 
 ## 2. Builder Batch Plan (Crate-Aligned, 6 Batches)
 
 | Batch | Name | WP | Crate | Requirements | Depends On | Milestone | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | SyntaxKind + Lexer | WS-1 | core | PAR-001, LEX-001~012 | — | — | completed |
-| 2 | Parser + Typed AST | WS-2 | core | PAR-002~007 | B1 | — | not started |
+| 2 | Parser + Typed AST | WS-2 | core | PAR-002~007 | B1 | — | completed |
 | 3 | Formatting | WS-5 | core | FMT-001~009 | B2 | core crate complete | not started |
 | 4 | LSP Core + Diagnostics | WS-3 | lsp | LSP-001~008 | B3 | — | not started |
 | 5 | Hover | WS-4 | lsp | HOV-001~006 | B4 | lsp crate complete | not started |
@@ -123,3 +123,26 @@ All 17 Freeze Candidates resolved during Phase 1 Stage B (2026-03-18):
 - Notes:
   - Added `proptest` to `crates/vhs-analyzer-core/Cargo.toml` for lossless and no-panic property coverage.
   - Added an explicit wait-scope keyword test for `Screen` and `Line` because the frozen lexer matrix does not enumerate them individually even though the frozen lexer spec requires dedicated token kinds.
+
+### Batch 2 — Parser + Typed AST
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `PAR-002` through `PAR-007`
+- Files:
+  - `crates/vhs-analyzer-core/src/lib.rs`
+  - `crates/vhs-analyzer-core/src/parser.rs`
+  - `crates/vhs-analyzer-core/src/ast.rs`
+  - `crates/vhs-analyzer-core/tests/parser_tests.rs`
+  - `crates/vhs-analyzer-core/tests/ast_tests.rs`
+- Deliverables:
+  - Implemented a direct `rowan::GreenNodeBuilder` parser with dedicated command nodes, newline-delimited recovery, strict one-command-per-line handling, and side-channel `ParseError` collection.
+  - Added hand-written typed AST wrappers and accessors for Phase 1 parser nodes, including `TypeCommand`, `SetCommand`, `KeyCommand`, `Duration`, and related command wrappers.
+  - Added 41 passing parser tests plus 4 typed AST tests covering directive parsing, error localization, lossless round-trips, no-panic property behavior, and typed accessors.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets -- -D warnings`
+  - `cargo test --workspace`
+- Notes:
+  - Parser coverage intentionally follows the frozen explicit `SyntaxKind` enumeration and does not attempt to resolve unrelated spec count mismatches.
+  - The parser accepts whitespace-tolerant `@` and `+` forms so later formatting work can normalize lines without losing CST structure.

@@ -44,12 +44,12 @@ from spec through code to test.
 | Req ID | Statement Summary | Priority | Impl Module | Test Reference | Design Decision |
 | --- | --- | --- | --- | --- | --- |
 | PAR-001 | Unified SyntaxKind enum (token + node kinds) | P0 MUST | `crates/vhs-analyzer-core/src/syntax.rs` | Batch 1 rowan raw-kind round-trip + Phase 2 T-PAR-001 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
-| PAR-002 | Lossless CST (round-trip via SyntaxNode.text()) | P0 MUST | `core::parser` | T-PAR-050, T-PAR-052, T-PAR-057 | — |
-| PAR-003 | No panics on any input | P0 MUST | `core::parser` | T-PAR-051, T-PAR-054 through T-PAR-058 | FC-PAR-03: strict one-command-per-line |
-| PAR-004 | Error localization (per-command isolation) | P0 MUST | `core::parser` | T-PAR-053, T-PAR-055, T-PAR-059 | — |
-| PAR-005 | Fuel-based infinite loop protection | P0 MUST | `core::parser` | T-PAR-056 | — |
-| PAR-006 | All VHS directives produce dedicated nodes | P0 MUST | `core::parser` | T-PAR-001 through T-PAR-031 | FC-PAR-04: Copy with optional string |
-| PAR-007 | Typed AST accessor layer | P1 SHOULD | `core::ast` | T-PAR-070 through T-PAR-073 | FC-PAR-02: hand-written for Phase 1 |
+| PAR-002 | Lossless CST (round-trip via SyntaxNode.text()) | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-050, T-PAR-052, T-PAR-057 (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | — |
+| PAR-003 | No panics on any input | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-051, T-PAR-054 through T-PAR-058 (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | FC-PAR-03: strict one-command-per-line |
+| PAR-004 | Error localization (per-command isolation) | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-053, T-PAR-055, T-PAR-059 (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | — |
+| PAR-005 | Fuel-based infinite loop protection | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-056 (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | — |
+| PAR-006 | All VHS directives produce dedicated nodes | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-001 through T-PAR-031 (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | FC-PAR-04: Copy with optional string |
+| PAR-007 | Typed AST accessor layer | P1 SHOULD | `crates/vhs-analyzer-core/src/ast.rs` | T-PAR-070 through T-PAR-073 (`crates/vhs-analyzer-core/tests/ast_tests.rs`) | FC-PAR-02: hand-written for Phase 1 |
 
 ### 2.3 LSP Core (WS-3) — SPEC_LSP_CORE.md
 

@@ -94,7 +94,14 @@ batches:
     test_ids: "T-PAR-*"
     crate: vhs-analyzer-core
     depends_on: [batch1]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-core/src/lib.rs
+      - crates/vhs-analyzer-core/src/parser.rs
+      - crates/vhs-analyzer-core/src/ast.rs
+      - crates/vhs-analyzer-core/tests/parser_tests.rs
+      - crates/vhs-analyzer-core/tests/ast_tests.rs
   batch3:
     name: "Formatting (WS-5)"
     work_packages: [WS-5]
@@ -131,7 +138,7 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 37
+  automated_tests: 82
   ci_gate: true
   entries:
     - batch: batch1
@@ -164,6 +171,31 @@ builder_progress:
         - "Implemented a hand-written, lossless lexer in crates/vhs-analyzer-core/src/lexer.rs."
         - "Added 37 integration and property tests in crates/vhs-analyzer-core/tests/lexer_tests.rs."
         - "Added proptest as a dev-dependency for lossless and no-panic property coverage."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets: pass
+        cargo_test_workspace: pass
+    - batch: batch2
+      name: "Parser + Typed AST (WS-2)"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - PAR-002
+        - PAR-003
+        - PAR-004
+        - PAR-005
+        - PAR-006
+        - PAR-007
+      scenarios:
+        implemented:
+          - T-PAR-001 through T-PAR-031
+          - T-PAR-050 through T-PAR-059
+          - T-PAR-070 through T-PAR-073
+      notes:
+        - "Implemented a direct GreenNodeBuilder parser in crates/vhs-analyzer-core/src/parser.rs with line-oriented recovery and side-channel parse errors."
+        - "Added hand-written typed AST wrappers and accessors in crates/vhs-analyzer-core/src/ast.rs."
+        - "Added 41 parser tests and 4 typed AST tests in crates/vhs-analyzer-core/tests/parser_tests.rs and crates/vhs-analyzer-core/tests/ast_tests.rs."
+        - "Verified strict one-command-per-line recovery, lossless CST round-trips, and no-panic property coverage for arbitrary input."
       quality_gate:
         cargo_fmt_all_check: pass
         cargo_clippy_workspace_all_targets: pass
