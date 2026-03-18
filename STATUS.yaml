@@ -2,8 +2,8 @@ schema_version: 2
 updated_at: "2026-03-18"
 project:
   name: vhs-analyzer
-  phase: pre_phase1_initialization
-  status: not_started
+  phase: phase1_architect_stage_a
+  status: completed
 
 authority_order:
   - spec
@@ -38,8 +38,32 @@ phases:
     completed_at: "2026-03-18"
     description: "Project initialization — monorepo scaffolding, Cargo workspace, toolchain"
   phase1:
-    status: not_started
+    status: in_progress
+    started_at: "2026-03-18"
     description: "LSP Foundation — Architect Stage A/B, then Builder implements Lexer, Parser, LSP Core, Hover, Formatting"
+    stages:
+      architect_stage_a:
+        status: completed
+        completed_at: "2026-03-18"
+        deliverables:
+          - spec/phase1/SPEC_LEXER.md
+          - spec/phase1/SPEC_PARSER.md
+          - spec/phase1/SPEC_LSP_CORE.md
+          - spec/phase1/SPEC_HOVER.md
+          - spec/phase1/SPEC_FORMATTING.md
+          - spec/phase1/SPEC_TRACEABILITY.md
+        stats:
+          requirements_total: 41
+          requirements_p0_must: 32
+          requirements_p1_should: 8
+          requirements_p2_may: 1
+          freeze_candidates: 17
+      architect_stage_b:
+        status: not_started
+        description: "Freeze all specs with MUST/SHOULD/MAY contracts and resolve Freeze Candidates"
+      builder:
+        status: not_started
+        description: "Implement from frozen specs — Lexer, Parser, tower-lsp-server, Hover, Formatting"
   phase2:
     status: not_started
     description: "Intelligence & Diagnostics — Autocomplete, Semantic Validation, Safety Check Engine"
@@ -48,4 +72,4 @@ phases:
     description: "VSCode Extension Client — LSP client, Live Preview, CodeLens, Platform VSIX packaging"
 
 next_execution_targets:
-  - phase1_architect_stage_a
+  - phase1_architect_stage_b
