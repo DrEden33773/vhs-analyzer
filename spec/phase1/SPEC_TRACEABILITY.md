@@ -79,15 +79,15 @@ from spec through code to test.
 
 | Req ID | Statement Summary | Priority | Impl Module | Test Reference | Design Decision |
 | --- | --- | --- | --- | --- | --- |
-| FMT-001 | LSP formatting response (minimal TextEdits) | P0 MUST | `core::formatting` | T-FMT-001, T-FMT-002, T-FMT-016, T-FMT-017 | FC-FMT-01: preserve order; FC-FMT-02: no sort |
-| FMT-002 | No leading indentation (column 0) | P0 MUST | `core::formatting` | T-FMT-003, T-FMT-004 | — |
-| FMT-003 | Single space between tokens | P0 MUST | `core::formatting` | T-FMT-005 | — |
-| FMT-004 | No space around modifier/duration punctuation | P0 MUST | `core::formatting` | T-FMT-006, T-FMT-007, T-FMT-018 | FC-FMT-03: no space around @ |
-| FMT-005 | Blank line normalization | P1 SHOULD | `core::formatting` | T-FMT-008, T-FMT-009 | FC-FMT-04: no auto-insert |
-| FMT-006 | Trailing whitespace removal | P0 MUST | `core::formatting` | T-FMT-010 | — |
-| FMT-007 | Final newline | P1 SHOULD | `core::formatting` | T-FMT-011, T-FMT-012 | — |
-| FMT-008 | Comment preservation | P0 MUST | `core::formatting` | T-FMT-013, T-FMT-014 | — |
-| FMT-009 | Error tolerance (skip ERROR nodes) | P0 MUST | `core::formatting` | T-FMT-015 | — |
+| FMT-001 | LSP formatting response (minimal TextEdits) | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-001, T-FMT-002, T-FMT-016, T-FMT-017 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | FC-FMT-01: preserve order; FC-FMT-02: no sort |
+| FMT-002 | No leading indentation (column 0) | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-003, T-FMT-004, T-FMT-014 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | — |
+| FMT-003 | Single space between tokens | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-005 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | — |
+| FMT-004 | No space around modifier/duration punctuation | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-006, T-FMT-007, T-FMT-018 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | FC-FMT-03: no space around @ |
+| FMT-005 | Blank line normalization | P1 SHOULD | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-008, T-FMT-009 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | FC-FMT-04: no auto-insert |
+| FMT-006 | Trailing whitespace removal | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-010 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | — |
+| FMT-007 | Final newline | P1 SHOULD | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-011, T-FMT-012 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | — |
+| FMT-008 | Comment preservation | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-013, T-FMT-014 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | — |
+| FMT-009 | Error tolerance (skip ERROR nodes) | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-015 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | — |
 
 ## 3. Requirement Statistics
 

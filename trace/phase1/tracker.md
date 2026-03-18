@@ -1,7 +1,7 @@
 # Phase 1 Execution Tracker
 
 Phase: LSP Foundation (Lexer, Parser, tower-lsp-server, Hover, Formatting)
-Status: In Progress — Batch 2 complete, Builder in progress
+Status: In Progress — Batch 3 complete, core crate complete, Builder in progress
 Started: 2026-03-18
 Completed: —
 
@@ -11,7 +11,7 @@ Completed: —
 | --- | --- | --- | --- | --- |
 | Architect Stage A | Claude | Completed | 2026-03-18 | 6 exploratory specs, 41 reqs, 17 FC identified |
 | Architect Stage B | Claude | Completed | 2026-03-18 | 7 frozen specs, 42 reqs, 105 test scenarios |
-| Builder | Builder | In Progress | — | Batch 2 complete — Parser + Typed AST; LSP Core, Hover, Formatting remain |
+| Builder | Builder | In Progress | — | Batch 3 complete — Formatting done, `vhs-analyzer-core` complete; LSP Core and Hover remain |
 
 ## 2. Builder Batch Plan (Crate-Aligned, 6 Batches)
 
@@ -19,7 +19,7 @@ Completed: —
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | SyntaxKind + Lexer | WS-1 | core | PAR-001, LEX-001~012 | — | — | completed |
 | 2 | Parser + Typed AST | WS-2 | core | PAR-002~007 | B1 | — | completed |
-| 3 | Formatting | WS-5 | core | FMT-001~009 | B2 | core crate complete | not started |
+| 3 | Formatting | WS-5 | core | FMT-001~009 | B2 | core crate complete | completed |
 | 4 | LSP Core + Diagnostics | WS-3 | lsp | LSP-001~008 | B3 | — | not started |
 | 5 | Hover | WS-4 | lsp | HOV-001~006 | B4 | lsp crate complete | not started |
 | 6 | Integration + Closeout | — | both | T-INT-001 | B5 | Phase 1 complete | not started |
@@ -146,3 +146,25 @@ All 17 Freeze Candidates resolved during Phase 1 Stage B (2026-03-18):
 - Notes:
   - Parser coverage intentionally follows the frozen explicit `SyntaxKind` enumeration and does not attempt to resolve unrelated spec count mismatches.
   - The parser accepts whitespace-tolerant `@` and `+` forms so later formatting work can normalize lines without losing CST structure.
+
+### Batch 3 — Formatting
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `FMT-001` through `FMT-009`
+- Files:
+  - `crates/vhs-analyzer-core/src/lib.rs`
+  - `crates/vhs-analyzer-core/src/formatting.rs`
+  - `crates/vhs-analyzer-core/tests/formatting_tests.rs`
+- Deliverables:
+  - Implemented a rowan-only formatting module that emits byte-range `TextEdit` operations from the parsed syntax tree.
+  - Normalized leading indentation, inter-token spacing, blank lines, trailing whitespace, final newlines, and line-start comment indentation while preserving directive order.
+  - Preserved malformed lines containing `ERROR` nodes verbatim so formatting remains lossless and error-tolerant.
+  - Added 18 passing formatting tests covering `T-FMT-001` through `T-FMT-018`, including idempotence, comment preservation, and mixed valid/error files.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets -- -D warnings`
+  - `cargo test --workspace`
+- Notes:
+  - Batch 3 completes the `vhs-analyzer-core` crate milestone.
+  - The frozen summary tables still report 17 formatting scenarios, but implementation follows the explicit `T-FMT-001` through `T-FMT-018` enumeration without resolving the spec mismatch.

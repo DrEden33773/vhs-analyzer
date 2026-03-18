@@ -17,3 +17,6 @@ pub mod parser;
 
 /// Typed AST wrappers over the rowan syntax tree.
 pub mod ast;
+
+/// Whitespace-only formatter for VHS source text.
+pub mod formatting;

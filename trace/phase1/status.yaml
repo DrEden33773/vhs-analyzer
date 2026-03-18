@@ -110,7 +110,12 @@ batches:
     crate: vhs-analyzer-core
     depends_on: [batch2]
     milestone: "vhs-analyzer-core crate complete"
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-core/src/lib.rs
+      - crates/vhs-analyzer-core/src/formatting.rs
+      - crates/vhs-analyzer-core/tests/formatting_tests.rs
   batch4:
     name: "LSP Core + Diagnostics (WS-3)"
     work_packages: [WS-3]
@@ -138,7 +143,7 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 82
+  automated_tests: 100
   ci_gate: true
   entries:
     - batch: batch1
@@ -196,6 +201,33 @@ builder_progress:
         - "Added hand-written typed AST wrappers and accessors in crates/vhs-analyzer-core/src/ast.rs."
         - "Added 41 parser tests and 4 typed AST tests in crates/vhs-analyzer-core/tests/parser_tests.rs and crates/vhs-analyzer-core/tests/ast_tests.rs."
         - "Verified strict one-command-per-line recovery, lossless CST round-trips, and no-panic property coverage for arbitrary input."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets: pass
+        cargo_test_workspace: pass
+    - batch: batch3
+      name: "Formatting (WS-5)"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - FMT-001
+        - FMT-002
+        - FMT-003
+        - FMT-004
+        - FMT-005
+        - FMT-006
+        - FMT-007
+        - FMT-008
+        - FMT-009
+      scenarios:
+        implemented:
+          - T-FMT-001 through T-FMT-018
+      notes:
+        - "Implemented a rowan-only formatter in crates/vhs-analyzer-core/src/formatting.rs that returns byte-range TextEdit values from the parsed syntax tree."
+        - "Normalized leading indentation, token spacing, blank lines, trailing whitespace, final newlines, and comment indentation while preserving directive order."
+        - "Kept lines containing ERROR nodes unchanged so malformed fragments remain lossless and formatter-safe."
+        - "Added 18 passing formatting tests in crates/vhs-analyzer-core/tests/formatting_tests.rs and completed the vhs-analyzer-core milestone."
+        - "Frozen summary tables still report 17 formatting scenarios, but implementation follows the explicit T-FMT-001 through T-FMT-018 enumeration without resolving the spec mismatch."
       quality_gate:
         cargo_fmt_all_check: pass
         cargo_clippy_workspace_all_targets: pass
