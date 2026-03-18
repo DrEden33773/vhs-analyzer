@@ -1,6 +1,6 @@
 # Phase 1: LSP Foundation
 
-## Status: Not Started
+## Status: Spec Frozen — Builder Ready
 
 Phase 1 builds the core language server: a resilient Lexer/Parser and the
 `tower-lsp-server` wiring with basic Hover and Formatting capabilities.
@@ -20,23 +20,30 @@ WS-5: Formatting   (SPEC_FORMATTING.md)  — document formatting rules
 ```txt
 WS-1 (Lexer)
   └──> WS-2 (Parser)
-         ├──> WS-3 (LSP Core) ──> WS-4 (Hover)
-         └──────────────────────> WS-5 (Formatting)
+         ├──> WS-5 (Formatting)
+         │      └──> WS-3 (LSP Core)
+         │              └──> WS-4 (Hover)
+         └─────────────────────────────────
 ```
 
 WS-1 MUST complete before WS-2.
-WS-2 MUST complete before WS-3, WS-4, and WS-5.
+WS-2 MUST complete before WS-5 (formatting reads the syntax tree).
+WS-5 MUST complete before WS-3 (core crate fully built before LSP wiring).
 WS-3 MUST complete before WS-4 (hover needs LSP wiring).
-WS-5 MAY run in parallel with WS-3/WS-4 once WS-2 is done.
 
-## Suggested Batch Progression
+## Batch Progression (Crate-Aligned, 6 Batches)
 
 ```txt
-Batch 1: WS-1 — Lexer (token set, error handling)
-Batch 2: WS-2 — Parser (rowan AST, all VHS directives)
-Batch 3: WS-3 — LSP Core (tower-lsp-server init, didChange, document state)
-Batch 4: WS-4 + WS-5 — Hover + Formatting (can be parallel)
+Batch 1: WS-1       — SyntaxKind enum + hand-written lexer          [core]
+Batch 2: WS-2       — Recursive descent parser + typed AST          [core]
+Batch 3: WS-5       — Token-stream formatter                        [core] ← core crate complete
+Batch 4: WS-3       — tower-lsp-server wiring + parse diagnostics   [lsp]
+Batch 5: WS-4       — Hover documentation provider                  [lsp]  ← lsp crate complete
+Batch 6: —          — Integration test + closeout
 ```
+
+B1 → B2 → B3 → B4 → B5 → B6 (strictly sequential).
+See `prompt/PHASE1_KICK_BUILDER.md` for full batch definitions.
 
 ## Crate Architecture
 
@@ -45,17 +52,27 @@ Phase 1 code lives in:
 ```txt
 crates/
 ├── vhs-analyzer-core/     — Lexer, Parser, AST (rowan), Formatting logic
-│   └── src/
-│       ├── lib.rs
-│       ├── lexer.rs       (WS-1)
-│       ├── parser.rs      (WS-2)
-│       ├── syntax.rs      (SyntaxKind enum, rowan GreenNode bridge)
-│       └── formatting.rs  (WS-5)
+│   ├── src/
+│   │   ├── lib.rs
+│   │   ├── syntax.rs      (SyntaxKind enum, rowan Language impl)  (B1)
+│   │   ├── lexer.rs       (Token, lex())                          (B1)
+│   │   ├── parser.rs      (Parser, parse())                       (B2)
+│   │   ├── ast.rs         (typed AST wrappers)                    (B2)
+│   │   └── formatting.rs  (format())                              (B3)
+│   └── tests/
+│       ├── lexer_tests.rs
+│       ├── parser_tests.rs
+│       ├── ast_tests.rs
+│       └── formatting_tests.rs
 └── vhs-analyzer-lsp/      — tower-lsp-server integration, Hover provider
-    └── src/
-        ├── main.rs        (entry point, stdio transport)
-        ├── server.rs      (LanguageServer trait impl) (WS-3)
-        └── hover.rs       (WS-4)
+    ├── src/
+    │   ├── main.rs        (entry point, stdio transport)           (B4)
+    │   ├── server.rs      (VhsLanguageServer, LanguageServer impl) (B4)
+    │   └── hover.rs       (hover handler, doc registry)            (B5)
+    └── tests/
+        ├── lsp_integration_tests.rs
+        ├── hover_tests.rs
+        └── integration_test.rs                                     (B6)
 ```
 
 ## Key Dependencies (Phase 1)
