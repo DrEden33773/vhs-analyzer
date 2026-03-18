@@ -40,7 +40,8 @@ When files disagree, follow:
 2. Implement code to match spec.
 3. Update tests per the current phase's `SPEC_TEST_MATRIX.md`.
 4. Update the current phase's `SPEC_TRACEABILITY.md` links for changed requirements.
-5. Update `STATUS.yaml` and `EXECUTION_TRACKER.md`.
+5. Update `trace/<current-phase>/status.yaml` and `trace/<current-phase>/tracker.md` with batch progress.
+6. Update root `STATUS.yaml` only when phase-level status changes (e.g., `not_started` → `in_progress` → `completed`).
 
 ## 5. Quick Start Task Routing
 
@@ -79,5 +80,5 @@ When files disagree, follow:
 - Do not introduce Phase 3 extension client implementation into Phase 1 or Phase 2 specs.
 - Phase specs are frozen after Stage B completion; changes require explicit user approval.
 - Use `tree-sitter-vhs` grammar.js as the ground-truth reference for VHS tape language syntax.
-- Completed phase execution records are archived in `trace/<phase>/`. Root `STATUS.yaml` and `EXECUTION_TRACKER.md` only contain the current execution state.
+- **Root files are index-only.** Root `STATUS.yaml` and `EXECUTION_TRACKER.md` are thin routing files — they contain project metadata, phase-level status pointers, and responsibility boundaries only. All phase-specific execution detail (stages, deliverables, stats, decision logs, batch progress, builder checkpoints) MUST live in `trace/<phase>/status.yaml` and `trace/<phase>/tracker.md`. Agents MUST NOT bloat root files with phase-internal data. See `trace/README.md` for the full convention.
 - All `.md` files produced by any agent MUST pass `markdownlint-cli2`. See `.cursor/rules/markdown-output.mdc` for compliance details and `.markdownlint-cli2.jsonc` for the rule configuration.

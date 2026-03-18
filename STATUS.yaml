@@ -2,8 +2,8 @@ schema_version: 2
 updated_at: "2026-03-18"
 project:
   name: vhs-analyzer
-  phase: phase1_architect_stage_b
-  status: spec_frozen
+  phase: phase1_builder
+  status: in_progress
 
 authority_order:
   - spec
@@ -36,59 +36,14 @@ phases:
   pre_phase1:
     status: completed
     completed_at: "2026-03-18"
-    description: "Project initialization — monorepo scaffolding, Cargo workspace, toolchain"
   phase1:
     status: in_progress
     started_at: "2026-03-18"
-    description: "LSP Foundation — Architect Stage A/B complete, Builder implements Lexer, Parser, LSP Core, Hover, Formatting"
-    stages:
-      architect_stage_a:
-        status: completed
-        completed_at: "2026-03-18"
-        deliverables:
-          - spec/phase1/SPEC_LEXER.md
-          - spec/phase1/SPEC_PARSER.md
-          - spec/phase1/SPEC_LSP_CORE.md
-          - spec/phase1/SPEC_HOVER.md
-          - spec/phase1/SPEC_FORMATTING.md
-          - spec/phase1/SPEC_TRACEABILITY.md
-        stats:
-          requirements_total: 41
-          requirements_p0_must: 32
-          requirements_p1_should: 8
-          requirements_p2_may: 1
-          freeze_candidates: 17
-      architect_stage_b:
-        status: completed
-        completed_at: "2026-03-18"
-        description: "Freeze all specs with MUST/SHOULD/MAY contracts and resolve Freeze Candidates"
-        deliverables:
-          - spec/phase1/SPEC_LEXER.md (CONTRACT_FROZEN)
-          - spec/phase1/SPEC_PARSER.md (CONTRACT_FROZEN)
-          - spec/phase1/SPEC_LSP_CORE.md (CONTRACT_FROZEN)
-          - spec/phase1/SPEC_HOVER.md (CONTRACT_FROZEN)
-          - spec/phase1/SPEC_FORMATTING.md (CONTRACT_FROZEN)
-          - spec/phase1/SPEC_TRACEABILITY.md (CONTRACT_FROZEN)
-          - spec/phase1/SPEC_TEST_MATRIX.md (CONTRACT_FROZEN)
-        stats:
-          requirements_total: 42
-          requirements_p0_must: 32
-          requirements_p1_should: 9
-          requirements_p2_may: 1
-          freeze_candidates_resolved: 17
-          test_scenarios_total: 105
-          test_scenarios_p0: 84
-          test_scenarios_p1: 20
-          test_scenarios_p2: 1
-      builder:
-        status: not_started
-        description: "Implement from frozen specs — Lexer, Parser, tower-lsp-server, Hover, Formatting"
+    archive: trace/phase1/
   phase2:
     status: not_started
-    description: "Intelligence & Diagnostics — Autocomplete, Semantic Validation, Safety Check Engine"
   phase3:
     status: not_started
-    description: "VSCode Extension Client — LSP client, Live Preview, CodeLens, Platform VSIX packaging"
 
 next_execution_targets:
   - phase1_builder

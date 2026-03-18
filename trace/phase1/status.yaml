@@ -1,10 +1,52 @@
 phase: phase1_lsp_foundation
-status: not_started
-started_at: null
+status: in_progress
+started_at: "2026-03-18"
 completed_at: null
 
+stages:
+  architect_stage_a:
+    status: completed
+    completed_at: "2026-03-18"
+    deliverables:
+      - spec/phase1/SPEC_LEXER.md
+      - spec/phase1/SPEC_PARSER.md
+      - spec/phase1/SPEC_LSP_CORE.md
+      - spec/phase1/SPEC_HOVER.md
+      - spec/phase1/SPEC_FORMATTING.md
+      - spec/phase1/SPEC_TRACEABILITY.md
+    stats:
+      requirements_total: 41
+      requirements_p0_must: 32
+      requirements_p1_should: 8
+      requirements_p2_may: 1
+      freeze_candidates: 17
+  architect_stage_b:
+    status: completed
+    completed_at: "2026-03-18"
+    description: "Freeze all specs — resolve 17 Freeze Candidates, produce MUST/SHOULD/MAY contracts"
+    deliverables:
+      - spec/phase1/SPEC_LEXER.md (CONTRACT_FROZEN)
+      - spec/phase1/SPEC_PARSER.md (CONTRACT_FROZEN)
+      - spec/phase1/SPEC_LSP_CORE.md (CONTRACT_FROZEN)
+      - spec/phase1/SPEC_HOVER.md (CONTRACT_FROZEN)
+      - spec/phase1/SPEC_FORMATTING.md (CONTRACT_FROZEN)
+      - spec/phase1/SPEC_TRACEABILITY.md (CONTRACT_FROZEN)
+      - spec/phase1/SPEC_TEST_MATRIX.md (CONTRACT_FROZEN)
+    stats:
+      requirements_total: 42
+      requirements_p0_must: 32
+      requirements_p1_should: 9
+      requirements_p2_may: 1
+      freeze_candidates_resolved: 17
+      test_scenarios_total: 105
+      test_scenarios_p0: 84
+      test_scenarios_p1: 20
+      test_scenarios_p2: 1
+  builder:
+    status: not_started
+    description: "Implement from frozen specs — Lexer, Parser, tower-lsp-server, Hover, Formatting"
+
 spec_files:
-  - spec/phase1/README.md
   - spec/phase1/SPEC_LEXER.md
   - spec/phase1/SPEC_PARSER.md
   - spec/phase1/SPEC_LSP_CORE.md
@@ -13,30 +55,51 @@ spec_files:
   - spec/phase1/SPEC_TEST_MATRIX.md
   - spec/phase1/SPEC_TRACEABILITY.md
 
-requirement_ids: {}
+requirement_ids:
+  lexer: [LEX-001, LEX-002, LEX-003, LEX-004, LEX-005, LEX-006, LEX-007, LEX-008, LEX-009, LEX-010, LEX-011, LEX-012]
+  parser: [PAR-001, PAR-002, PAR-003, PAR-004, PAR-005, PAR-006, PAR-007]
+  lsp_core: [LSP-001, LSP-002, LSP-003, LSP-004, LSP-005, LSP-006, LSP-007, LSP-008]
+  hover: [HOV-001, HOV-002, HOV-003, HOV-004, HOV-005, HOV-006]
+  formatting: [FMT-001, FMT-002, FMT-003, FMT-004, FMT-005, FMT-006, FMT-007, FMT-008, FMT-009]
 
-test_scenarios: null
+test_scenarios:
+  total: 105
+  by_category:
+    lexer: 36
+    parser: 25
+    lsp_core: 13
+    hover: 14
+    formatting: 17
 
 batches:
   batch1:
     name: "Lexer (WS-1)"
     work_packages: [WS-1]
-    requirements: []
+    requirements: [LEX-001, LEX-002, LEX-003, LEX-004, LEX-005, LEX-006, LEX-007, LEX-008, LEX-009, LEX-010, LEX-011, LEX-012]
+    test_ids: "T-LEX-*"
     status: not_started
   batch2:
     name: "Parser (WS-2)"
     work_packages: [WS-2]
-    requirements: []
+    requirements: [PAR-001, PAR-002, PAR-003, PAR-004, PAR-005, PAR-006, PAR-007]
+    test_ids: "T-PAR-*"
+    depends_on: [batch1]
     status: not_started
   batch3:
     name: "LSP Core (WS-3)"
     work_packages: [WS-3]
-    requirements: []
+    requirements: [LSP-001, LSP-002, LSP-003, LSP-004, LSP-005, LSP-006, LSP-007, LSP-008]
+    test_ids: "T-LSP-*"
+    depends_on: [batch2]
     status: not_started
   batch4:
     name: "Hover + Formatting (WS-4 + WS-5)"
     work_packages: [WS-4, WS-5]
-    requirements: []
+    requirements: [HOV-001, HOV-002, HOV-003, HOV-004, HOV-005, HOV-006, FMT-001, FMT-002, FMT-003, FMT-004, FMT-005, FMT-006, FMT-007, FMT-008, FMT-009]
+    test_ids: "T-HOV-*, T-FMT-*"
+    depends_on: [batch2]
     status: not_started
 
-builder_progress: {}
+builder_progress:
+  automated_tests: 0
+  ci_gate: false
