@@ -1,7 +1,7 @@
 phase: phase1_lsp_foundation
-status: in_progress
+status: completed
 started_at: "2026-03-18"
-completed_at: null
+completed_at: "2026-03-19"
 
 stages:
   architect_stage_a:
@@ -43,8 +43,9 @@ stages:
       test_scenarios_p1: 20
       test_scenarios_p2: 1
   builder:
-    status: in_progress
+    status: completed
     started_at: "2026-03-19"
+    completed_at: "2026-03-19"
     description: "Implement from frozen specs — Lexer, Parser, tower-lsp-server, Hover, Formatting"
 
 spec_files:
@@ -151,14 +152,23 @@ batches:
   batch6:
     name: "Integration + Closeout"
     work_packages: []
-    requirements: []
-    test_ids: "T-INT-001"
+    requirements: [LEX-001, LEX-002, PAR-002, PAR-003, FMT-001, LSP-001, LSP-002, LSP-003, LSP-005, LSP-006, LSP-008, HOV-001]
+    test_ids: "T-INT-001 + property-based tests"
     crate: both
     depends_on: [batch5]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-core/tests/formatting_tests.rs
+      - crates/vhs-analyzer-lsp/tests/integration_test.rs
+      - spec/phase1/SPEC_TRACEABILITY.md
+      - trace/phase1/status.yaml
+      - trace/phase1/tracker.md
+      - STATUS.yaml
+      - EXECUTION_TRACKER.md
 
 builder_progress:
-  automated_tests: 133
+  automated_tests: 135
   ci_gate: true
   entries:
     - batch: batch1
@@ -298,6 +308,38 @@ builder_progress:
         - "Wired textDocument/hover in crates/vhs-analyzer-lsp/src/server.rs through token_at_offset-based resolution, command-context lookup, exact token ranges, and trivia-aware null responses."
         - "Added 17 passing hover tests in crates/vhs-analyzer-lsp/tests/hover_tests.rs and updated concurrent hover coverage in crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs to expect real documentation."
         - "Batch 5 completes the vhs-analyzer-lsp crate milestone."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass
+    - batch: batch6
+      name: "Integration + Closeout"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - LEX-001
+        - LEX-002
+        - PAR-002
+        - PAR-003
+        - FMT-001
+        - LSP-001
+        - LSP-002
+        - LSP-003
+        - LSP-005
+        - LSP-006
+        - LSP-008
+        - HOV-001
+      scenarios:
+        implemented:
+          - T-INT-001
+        additional:
+          - Lexer lossless and no-panic property coverage
+          - Parser lossless and no-panic property coverage
+          - Formatter idempotence property coverage
+      notes:
+        - "Added a black-box stdio integration test in crates/vhs-analyzer-lsp/tests/integration_test.rs covering initialize, didOpen with invalid content, hover Markdown, formatting edits, didChange diagnostics clearing, and clean shutdown/exit."
+        - "Added a property-based formatter idempotence test in crates/vhs-analyzer-core/tests/formatting_tests.rs to complete the Batch 6 property coverage requirements."
+        - "Updated traceability and phase-level status files to mark Phase 1 complete while keeping the root records thin."
       quality_gate:
         cargo_fmt_all_check: pass
         cargo_clippy_workspace_all_targets_all_features_locked: pass

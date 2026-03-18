@@ -55,20 +55,20 @@ from spec through code to test.
 
 | Req ID | Statement Summary | Priority | Impl Module | Test Reference | Design Decision |
 | --- | --- | --- | --- | --- | --- |
-| LSP-001 | Server bootstrap via stdio | P0 MUST | `crates/vhs-analyzer-lsp/src/main.rs` | T-LSP-001 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`), T-INT-001 | — |
-| LSP-002 | Initialize handshake with capabilities | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-002, T-LSP-003 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
-| LSP-003 | Full document sync (didOpen/didChange/didClose) | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-004 through T-LSP-006 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
+| LSP-001 | Server bootstrap via stdio | P0 MUST | `crates/vhs-analyzer-lsp/src/main.rs` | T-LSP-001 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`), T-INT-001 (`crates/vhs-analyzer-lsp/tests/integration_test.rs`) | — |
+| LSP-002 | Initialize handshake with capabilities | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-002, T-LSP-003 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`), T-INT-001 (`crates/vhs-analyzer-lsp/tests/integration_test.rs`) | — |
+| LSP-003 | Full document sync (didOpen/didChange/didClose) | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-004 through T-LSP-006 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`), T-INT-001 (`crates/vhs-analyzer-lsp/tests/integration_test.rs`) | — |
 | LSP-004 | Concurrent document state store (DashMap) | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-007 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | FC-LSP-01: MUST use DashMap |
-| LSP-005 | Shutdown and exit protocol | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs`, `crates/vhs-analyzer-lsp/src/main.rs` | T-LSP-008 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
-| LSP-006 | Graceful error handling (no panics, LSP error responses) | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-009 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
+| LSP-005 | Shutdown and exit protocol | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs`, `crates/vhs-analyzer-lsp/src/main.rs` | T-LSP-008 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`), T-INT-001 (`crates/vhs-analyzer-lsp/tests/integration_test.rs`) | — |
+| LSP-006 | Graceful error handling (no panics, LSP error responses) | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-009 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`), T-INT-001 (`crates/vhs-analyzer-lsp/tests/integration_test.rs`) | — |
 | LSP-007 | Logging via tracing to stderr + client | P1 SHOULD | `crates/vhs-analyzer-lsp/src/main.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-013 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
-| LSP-008 | Parse-error diagnostics via publishDiagnostics | P1 SHOULD | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-010 through T-LSP-012 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | FC-LSP-03: SHOULD publish in Phase 1 |
+| LSP-008 | Parse-error diagnostics via publishDiagnostics | P1 SHOULD | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-010 through T-LSP-012 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`), T-INT-001 (`crates/vhs-analyzer-lsp/tests/integration_test.rs`) | FC-LSP-03: SHOULD publish in Phase 1 |
 
 ### 2.4 Hover (WS-4) — SPEC_HOVER.md
 
 | Req ID | Statement Summary | Priority | Impl Module | Test Reference | Design Decision |
 | --- | --- | --- | --- | --- | --- |
-| HOV-001 | Hover response format (Markdown, range) | P0 MUST | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-010 through T-HOV-012 + Markdown markup coverage (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | — |
+| HOV-001 | Hover response format (Markdown, range) | P0 MUST | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-010 through T-HOV-012 + Markdown markup coverage (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`), T-INT-001 (`crates/vhs-analyzer-lsp/tests/integration_test.rs`) | — |
 | HOV-002 | Command keyword hover documentation | P0 MUST | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-001 through T-HOV-004, T-HOV-016 (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | FC-HOV-01: embedded match expression |
 | HOV-003 | Setting name hover documentation | P0 MUST | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-005 through T-HOV-007 (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | — |
 | HOV-004 | Modifier key hover | P1 SHOULD | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-008, T-HOV-009 (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | — |
@@ -79,7 +79,7 @@ from spec through code to test.
 
 | Req ID | Statement Summary | Priority | Impl Module | Test Reference | Design Decision |
 | --- | --- | --- | --- | --- | --- |
-| FMT-001 | LSP formatting response (minimal TextEdits) | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-001, T-FMT-002, T-FMT-016, T-FMT-017 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | FC-FMT-01: preserve order; FC-FMT-02: no sort |
+| FMT-001 | LSP formatting response (minimal TextEdits) | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-001, T-FMT-002, T-FMT-016, T-FMT-017 + formatter idempotence property (`crates/vhs-analyzer-core/tests/formatting_tests.rs`), T-INT-001 (`crates/vhs-analyzer-lsp/tests/integration_test.rs`) | FC-FMT-01: preserve order; FC-FMT-02: no sort |
 | FMT-002 | No leading indentation (column 0) | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-003, T-FMT-004, T-FMT-014 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | — |
 | FMT-003 | Single space between tokens | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-005 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | — |
 | FMT-004 | No space around modifier/duration punctuation | P0 MUST | `crates/vhs-analyzer-core/src/formatting.rs` | T-FMT-006, T-FMT-007, T-FMT-018 (`crates/vhs-analyzer-core/tests/formatting_tests.rs`) | FC-FMT-03: no space around @ |

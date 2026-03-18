@@ -5,9 +5,9 @@ This file is an **index** — phase-specific details live in `trace/<phase>/`.
 
 ## 1. Snapshot
 
-- Date: 2026-03-18
+- Date: 2026-03-19
 - Workspace: `vhs-analyzer`
-- Current Phase: **Phase 1** — specs frozen, Builder next
+- Current Phase: **Phase 2** — not started; Phase 1 is complete
 
 ## 2. Responsibility Boundaries
 
@@ -22,16 +22,16 @@ This file is an **index** — phase-specific details live in `trace/<phase>/`.
 Legend: `[x]` completed, `[~]` in progress, `[ ]` not started
 
 - [x] Pre-Phase 1: Project Initialization (monorepo scaffolding, workflow setup)
-- [~] Phase 1: LSP Foundation → [details](trace/phase1/tracker.md)
+- [x] Phase 1: LSP Foundation → [details](trace/phase1/tracker.md)
   - [x] Architect Stage A (exploratory specs)
   - [x] Architect Stage B (spec freeze — 17 FC resolved, 42 reqs, 105 tests)
-  - [ ] Builder (Lexer → Parser → LSP Core → Hover + Formatting)
+  - [x] Builder (Lexer → Parser → LSP Core → Hover + Formatting → Integration closeout)
 - [ ] Phase 2: Intelligence & Diagnostics
 - [ ] Phase 3: VSCode Extension Client
 
-Progress score (all phases): `4 / 15 = 27%`
+Progress score (all phases): see `trace/` archives for current per-phase detail
 
-Current automated tests: `0`
+Current automated tests: `135`
 
 ## 4. Pending Tasks with Planned LLM Ownership
 
@@ -44,7 +44,7 @@ Current automated tests: `0`
 
 ### 4.2 Builder-Owned
 
-- [ ] Implement Phase 1 from frozen specs (Lexer, Parser, tower-lsp-server, Hover)
+- [x] Implement Phase 1 from frozen specs (Lexer, Parser, tower-lsp-server, Hover, integration closeout)
 - [ ] Implement Phase 2 from frozen specs (Completion, Diagnostics, Safety)
 - [ ] Implement Phase 3 from frozen specs (VSCode client, Preview, CodeLens, CI/CD)
 
@@ -62,6 +62,6 @@ Each directory contains `status.yaml` (machine-readable) and `tracker.md`
 | Phase | Status | Started | Completed | Archive |
 | ----- | ------ | ------- | --------- | ------- |
 | Pre-Phase 1 | Completed | 2026-03-18 | 2026-03-18 | — |
-| Phase 1 | In Progress (spec frozen) | 2026-03-18 | — | [trace/phase1/](trace/phase1/) |
+| Phase 1 | Completed | 2026-03-18 | 2026-03-19 | [trace/phase1/](trace/phase1/) |
 | Phase 2 | Not Started | — | — | — |
 | Phase 3 | Not Started | — | — | — |

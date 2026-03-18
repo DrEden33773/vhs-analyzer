@@ -1,3 +1,4 @@
+use proptest::prelude::*;
 use rowan::{TextRange, TextSize};
 use vhs_analyzer_core::formatting::{FormattingOptions, TextEdit, format};
 use vhs_analyzer_core::parser::parse;
@@ -197,4 +198,42 @@ fn formatter_preserves_directive_order() {
 #[test]
 fn formatter_removes_spaces_from_ctrl_alt_shift_combination() {
     assert_formats_to("Ctrl + Alt + Shift + A\n", "Ctrl+Alt+Shift+A\n");
+}
+
+proptest! {
+    #[test]
+    fn formatter_is_idempotent_for_generated_valid_tapes(
+        lines in prop::collection::vec(
+            prop_oneof![
+                Just(String::new()),
+                Just("Output demo.gif".to_owned()),
+                Just("Set   FontSize   14".to_owned()),
+                Just("Set Theme \"Dracula\"".to_owned()),
+                Just("  Type \"hello\"   ".to_owned()),
+                Just("Type @ 500ms \"text\"".to_owned()),
+                Just("Enter".to_owned()),
+                Just("Sleep 500ms".to_owned()),
+                Just("Ctrl + C".to_owned()),
+                Just("Ctrl + Alt + Shift + A".to_owned()),
+                Just("Wait /World/".to_owned()),
+                Just("Screenshot output.png".to_owned()),
+                Just("  # indented comment".to_owned()),
+            ],
+            0..20
+        ),
+        trailing_newlines in 0usize..=3,
+    ) {
+        let mut source = lines.join("\n");
+        if trailing_newlines > 0 {
+            source.push_str(&"\n".repeat(trailing_newlines));
+        }
+
+        let first_pass = apply_text_edits(&source, &format_source(&source));
+        let second_pass = format_source(&first_pass);
+
+        prop_assert!(
+            second_pass.is_empty(),
+            "formatter should be idempotent after one pass for source {source:?}, got {first_pass:?}"
+        );
+    }
 }

@@ -1,9 +1,9 @@
 # Phase 1 Execution Tracker
 
 Phase: LSP Foundation (Lexer, Parser, tower-lsp-server, Hover, Formatting)
-Status: In Progress — Batch 5 complete, Builder in progress
+Status: Completed — Phase 1 closed out
 Started: 2026-03-18
-Completed: —
+Completed: 2026-03-19
 
 ## 1. Stage Progress
 
@@ -11,7 +11,7 @@ Completed: —
 | --- | --- | --- | --- | --- |
 | Architect Stage A | Claude | Completed | 2026-03-18 | 6 exploratory specs, 41 reqs, 17 FC identified |
 | Architect Stage B | Claude | Completed | 2026-03-18 | 7 frozen specs, 42 reqs, 105 test scenarios |
-| Builder | Builder | In Progress | — | Batch 5 complete — Hover done; integration closeout remains |
+| Builder | Builder | Completed | 2026-03-19 | Batch 6 complete — integration closeout and final verification done |
 
 ## 2. Builder Batch Plan (Crate-Aligned, 6 Batches)
 
@@ -22,7 +22,7 @@ Completed: —
 | 3 | Formatting | WS-5 | core | FMT-001~009 | B2 | core crate complete | completed |
 | 4 | LSP Core + Diagnostics | WS-3 | lsp | LSP-001~008 | B3 | — | completed |
 | 5 | Hover | WS-4 | lsp | HOV-001~006 | B4 | lsp crate complete | completed |
-| 6 | Integration + Closeout | — | both | T-INT-001 | B5 | Phase 1 complete | not started |
+| 6 | Integration + Closeout | — | both | T-INT-001 + property tests | B5 | Phase 1 complete | completed |
 
 ## 3. Dependency Constraints
 
@@ -217,3 +217,28 @@ All 17 Freeze Candidates resolved during Phase 1 Stage B (2026-03-18):
 - Notes:
   - Batch 5 completes the `vhs-analyzer-lsp` crate milestone.
   - The hover registry keeps the frozen explicit `match` style and uses targeted `#[expect(clippy::too_many_lines)]` annotations with justification so the registry remains reviewable under the workspace lint policy.
+
+### Batch 6 — Integration + Closeout
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `LEX-001`, `LEX-002`, `PAR-002`, `PAR-003`, `FMT-001`, `LSP-001`, `LSP-002`, `LSP-003`, `LSP-005`, `LSP-006`, `LSP-008`, `HOV-001`
+- Files:
+  - `crates/vhs-analyzer-core/tests/formatting_tests.rs`
+  - `crates/vhs-analyzer-lsp/tests/integration_test.rs`
+  - `spec/phase1/SPEC_TRACEABILITY.md`
+  - `trace/phase1/status.yaml`
+  - `trace/phase1/tracker.md`
+  - `STATUS.yaml`
+  - `EXECUTION_TRACKER.md`
+- Deliverables:
+  - Added a black-box stdio integration test that starts the real `vhs-analyzer-lsp` binary, runs `initialize`, opens an invalid `.tape` document, verifies hover Markdown, checks formatting edits, confirms diagnostics clear after `didChange`, and validates clean `shutdown` plus `exit`.
+  - Added a property-based formatter idempotence test that generates valid-but-messy tape content and proves a second formatting pass returns zero edits.
+  - Updated Phase 1 traceability and phase status records to mark the frozen Phase 1 scope complete.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
+- Notes:
+  - Phase 1 now closes with 135 passing automated tests across both crates.
+  - Root `STATUS.yaml` and `EXECUTION_TRACKER.md` remain thin phase-level indexes per `AGENTS.md`.
