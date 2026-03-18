@@ -1,3 +1,6 @@
+#[path = "../src/hover.rs"]
+mod hover;
+
 #[path = "../src/server.rs"]
 mod server;
 
@@ -612,7 +615,10 @@ async fn hover_on_one_document_while_changing_another_completes_without_corrupti
     .await
     .expect("concurrent document access should complete");
 
-    assert_eq!(hover_result.expect("hover should succeed"), None);
+    assert!(
+        hover_result.expect("hover should succeed").is_some(),
+        "hover should return documentation for the open Type command"
+    );
 
     let state_a = service
         .inner()

@@ -140,7 +140,14 @@ batches:
     crate: vhs-analyzer-lsp
     depends_on: [batch4]
     milestone: "vhs-analyzer-lsp crate complete"
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-lsp/src/main.rs
+      - crates/vhs-analyzer-lsp/src/server.rs
+      - crates/vhs-analyzer-lsp/src/hover.rs
+      - crates/vhs-analyzer-lsp/tests/hover_tests.rs
+      - crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs
   batch6:
     name: "Integration + Closeout"
     work_packages: []
@@ -151,7 +158,7 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 116
+  automated_tests: 133
   ci_gate: true
   entries:
     - batch: batch1
@@ -266,6 +273,31 @@ builder_progress:
         - "Published parse-error diagnostics on didOpen and didChange, cleared diagnostics on didClose, and bridged textDocument/formatting to the rowan-based core formatter."
         - "Added 16 passing LSP integration tests in crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs covering stdio bootstrap, initialize metadata, document sync, concurrent access, diagnostics, shutdown/exit, stderr logging, and the formatting bridge."
         - "Exposed GreenNode access from vhs-analyzer-core so the LSP document store can retain parsed trees without reparsing for formatting."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass
+    - batch: batch5
+      name: "Hover (WS-4)"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - HOV-001
+        - HOV-002
+        - HOV-003
+        - HOV-004
+        - HOV-005
+        - HOV-006
+      scenarios:
+        implemented:
+          - T-HOV-001 through T-HOV-016
+        additional:
+          - Markdown markup-content coverage for Type keyword hover
+      notes:
+        - "Added a dedicated hover registry in crates/vhs-analyzer-lsp/src/hover.rs using explicit match-based mappings for command keywords, setting keywords, modifier keywords, and Sleep duration literals."
+        - "Wired textDocument/hover in crates/vhs-analyzer-lsp/src/server.rs through token_at_offset-based resolution, command-context lookup, exact token ranges, and trivia-aware null responses."
+        - "Added 17 passing hover tests in crates/vhs-analyzer-lsp/tests/hover_tests.rs and updated concurrent hover coverage in crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs to expect real documentation."
+        - "Batch 5 completes the vhs-analyzer-lsp crate milestone."
       quality_gate:
         cargo_fmt_all_check: pass
         cargo_clippy_workspace_all_targets_all_features_locked: pass

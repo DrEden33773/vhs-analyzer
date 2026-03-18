@@ -5,10 +5,11 @@ use dashmap::DashMap;
 use tower_lsp_server::jsonrpc::{Error, ErrorCode, Result};
 use tower_lsp_server::ls_types::{
     Diagnostic, DiagnosticSeverity, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
-    DidOpenTextDocumentParams, DocumentFormattingParams, Hover, HoverParams,
-    HoverProviderCapability, InitializeParams, InitializeResult, InitializedParams, MessageType,
-    OneOf, Position, Range, ServerCapabilities, ServerInfo, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextDocumentSyncOptions, TextEdit as LspTextEdit, Uri,
+    DidOpenTextDocumentParams, DocumentFormattingParams, Hover, HoverContents, HoverParams,
+    HoverProviderCapability, InitializeParams, InitializeResult, InitializedParams, MarkupContent,
+    MarkupKind, MessageType, OneOf, Position, Range, ServerCapabilities, ServerInfo,
+    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    TextEdit as LspTextEdit, Uri,
 };
 use tower_lsp_server::{Client, LanguageServer};
 use tracing::{error, info};
@@ -16,6 +17,8 @@ use vhs_analyzer_core::GreenNode;
 use vhs_analyzer_core::formatting::{FormattingOptions, format as format_document};
 use vhs_analyzer_core::parser::{ParseError, parse};
 use vhs_analyzer_core::syntax::SyntaxNode;
+
+use crate::hover;
 
 #[derive(Debug, Clone)]
 pub struct DocumentState {
@@ -168,6 +171,44 @@ impl VhsLanguageServer {
         Position::new(line, character)
     }
 
+    fn offset_for_position(source: &str, position: Position) -> usize {
+        let target_line = usize::try_from(position.line).unwrap_or(usize::MAX);
+        let target_character = usize::try_from(position.character).unwrap_or(usize::MAX);
+        let mut line = 0_usize;
+        let mut character = 0_usize;
+        let mut last_boundary = 0_usize;
+
+        for (byte_index, ch) in source.char_indices() {
+            if line == target_line && character >= target_character {
+                return byte_index;
+            }
+
+            last_boundary = byte_index;
+
+            match ch {
+                '\r' => {
+                    line += 1;
+                    character = 0;
+                }
+                '\n' => {
+                    if !source[..byte_index].ends_with('\r') {
+                        line += 1;
+                    }
+                    character = 0;
+                }
+                _ => {
+                    character += ch.len_utf16();
+                }
+            }
+        }
+
+        if line == target_line && character >= target_character {
+            last_boundary
+        } else {
+            source.len()
+        }
+    }
+
     async fn publish_diagnostics(&self, uri: Uri, state: &DocumentState) {
         self.client
             .publish_diagnostics(uri, Self::diagnostics_for_state(state), None)
@@ -235,8 +276,21 @@ impl LanguageServer for VhsLanguageServer {
 
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>> {
         let uri = &params.text_document_position_params.text_document.uri;
-        let _ = self.require_document(uri)?;
-        Ok(None)
+        let state = self.require_document(uri)?;
+        let syntax = SyntaxNode::new_root(state.green.clone());
+        let offset =
+            Self::offset_for_position(&state.source, params.text_document_position_params.position);
+        let Some(info) = hover::hover_info(&syntax, offset) else {
+            return Ok(None);
+        };
+
+        Ok(Some(Hover {
+            contents: HoverContents::Markup(MarkupContent {
+                kind: MarkupKind::Markdown,
+                value: info.markdown,
+            }),
+            range: Some(Self::range_for_offsets(&state.source, info.start, info.end)),
+        }))
     }
 
     async fn formatting(

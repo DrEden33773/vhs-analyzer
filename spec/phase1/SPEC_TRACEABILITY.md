@@ -68,12 +68,12 @@ from spec through code to test.
 
 | Req ID | Statement Summary | Priority | Impl Module | Test Reference | Design Decision |
 | --- | --- | --- | --- | --- | --- |
-| HOV-001 | Hover response format (Markdown, range) | P0 MUST | `lsp::hover` | T-HOV-010 through T-HOV-012 | — |
-| HOV-002 | Command keyword hover documentation | P0 MUST | `lsp::hover` | T-HOV-001 through T-HOV-003, T-HOV-016 | FC-HOV-01: embedded match expression |
-| HOV-003 | Setting name hover documentation | P0 MUST | `lsp::hover` | T-HOV-005 through T-HOV-007 | — |
-| HOV-004 | Modifier key hover | P1 SHOULD | `lsp::hover` | T-HOV-008, T-HOV-009 | — |
-| HOV-005 | Literal value hover | P2 MAY | `lsp::hover` | T-HOV-015 | — |
-| HOV-006 | Hover resolution algorithm (token → ancestor → lookup) | P0 MUST | `lsp::hover` | T-HOV-013, T-HOV-014 | FC-HOV-02: no links; FC-HOV-03: template + unique descriptions |
+| HOV-001 | Hover response format (Markdown, range) | P0 MUST | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-010 through T-HOV-012 + Markdown markup coverage (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | — |
+| HOV-002 | Command keyword hover documentation | P0 MUST | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-001 through T-HOV-004, T-HOV-016 (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | FC-HOV-01: embedded match expression |
+| HOV-003 | Setting name hover documentation | P0 MUST | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-005 through T-HOV-007 (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | — |
+| HOV-004 | Modifier key hover | P1 SHOULD | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-008, T-HOV-009 (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | — |
+| HOV-005 | Literal value hover | P2 MAY | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-015 (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | — |
+| HOV-006 | Hover resolution algorithm (token → ancestor → lookup) | P0 MUST | `crates/vhs-analyzer-lsp/src/hover.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-HOV-013, T-HOV-014 (`crates/vhs-analyzer-lsp/tests/hover_tests.rs`) | FC-HOV-02: no links; FC-HOV-03: template + unique descriptions |
 
 ### 2.5 Formatting (WS-5) — SPEC_FORMATTING.md
 

@@ -1,7 +1,7 @@
 # Phase 1 Execution Tracker
 
 Phase: LSP Foundation (Lexer, Parser, tower-lsp-server, Hover, Formatting)
-Status: In Progress — Batch 4 complete, Builder in progress
+Status: In Progress — Batch 5 complete, Builder in progress
 Started: 2026-03-18
 Completed: —
 
@@ -11,7 +11,7 @@ Completed: —
 | --- | --- | --- | --- | --- |
 | Architect Stage A | Claude | Completed | 2026-03-18 | 6 exploratory specs, 41 reqs, 17 FC identified |
 | Architect Stage B | Claude | Completed | 2026-03-18 | 7 frozen specs, 42 reqs, 105 test scenarios |
-| Builder | Builder | In Progress | — | Batch 4 complete — LSP Core + Diagnostics done; Hover and integration closeout remain |
+| Builder | Builder | In Progress | — | Batch 5 complete — Hover done; integration closeout remains |
 
 ## 2. Builder Batch Plan (Crate-Aligned, 6 Batches)
 
@@ -21,7 +21,7 @@ Completed: —
 | 2 | Parser + Typed AST | WS-2 | core | PAR-002~007 | B1 | — | completed |
 | 3 | Formatting | WS-5 | core | FMT-001~009 | B2 | core crate complete | completed |
 | 4 | LSP Core + Diagnostics | WS-3 | lsp | LSP-001~008 | B3 | — | completed |
-| 5 | Hover | WS-4 | lsp | HOV-001~006 | B4 | lsp crate complete | not started |
+| 5 | Hover | WS-4 | lsp | HOV-001~006 | B4 | lsp crate complete | completed |
 | 6 | Integration + Closeout | — | both | T-INT-001 | B5 | Phase 1 complete | not started |
 
 ## 3. Dependency Constraints
@@ -193,3 +193,27 @@ All 17 Freeze Candidates resolved during Phase 1 Stage B (2026-03-18):
 - Notes:
   - Batch 4 keeps hover content itself deferred to Batch 5, but the hover request path is now wired and error-safe.
   - `vhs-analyzer-core` now re-exports `GreenNode` and exposes `Parse::green()` so the LSP layer can retain parsed trees without reparsing for formatting.
+
+### Batch 5 — Hover
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `HOV-001` through `HOV-006`
+- Files:
+  - `crates/vhs-analyzer-lsp/src/main.rs`
+  - `crates/vhs-analyzer-lsp/src/server.rs`
+  - `crates/vhs-analyzer-lsp/src/hover.rs`
+  - `crates/vhs-analyzer-lsp/tests/hover_tests.rs`
+  - `crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`
+- Deliverables:
+  - Implemented a dedicated hover registry in `crates/vhs-analyzer-lsp/src/hover.rs` using explicit match-based mappings for command keywords, setting keywords, modifier keywords, and `Sleep` duration literals.
+  - Wired `textDocument/hover` in `crates/vhs-analyzer-lsp/src/server.rs` through `token_at_offset`-based resolution, command-context lookup, exact token ranges, and trivia-aware `None` responses.
+  - Added 17 passing hover tests covering command docs, setting docs, modifier docs, trivia null cases, token ranges, context-sensitive `Enter`, and optional literal duration hover.
+  - Updated the concurrent LSP integration coverage so hover-on-A while changing-B now expects real documentation instead of the previous placeholder `None`.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
+- Notes:
+  - Batch 5 completes the `vhs-analyzer-lsp` crate milestone.
+  - The hover registry keeps the frozen explicit `match` style and uses targeted `#[expect(clippy::too_many_lines)]` annotations with justification so the registry remains reviewable under the workspace lint policy.
