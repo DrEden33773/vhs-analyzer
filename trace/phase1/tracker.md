@@ -1,7 +1,7 @@
 # Phase 1 Execution Tracker
 
 Phase: LSP Foundation (Lexer, Parser, tower-lsp-server, Hover, Formatting)
-Status: In Progress — Architect stages complete, Builder next
+Status: In Progress — Batch 1 complete, Builder in progress
 Started: 2026-03-18
 Completed: —
 
@@ -11,13 +11,13 @@ Completed: —
 | --- | --- | --- | --- | --- |
 | Architect Stage A | Claude | Completed | 2026-03-18 | 6 exploratory specs, 41 reqs, 17 FC identified |
 | Architect Stage B | Claude | Completed | 2026-03-18 | 7 frozen specs, 42 reqs, 105 test scenarios |
-| Builder | Builder | Not Started | — | Lexer, Parser, LSP Core, Hover, Formatting |
+| Builder | Builder | In Progress | — | Batch 1 complete — Lexer, Parser, LSP Core, Hover, Formatting |
 
 ## 2. Builder Batch Plan (Crate-Aligned, 6 Batches)
 
 | Batch | Name | WP | Crate | Requirements | Depends On | Milestone | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | SyntaxKind + Lexer | WS-1 | core | PAR-001, LEX-001~012 | — | — | not started |
+| 1 | SyntaxKind + Lexer | WS-1 | core | PAR-001, LEX-001~012 | — | — | completed |
 | 2 | Parser + Typed AST | WS-2 | core | PAR-002~007 | B1 | — | not started |
 | 3 | Formatting | WS-5 | core | FMT-001~009 | B2 | core crate complete | not started |
 | 4 | LSP Core + Diagnostics | WS-3 | lsp | LSP-001~008 | B3 | — | not started |
@@ -101,4 +101,25 @@ All 17 Freeze Candidates resolved during Phase 1 Stage B (2026-03-18):
 
 ## 8. Completion Records
 
-(No Builder batches completed yet.)
+### Batch 1 — SyntaxKind + Lexer
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `PAR-001`, `LEX-001` through `LEX-012`
+- Files:
+  - `crates/vhs-analyzer-core/src/lib.rs`
+  - `crates/vhs-analyzer-core/src/syntax.rs`
+  - `crates/vhs-analyzer-core/src/lexer.rs`
+  - `crates/vhs-analyzer-core/tests/lexer_tests.rs`
+  - `crates/vhs-analyzer-core/Cargo.toml`
+- Deliverables:
+  - Added the unified `SyntaxKind` enum with `#[repr(u16)]` and the `rowan::Language` bridge.
+  - Implemented a hand-written lexer covering trivia, comments, keywords, literals, punctuation, PATH allowlist rules, and error tokens.
+  - Added 37 passing integration and property tests for lexer behavior and the rowan raw-kind round-trip.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets -- -D warnings`
+  - `cargo test --workspace`
+- Notes:
+  - Added `proptest` to `crates/vhs-analyzer-core/Cargo.toml` for lossless and no-panic property coverage.
+  - Added an explicit wait-scope keyword test for `Screen` and `Line` because the frozen lexer matrix does not enumerate them individually even though the frozen lexer spec requires dedicated token kinds.

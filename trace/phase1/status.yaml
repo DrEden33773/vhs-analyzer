@@ -43,7 +43,8 @@ stages:
       test_scenarios_p1: 20
       test_scenarios_p2: 1
   builder:
-    status: not_started
+    status: in_progress
+    started_at: "2026-03-19"
     description: "Implement from frozen specs — Lexer, Parser, tower-lsp-server, Hover, Formatting"
 
 spec_files:
@@ -78,7 +79,14 @@ batches:
     requirements: [PAR-001, LEX-001, LEX-002, LEX-003, LEX-004, LEX-005, LEX-006, LEX-007, LEX-008, LEX-009, LEX-010, LEX-011, LEX-012]
     test_ids: "T-LEX-*"
     crate: vhs-analyzer-core
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-core/src/lib.rs
+      - crates/vhs-analyzer-core/src/syntax.rs
+      - crates/vhs-analyzer-core/src/lexer.rs
+      - crates/vhs-analyzer-core/tests/lexer_tests.rs
+      - crates/vhs-analyzer-core/Cargo.toml
   batch2:
     name: "Parser + Typed AST (WS-2)"
     work_packages: [WS-2]
@@ -123,5 +131,40 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 0
-  ci_gate: false
+  automated_tests: 37
+  ci_gate: true
+  entries:
+    - batch: batch1
+      name: "SyntaxKind + Lexer (WS-1)"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - PAR-001
+        - LEX-001
+        - LEX-002
+        - LEX-003
+        - LEX-004
+        - LEX-005
+        - LEX-006
+        - LEX-007
+        - LEX-008
+        - LEX-009
+        - LEX-010
+        - LEX-011
+        - LEX-012
+      scenarios:
+        implemented:
+          - T-LEX-001 through T-LEX-034
+          - T-LEX-050 through T-LEX-053
+        additional:
+          - PAR-001 rowan raw kind round-trip
+          - Wait scope keyword coverage for Screen and Line
+      notes:
+        - "Added the unified SyntaxKind enum and rowan::Language bridge in crates/vhs-analyzer-core/src/syntax.rs."
+        - "Implemented a hand-written, lossless lexer in crates/vhs-analyzer-core/src/lexer.rs."
+        - "Added 37 integration and property tests in crates/vhs-analyzer-core/tests/lexer_tests.rs."
+        - "Added proptest as a dev-dependency for lossless and no-panic property coverage."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets: pass
+        cargo_test_workspace: pass

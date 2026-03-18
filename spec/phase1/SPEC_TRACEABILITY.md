@@ -3,7 +3,7 @@
 **Phase:** 1 — LSP Foundation
 **Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
-**Last Updated:** 2026-03-18
+**Last Updated:** 2026-03-19
 **Frozen By:** Architect (Claude) — Stage B
 
 ---
@@ -26,24 +26,24 @@ from spec through code to test.
 
 | Req ID | Statement Summary | Priority | Impl Module | Test Reference | Design Decision |
 | --- | --- | --- | --- | --- | --- |
-| LEX-001 | Lossless tokenization (round-trip) | P0 MUST | `core::lexer` | T-LEX-001, T-LEX-002, T-LEX-052 | — |
-| LEX-002 | Error resilience (no panic, no skip) | P0 MUST | `core::lexer` | T-LEX-050 through T-LEX-053 | — |
-| LEX-003 | Whitespace preservation (WHITESPACE + NEWLINE) | P0 MUST | `core::lexer` | T-LEX-003, T-LEX-004, T-LEX-006 | — |
-| LEX-004 | Comment tokens | P0 MUST | `core::lexer` | T-LEX-005, T-LEX-006 | — |
-| LEX-005 | Keyword recognition (case-sensitive) | P0 MUST | `core::lexer` | T-LEX-007, T-LEX-008, T-LEX-028 through T-LEX-034 | FC-LEX-01: include ScrollUp/ScrollDown/Screenshot; FC-LEX-04: BOOLEAN kind |
-| LEX-006 | Numeric literals (INTEGER, FLOAT) | P0 MUST | `core::lexer` | T-LEX-009 through T-LEX-011 | — |
-| LEX-007 | String literals (quoted, unterminated) | P0 MUST | `core::lexer` | T-LEX-012 through T-LEX-015 | FC-LEX-03: single STRING token for unterminated |
-| LEX-008 | Time literals (ms, s suffix) | P1 SHOULD | `core::lexer` | T-LEX-016 through T-LEX-018 | — |
-| LEX-009 | Regex literals | P0 MUST | `core::lexer` | T-LEX-019 | — |
-| LEX-010 | JSON literals | P0 MUST | `core::lexer` | T-LEX-020, T-LEX-021 | — |
-| LEX-011 | Path literals | P1 SHOULD | `core::lexer` | T-LEX-022 through T-LEX-024 | FC-LEX-05: extension allowlist |
-| LEX-012 | Punctuation tokens (@, +, %) | P0 MUST | `core::lexer` | T-LEX-025 through T-LEX-027 | — |
+| LEX-001 | Lossless tokenization (round-trip) | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-001, T-LEX-002, T-LEX-052 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
+| LEX-002 | Error resilience (no panic, no skip) | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-050 through T-LEX-053 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
+| LEX-003 | Whitespace preservation (WHITESPACE + NEWLINE) | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-003, T-LEX-004, T-LEX-006 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
+| LEX-004 | Comment tokens | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-005, T-LEX-006 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
+| LEX-005 | Keyword recognition (case-sensitive) | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-007, T-LEX-008, T-LEX-028 through T-LEX-034 + wait-scope coverage (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | FC-LEX-01: include ScrollUp/ScrollDown/Screenshot; FC-LEX-04: BOOLEAN kind |
+| LEX-006 | Numeric literals (INTEGER, FLOAT) | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-009 through T-LEX-011 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
+| LEX-007 | String literals (quoted, unterminated) | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-012 through T-LEX-015 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | FC-LEX-03: single STRING token for unterminated |
+| LEX-008 | Time literals (ms, s suffix) | P1 SHOULD | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-016 through T-LEX-018 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
+| LEX-009 | Regex literals | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-019 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
+| LEX-010 | JSON literals | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-020, T-LEX-021 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
+| LEX-011 | Path literals | P1 SHOULD | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-022 through T-LEX-024 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | FC-LEX-05: extension allowlist |
+| LEX-012 | Punctuation tokens (@, +, %) | P0 MUST | `crates/vhs-analyzer-core/src/lexer.rs` | T-LEX-025 through T-LEX-027 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
 
 ### 2.2 Parser (WS-2) — SPEC_PARSER.md
 
 | Req ID | Statement Summary | Priority | Impl Module | Test Reference | Design Decision |
 | --- | --- | --- | --- | --- | --- |
-| PAR-001 | Unified SyntaxKind enum (token + node kinds) | P0 MUST | `core::syntax` | T-PAR-001 (compilation) | — |
+| PAR-001 | Unified SyntaxKind enum (token + node kinds) | P0 MUST | `crates/vhs-analyzer-core/src/syntax.rs` | Batch 1 rowan raw-kind round-trip + Phase 2 T-PAR-001 (`crates/vhs-analyzer-core/tests/lexer_tests.rs`) | — |
 | PAR-002 | Lossless CST (round-trip via SyntaxNode.text()) | P0 MUST | `core::parser` | T-PAR-050, T-PAR-052, T-PAR-057 | — |
 | PAR-003 | No panics on any input | P0 MUST | `core::parser` | T-PAR-051, T-PAR-054 through T-PAR-058 | FC-PAR-03: strict one-command-per-line |
 | PAR-004 | Error localization (per-command isolation) | P0 MUST | `core::parser` | T-PAR-053, T-PAR-055, T-PAR-059 | — |
