@@ -20,3 +20,6 @@ pub mod ast;
 
 /// Whitespace-only formatter for VHS source text.
 pub mod formatting;
+
+/// Re-export of the rowan green tree used by parsed VHS syntax nodes.
+pub use rowan::GreenNode;

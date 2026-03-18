@@ -228,8 +228,8 @@ Batch 6 — Integration Test + Closeout:
 
   Regression:
     - cargo fmt --all -- --check
-    - cargo clippy --workspace -- -D warnings
-    - cargo test --workspace --all-targets
+    - cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+    - cargo test --workspace --all-targets --locked
     - Property-based tests (proptest): lexer lossless, lexer no-panic,
       parser lossless, parser no-panic, formatter idempotence.
 
@@ -427,8 +427,8 @@ Test naming: use descriptive names that read like specifications:
 
 [Quality Gate — All Must Pass Before Marking a Batch Complete]
 - [ ] cargo fmt --all -- --check
-- [ ] cargo clippy --workspace -- -D warnings
-- [ ] cargo test --workspace
+- [ ] cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+- [ ] cargo test --workspace --all-targets --locked
 - [ ] No `unwrap()` or `expect()` in non-test code (use `?` or proper error handling)
 - [ ] All pub items in vhs-analyzer-core have `///` doc comments
 - [ ] spec/phase1/SPEC_TRACEABILITY.md updated with Implementation and Tests columns
@@ -543,7 +543,7 @@ When you see a handoff prompt:
 When the user tells you the session is getting long and asks for a handoff
 prompt, produce one following the structure above. Be precise about:
 - Which batches are complete and what each batch accomplished.
-- Current test count (from the last `cargo test --workspace` run).
+- Current test count (from the last `cargo test --workspace --all-targets --locked` run).
 - Any spec ambiguities or known issues discovered.
 - The exact next batch number, its first action, and which spec
   sections to read first.

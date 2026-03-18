@@ -55,14 +55,14 @@ from spec through code to test.
 
 | Req ID | Statement Summary | Priority | Impl Module | Test Reference | Design Decision |
 | --- | --- | --- | --- | --- | --- |
-| LSP-001 | Server bootstrap via stdio | P0 MUST | `lsp::main` | T-LSP-001, T-INT-001 | — |
-| LSP-002 | Initialize handshake with capabilities | P0 MUST | `lsp::server` | T-LSP-002, T-LSP-003 | — |
-| LSP-003 | Full document sync (didOpen/didChange/didClose) | P0 MUST | `lsp::server` | T-LSP-004 through T-LSP-006 | — |
-| LSP-004 | Concurrent document state store (DashMap) | P0 MUST | `lsp::server` | T-LSP-007 | FC-LSP-01: MUST use DashMap |
-| LSP-005 | Shutdown and exit protocol | P0 MUST | `lsp::server` | T-LSP-008 | — |
-| LSP-006 | Graceful error handling (no panics, LSP error responses) | P0 MUST | `lsp::server` | T-LSP-009 | — |
-| LSP-007 | Logging via tracing to stderr + client | P1 SHOULD | `lsp::main` | T-LSP-013 | — |
-| LSP-008 | Parse-error diagnostics via publishDiagnostics | P1 SHOULD | `lsp::server` | T-LSP-010 through T-LSP-012 | FC-LSP-03: SHOULD publish in Phase 1 |
+| LSP-001 | Server bootstrap via stdio | P0 MUST | `crates/vhs-analyzer-lsp/src/main.rs` | T-LSP-001 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`), T-INT-001 | — |
+| LSP-002 | Initialize handshake with capabilities | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-002, T-LSP-003 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
+| LSP-003 | Full document sync (didOpen/didChange/didClose) | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-004 through T-LSP-006 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
+| LSP-004 | Concurrent document state store (DashMap) | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-007 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | FC-LSP-01: MUST use DashMap |
+| LSP-005 | Shutdown and exit protocol | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs`, `crates/vhs-analyzer-lsp/src/main.rs` | T-LSP-008 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
+| LSP-006 | Graceful error handling (no panics, LSP error responses) | P0 MUST | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-009 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
+| LSP-007 | Logging via tracing to stderr + client | P1 SHOULD | `crates/vhs-analyzer-lsp/src/main.rs`, `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-013 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | — |
+| LSP-008 | Parse-error diagnostics via publishDiagnostics | P1 SHOULD | `crates/vhs-analyzer-lsp/src/server.rs` | T-LSP-010 through T-LSP-012 (`crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`) | FC-LSP-03: SHOULD publish in Phase 1 |
 
 ### 2.4 Hover (WS-4) — SPEC_HOVER.md
 

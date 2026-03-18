@@ -123,7 +123,15 @@ batches:
     test_ids: "T-LSP-*"
     crate: vhs-analyzer-lsp
     depends_on: [batch3]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-core/src/lib.rs
+      - crates/vhs-analyzer-core/src/parser.rs
+      - crates/vhs-analyzer-lsp/Cargo.toml
+      - crates/vhs-analyzer-lsp/src/main.rs
+      - crates/vhs-analyzer-lsp/src/server.rs
+      - crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs
   batch5:
     name: "Hover (WS-4)"
     work_packages: [WS-4]
@@ -143,7 +151,7 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 100
+  automated_tests: 116
   ci_gate: true
   entries:
     - batch: batch1
@@ -178,8 +186,8 @@ builder_progress:
         - "Added proptest as a dev-dependency for lossless and no-panic property coverage."
       quality_gate:
         cargo_fmt_all_check: pass
-        cargo_clippy_workspace_all_targets: pass
-        cargo_test_workspace: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass
     - batch: batch2
       name: "Parser + Typed AST (WS-2)"
       status: completed
@@ -203,8 +211,8 @@ builder_progress:
         - "Verified strict one-command-per-line recovery, lossless CST round-trips, and no-panic property coverage for arbitrary input."
       quality_gate:
         cargo_fmt_all_check: pass
-        cargo_clippy_workspace_all_targets: pass
-        cargo_test_workspace: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass
     - batch: batch3
       name: "Formatting (WS-5)"
       status: completed
@@ -230,5 +238,35 @@ builder_progress:
         - "Frozen summary tables still report 17 formatting scenarios, but implementation follows the explicit T-FMT-001 through T-FMT-018 enumeration without resolving the spec mismatch."
       quality_gate:
         cargo_fmt_all_check: pass
-        cargo_clippy_workspace_all_targets: pass
-        cargo_test_workspace: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass
+    - batch: batch4
+      name: "LSP Core + Diagnostics (WS-3)"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - LSP-001
+        - LSP-002
+        - LSP-003
+        - LSP-004
+        - LSP-005
+        - LSP-006
+        - LSP-007
+        - LSP-008
+      scenarios:
+        implemented:
+          - T-LSP-001 through T-LSP-013
+        additional:
+          - Initialize parameter storage for later client capability use
+          - Internal shutdown flag coverage after shutdown request
+          - Formatting handler bridge coverage for the advertised documentFormatting provider
+      notes:
+        - "Replaced the placeholder binary with a real tower-lsp-server stdio entry point in crates/vhs-analyzer-lsp/src/main.rs and initialized tracing output on stderr."
+        - "Implemented VhsLanguageServer in crates/vhs-analyzer-lsp/src/server.rs with InitializeResult capabilities, stored InitializeParams, a DashMap-backed document store, full document sync, shutdown tracking, and internal-error responses for missing documents."
+        - "Published parse-error diagnostics on didOpen and didChange, cleared diagnostics on didClose, and bridged textDocument/formatting to the rowan-based core formatter."
+        - "Added 16 passing LSP integration tests in crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs covering stdio bootstrap, initialize metadata, document sync, concurrent access, diagnostics, shutdown/exit, stderr logging, and the formatting bridge."
+        - "Exposed GreenNode access from vhs-analyzer-core so the LSP document store can retain parsed trees without reparsing for formatting."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass

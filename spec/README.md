@@ -102,7 +102,7 @@ Keywords are interpreted as:
 2. Update the relevant spec file first.
 3. Implement code to match the spec.
 4. Add or update tests from the corresponding `SPEC_TEST_MATRIX.md`.
-5. Run `cargo fmt --all`, `cargo clippy --workspace`, and `cargo test --workspace`.
+5. Run `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`, and `cargo test --workspace --all-targets --locked`.
 6. Update the corresponding `SPEC_TRACEABILITY.md` mappings.
 7. If behavior changed, update `STATUS.yaml`, `EXECUTION_TRACKER.md`, `README.md`, and `ROADMAP.md`.
 

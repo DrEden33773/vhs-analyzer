@@ -1,7 +1,7 @@
 # Phase 1 Execution Tracker
 
 Phase: LSP Foundation (Lexer, Parser, tower-lsp-server, Hover, Formatting)
-Status: In Progress — Batch 3 complete, core crate complete, Builder in progress
+Status: In Progress — Batch 4 complete, Builder in progress
 Started: 2026-03-18
 Completed: —
 
@@ -11,7 +11,7 @@ Completed: —
 | --- | --- | --- | --- | --- |
 | Architect Stage A | Claude | Completed | 2026-03-18 | 6 exploratory specs, 41 reqs, 17 FC identified |
 | Architect Stage B | Claude | Completed | 2026-03-18 | 7 frozen specs, 42 reqs, 105 test scenarios |
-| Builder | Builder | In Progress | — | Batch 3 complete — Formatting done, `vhs-analyzer-core` complete; LSP Core and Hover remain |
+| Builder | Builder | In Progress | — | Batch 4 complete — LSP Core + Diagnostics done; Hover and integration closeout remain |
 
 ## 2. Builder Batch Plan (Crate-Aligned, 6 Batches)
 
@@ -20,7 +20,7 @@ Completed: —
 | 1 | SyntaxKind + Lexer | WS-1 | core | PAR-001, LEX-001~012 | — | — | completed |
 | 2 | Parser + Typed AST | WS-2 | core | PAR-002~007 | B1 | — | completed |
 | 3 | Formatting | WS-5 | core | FMT-001~009 | B2 | core crate complete | completed |
-| 4 | LSP Core + Diagnostics | WS-3 | lsp | LSP-001~008 | B3 | — | not started |
+| 4 | LSP Core + Diagnostics | WS-3 | lsp | LSP-001~008 | B3 | — | completed |
 | 5 | Hover | WS-4 | lsp | HOV-001~006 | B4 | lsp crate complete | not started |
 | 6 | Integration + Closeout | — | both | T-INT-001 | B5 | Phase 1 complete | not started |
 
@@ -118,8 +118,8 @@ All 17 Freeze Candidates resolved during Phase 1 Stage B (2026-03-18):
   - Added 37 passing integration and property tests for lexer behavior and the rowan raw-kind round-trip.
 - Quality gate:
   - `cargo fmt --all -- --check`
-  - `cargo clippy --workspace --all-targets -- -D warnings`
-  - `cargo test --workspace`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
 - Notes:
   - Added `proptest` to `crates/vhs-analyzer-core/Cargo.toml` for lossless and no-panic property coverage.
   - Added an explicit wait-scope keyword test for `Screen` and `Line` because the frozen lexer matrix does not enumerate them individually even though the frozen lexer spec requires dedicated token kinds.
@@ -141,8 +141,8 @@ All 17 Freeze Candidates resolved during Phase 1 Stage B (2026-03-18):
   - Added 41 passing parser tests plus 4 typed AST tests covering directive parsing, error localization, lossless round-trips, no-panic property behavior, and typed accessors.
 - Quality gate:
   - `cargo fmt --all -- --check`
-  - `cargo clippy --workspace --all-targets -- -D warnings`
-  - `cargo test --workspace`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
 - Notes:
   - Parser coverage intentionally follows the frozen explicit `SyntaxKind` enumeration and does not attempt to resolve unrelated spec count mismatches.
   - The parser accepts whitespace-tolerant `@` and `+` forms so later formatting work can normalize lines without losing CST structure.
@@ -163,8 +163,33 @@ All 17 Freeze Candidates resolved during Phase 1 Stage B (2026-03-18):
   - Added 18 passing formatting tests covering `T-FMT-001` through `T-FMT-018`, including idempotence, comment preservation, and mixed valid/error files.
 - Quality gate:
   - `cargo fmt --all -- --check`
-  - `cargo clippy --workspace --all-targets -- -D warnings`
-  - `cargo test --workspace`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
 - Notes:
   - Batch 3 completes the `vhs-analyzer-core` crate milestone.
   - The frozen summary tables still report 17 formatting scenarios, but implementation follows the explicit `T-FMT-001` through `T-FMT-018` enumeration without resolving the spec mismatch.
+
+### Batch 4 — LSP Core + Diagnostics
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `LSP-001` through `LSP-008`
+- Files:
+  - `crates/vhs-analyzer-core/src/lib.rs`
+  - `crates/vhs-analyzer-core/src/parser.rs`
+  - `crates/vhs-analyzer-lsp/Cargo.toml`
+  - `crates/vhs-analyzer-lsp/src/main.rs`
+  - `crates/vhs-analyzer-lsp/src/server.rs`
+  - `crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`
+- Deliverables:
+  - Replaced the placeholder LSP binary with a real `tower-lsp-server` stdio entry point and initialized `tracing` output on stderr.
+  - Implemented `VhsLanguageServer` with InitializeResult capability advertisement, stored client initialize params, a `DashMap` document store, full-sync `didOpen`/`didChange`/`didClose`, and shutdown tracking.
+  - Published parse-error diagnostics on open/change, cleared diagnostics on close, returned internal LSP errors for missing-document hover/formatting requests, and bridged `textDocument/formatting` to the core formatter.
+  - Added 16 passing LSP integration tests covering stdio bootstrap, initialize metadata, document sync, concurrent access, diagnostics, shutdown/exit, stderr logging, shutdown state, initialize state retention, and formatting bridge behavior.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
+- Notes:
+  - Batch 4 keeps hover content itself deferred to Batch 5, but the hover request path is now wired and error-safe.
+  - `vhs-analyzer-core` now re-exports `GreenNode` and exposes `Parse::green()` so the LSP layer can retain parsed trees without reparsing for formatting.

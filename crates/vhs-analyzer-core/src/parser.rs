@@ -22,6 +22,12 @@ pub struct Parse {
 }
 
 impl Parse {
+    /// Returns the green tree root for the parsed source file.
+    #[must_use]
+    pub fn green(&self) -> GreenNode {
+        self.green.clone()
+    }
+
     /// Returns the root syntax node for the parsed source file.
     #[must_use]
     pub fn syntax(&self) -> SyntaxNode {
