@@ -38,12 +38,12 @@ spec/
     └── SPEC_TRACEABILITY.md
 ```
 
-## Phase 1: LSP Foundation (Not Started)
+## Phase 1: LSP Foundation (Completed)
 
-Phase 1 specs will be drafted by the Architect in Stage A (exploratory) and
-frozen in Stage B (contract). The Builder implements from frozen contracts only.
+Phase 1 specs were drafted by the Architect in Stage A (exploratory), frozen in
+Stage B (contract), and fully implemented plus closed out by the Builder.
 
-Planned spec files:
+Phase 1 spec files:
 
 - `phase1/SPEC_LEXER.md`: VHS token set derived from `tree-sitter-vhs` grammar.js, lexer resilience, error tokens
 - `phase1/SPEC_PARSER.md`: `rowan`-based lossless AST, recursive descent parser, node kinds, error recovery strategy

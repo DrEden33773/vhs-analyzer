@@ -118,12 +118,12 @@ Operational progress for these items will be tracked in `STATUS.yaml` and `EXECU
 
 ### Phase 1: LSP Foundation
 
-1. [ ] **(Architect Stage A)** Draft exploratory specs for Lexer, Parser, LSP Core, Hover, and Formatting.
-2. [ ] **(Architect Stage B)** Freeze all specs with MUST/SHOULD/MAY contracts and test matrix.
-3. [ ] **(Builder)** Handcraft Lexer and map VHS tokens.
-4. [ ] **(Builder)** Implement Recursive Descent Parser.
-5. [ ] **(Builder)** Wire up `tower-lsp-server` and implement `initialize` / `textDocument/didChange`.
-6. [ ] **(Builder)** Implement `textDocument/hover` provider.
+1. [x] **(Architect Stage A)** Draft exploratory specs for Lexer, Parser, LSP Core, Hover, and Formatting. **(Completed)**
+2. [x] **(Architect Stage B)** Freeze all specs with MUST/SHOULD/MAY contracts and test matrix. **(Completed)**
+3. [x] **(Builder)** Handcraft Lexer and map VHS tokens. **(Completed)**
+4. [x] **(Builder)** Implement Recursive Descent Parser. **(Completed)**
+5. [x] **(Builder)** Wire up `tower-lsp-server` and implement `initialize` / `textDocument/didChange`. **(Completed)**
+6. [x] **(Builder)** Implement `textDocument/hover` provider. **(Completed)**
 
 ### Phase 2: Diagnostics & Autocomplete
 
