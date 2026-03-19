@@ -2,17 +2,23 @@
 
 **Phase:** 3 — VSCode Extension Client
 **Work Stream:** WS-1 (Client)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** phase1/SPEC_LSP_CORE.md (LSP binary, stdio transport, server capabilities), phase2/SPEC_COMPLETION.md (completionProvider), phase2/SPEC_DIAGNOSTICS.md (diagnostics pipeline)
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-20
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-20.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
 ## 1. Purpose
 
 Define the VSCode extension client architecture: how the extension discovers,
-launches, and communicates with the Rust LSP binary (`vhs-analyzer-lsp`);
+launches, and communicates with the Rust LSP binary (`vhs-analyzer`);
 the extension activation/deactivation lifecycle; the user-facing configuration
 schema; runtime dependency detection; and the TextMate grammar for baseline
 syntax highlighting. This is the foundation work stream — WS-2 (Preview) and
@@ -50,7 +56,7 @@ WS-3 (CodeLens) depend on a functioning LSP client.
 | **ID** | CLI-001 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | The extension MUST discover the LSP server binary using a layered resolution chain, evaluated in order: (1) User-configured path via `vhs-analyzer.server.path` setting, (2) bundled binary at `{extensionPath}/server/vhs-analyzer-lsp[.exe]` (platform-specific VSIX), (3) `vhs-analyzer-lsp` on system `$PATH`. If all three fail, the extension MUST enter no-server mode (CLI-009). Each resolution step MUST validate that the discovered file exists and is executable. |
+| **Statement** | The extension MUST discover the LSP server binary using a layered resolution chain, evaluated in order: (1) User-configured path via `vhs-analyzer.server.path` setting, (2) bundled binary at `{extensionPath}/server/vhs-analyzer[.exe]` (platform-specific VSIX), (3) `vhs-analyzer` on system `$PATH`. If all three fail, the extension MUST enter no-server mode (CLI-009). Each resolution step MUST validate that the discovered file exists and is executable. |
 | **Verification** | Set `vhs-analyzer.server.path` to a valid binary → client connects. Remove setting, install platform-specific VSIX → bundled binary used. Remove bundled binary, add to PATH → PATH binary used. Remove all → no-server mode activates. |
 
 ### CLI-002 — ServerOptions Configuration
@@ -227,12 +233,12 @@ async function discoverServerBinary(): Promise<string | null>
 
     // Step 2: Bundled binary (platform-specific VSIX)
     const ext = process.platform === "win32" ? ".exe" : ""
-    const bundledPath = path.join(context.extensionPath, "server", `vhs-analyzer-lsp${ext}`)
+    const bundledPath = path.join(context.extensionPath, "server", `vhs-analyzer${ext}`)
     if await isExecutable(bundledPath):
         return bundledPath
 
     // Step 3: System PATH
-    const pathBinary = await which("vhs-analyzer-lsp").catch(() => null)
+    const pathBinary = await which("vhs-analyzer").catch(() => null)
     if pathBinary:
         return pathBinary
 
@@ -289,7 +295,7 @@ export async function deactivate():
         "vhs-analyzer.server.path": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Absolute path to the `vhs-analyzer-lsp` binary. Leave empty to use the bundled binary or `$PATH`.",
+          "markdownDescription": "Absolute path to the `vhs-analyzer` binary. Leave empty to use the bundled binary or `$PATH`.",
           "scope": "machine-overridable"
         },
         "vhs-analyzer.server.args": {
@@ -374,64 +380,72 @@ export async function deactivate():
 }
 ```
 
-## 11. Freeze Candidates
+## 11. Resolved Design Decisions
 
-### FC-CLI-01 — Binary Name Convention
+> All Freeze Candidates resolved through collaborative Architect–Orchestrator
+> discussion on 2026-03-20.
 
-**Question:** Should the bundled binary be named `vhs-analyzer-lsp` (matching
-the Rust binary crate) or `vhs-analyzer` (shorter)?
+### RD-CLI-01 — Binary Name Convention
 
-**Analysis:** `vhs-analyzer-lsp` is more descriptive and avoids ambiguity with
-a potential future CLI tool. rust-analyzer uses `rust-analyzer` (single name
-for both server and tooling). For vhs-analyzer, the `-lsp` suffix is
-recommended since the VHS CLI itself is called `vhs`.
+**Decision:** The bundled binary MUST be named `vhs-analyzer` (not
+`vhs-analyzer-lsp`).
 
-**Leaning:** `vhs-analyzer-lsp`
+**Rationale:** Follows the rust-analyzer precedent — the binary is named
+`rust-analyzer`, not `rust-analyzer-lsp`. Verified via `cargo install
+rust-analyzer` that crates.io hosts only a placeholder library crate (v0.0.1)
+with no binaries, confirming no separate CLI tool exists. `vhs-analyzer` has
+no standalone CLI tool and none is planned. The `-lsp` suffix adds no value
+since the binary's sole purpose is to serve as an LSP server. Builder MUST
+configure the Cargo `[[bin]]` target to produce `vhs-analyzer` as the output
+binary name.
 
-### FC-CLI-02 — TextMate Grammar Source Format
+### RD-CLI-02 — TextMate Grammar Source Format
 
-**Question:** Should the TextMate grammar be authored as JSON
-(`tape.tmLanguage.json`) or YAML (`tape.tmLanguage.yaml`) converted at
-build time?
+**Decision:** The TextMate grammar MUST be authored directly as JSON
+(`syntaxes/tape.tmLanguage.json`).
 
-**Analysis:** JSON is directly consumed by VSCode without build conversion.
-YAML is more readable for authoring but requires a build step. The VHS grammar
-is moderately sized (~150 rules). JSON is simpler for CI and eliminates a
-build dependency.
+**Rationale:** JSON is directly consumed by VSCode without build conversion.
+The VHS grammar is moderately sized (~150 rules). JSON eliminates a
+YAML-to-JSON build dependency and matches the standard practice of official
+VSCode language extensions (TypeScript, Python, rust-analyzer).
 
-**Leaning:** JSON (`tape.tmLanguage.json`) directly authored.
+### RD-CLI-03 — Server Restart on Setting Change
 
-### FC-CLI-03 — Server Restart on Setting Change
+**Decision:** Changing `vhs-analyzer.server.path` or
+`vhs-analyzer.server.args` MUST trigger an automatic server restart with a
+single attempt. If the new path is invalid, the extension MUST show an error
+notification with a "Restart Server" action button and remain in stopped state.
 
-**Question:** Should changing `vhs-analyzer.server.path` trigger an automatic
-server restart or require manual restart?
+**Rationale:** Auto-restart with single attempt provides better UX than
+manual restart (the rust-analyzer approach). The user modifying `server.path`
+typically has a valid binary ready. On failure, the error notification with
+action button gives the user explicit control for retry.
 
-**Analysis:** rust-analyzer requires manual restart ("Restart Server" command)
-for `server.path` changes. Auto-restart is more convenient but may surprise
-users if the new path is invalid (restart loop). A middle ground: auto-restart
-with a single attempt; if the new path fails, show an error and remain stopped.
+### RD-CLI-04 — No-Server Mode Notification Suppression
 
-**Leaning:** Auto-restart with single attempt; error on failure.
+**Decision:** The "LSP server not found" notification MUST include a "Don't
+show again" button. Clicking it MUST set a `globalState` flag
+(`"noServerMessageDismissed": true`) to permanently suppress the notification.
 
-### FC-CLI-04 — No-Server Mode: Suppress Repeated Notifications
+**Rationale:** This is the standard VSCode extension pattern for one-time
+notifications. `globalState` is scoped to the extension and survives restarts.
+Explicit user opt-out is more respectful than per-session or auto-suppress
+behavior.
 
-**Question:** How should the "LSP server not found" notification be suppressed
-after the user dismisses it?
+### RD-CLI-05 — Platform Detection for Runtime Dependency Check
 
-**Analysis:** Option A: `globalState` flag (`"noServerMessageDismissed": true`).
-Option B: "Don't show again" button that sets the flag. Option C: Show only
-once per session (not persisted). Option B provides explicit user control.
+**Decision:** The runtime dependency check (CLI-007) MUST use the `which` npm
+package (v6.x) for cross-platform executable path resolution.
 
-**Leaning:** "Don't show again" button using `globalState`.
+**Rationale:** `which` (npm/node-which, 187M+ weekly downloads) is the de
+facto standard for cross-platform executable resolution in Node.js. It handles
+Windows PATHEXT, symlinks, and edge cases. esbuild inlines it into the bundle,
+so there is no runtime `node_modules` dependency.
 
-### FC-CLI-05 — Platform Detection for which vs where
+### Cross-Phase Note — `--stdio` Flag Compatibility
 
-**Question:** Should the runtime dependency check (CLI-007) use `which` on
-Unix and `where` on Windows, or use a cross-platform npm package?
-
-**Analysis:** The `which` npm package (25M+ weekly downloads) provides
-cross-platform executable path resolution. Alternatively, `child_process`
-with platform-specific commands. The npm package is more reliable and handles
-edge cases (Windows PATHEXT, symlinks).
-
-**Leaning:** Use the `which` npm package for cross-platform compatibility.
+`vscode-languageclient` v9 automatically appends `--stdio` to the server
+arguments when using `TransportKind.stdio`. The Phase 1 `vhs-analyzer` binary
+SHOULD accept `--stdio` as a no-op flag (the default transport is already
+stdio per LSP-001). Builder MUST verify this compatibility before Phase 3
+integration testing.

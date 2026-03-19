@@ -2,10 +2,16 @@
 
 **Phase:** 3 — VSCode Extension Client
 **Work Stream:** WS-2 (Preview)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** WS-1 (SPEC_CLIENT.md — extension activation, configuration schema)
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-20
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-20.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -381,52 +387,50 @@ class PreviewPanel {
 }
 ```
 
-## 10. Freeze Candidates
+## 10. Resolved Design Decisions
 
-### FC-PRV-01 — Webview Panel: One Per File vs. Singleton
+> All Freeze Candidates resolved through collaborative Architect–Orchestrator
+> discussion on 2026-03-20.
 
-**Question:** Should there be one preview panel per tape file, or a single
-shared preview panel that switches content?
+### RD-PRV-01 — Webview Panel Multiplicity
 
-**Analysis:** One per file allows side-by-side comparison of two tapes but
-consumes more resources. A singleton is simpler and matches the "Preview"
-pattern in VSCode (Markdown preview is singleton per file). Recommended:
-one panel per file (matching PRV-001), but limited to a configurable max
-(default 3). Excess panels auto-dispose the oldest.
+**Decision:** The extension MUST create one preview panel per tape file with
+no artificial upper limit. If a preview panel for the same file already exists,
+the extension MUST reveal it instead of creating a duplicate (PRV-001).
 
-**Leaning:** One per file, max 3 panels.
+**Rationale:** VSCode does not impose hard limits on editor tabs; Webview
+panels should follow the same model. VHS tape files are small, and users
+rarely preview more than 2–3 simultaneously. An artificial cap (e.g., max 3)
+adds LRU tracking complexity with negligible benefit. The per-file
+deduplication in PRV-001 already prevents runaway panel creation.
 
-### FC-PRV-02 — VHS stderr Parsing for Progress
+### RD-PRV-02 — VHS stderr Handling
 
-**Question:** Should the extension parse VHS stderr for structured progress
-information, or pass raw lines through?
+**Decision:** VHS stderr output MUST be passed through raw — each stderr line
+forwarded as a `renderProgress` message to the Webview without parsing.
 
-**Analysis:** VHS stderr output is unstructured text (e.g., "Rendering GIF...",
-timing info). Parsing for percentage or step progress is fragile and VHS-version
-dependent. Raw passthrough is robust and always reflects actual VHS output.
+**Rationale:** VHS stderr is unstructured text with no machine-readable
+progress format (confirmed via VHS v0.11.0 source and PR #480). Parsing is
+fragile and VHS-version dependent. Raw passthrough always reflects actual VHS
+output and is forward-compatible with any future VHS changes.
 
-**Leaning:** Raw passthrough. Display raw stderr lines in the Webview loading
-state. If VHS adds structured progress output in the future, upgrade to parsing.
+### RD-PRV-03 — Output Path Regex
 
-### FC-PRV-03 — Output Path Regex Robustness
+**Decision:** The Output directive regex MUST be quote-aware:
+`/^Output\s+(?:["'](.+?)["']|(\S+))/m`. This regex MUST be defined as a
+shared utility function reused by both Preview (PRV-004) and CodeLens
+(CLS-001).
 
-**Question:** The regex `/^Output\s+(.+)/m` for extracting the output path —
-should it handle quoted paths (e.g., `Output "path with spaces.gif"`)?
+**Rationale:** VHS supports both quoted and unquoted paths in the Output
+directive (e.g., `Output "path with spaces.gif"`). The quote-aware regex
+correctly handles both forms. Sharing the regex between Preview and CodeLens
+ensures consistent behavior and eliminates duplication.
 
-**Analysis:** VHS supports both quoted and unquoted paths in the Output
-directive. The regex should strip surrounding quotes from the captured group.
-Pattern: `/^Output\s+(?:["'](.+?)["']|(\S+))/m` — matches quoted or unquoted.
+### RD-PRV-04 — Video Playback Controls
 
-**Leaning:** Quote-aware regex as described above.
+**Decision:** GIF output MUST use `<img>` (auto-loops natively). MP4/WebM
+output MUST use `<video controls autoplay loop>` with native browser controls.
 
-### FC-PRV-04 — Video Playback Controls
-
-**Question:** For MP4/WebM output, should the Webview provide custom playback
-controls or use the browser's native `<video controls>`?
-
-**Analysis:** Native `<video controls>` provides play, pause, seek, volume,
-fullscreen — all for free. Custom controls would add complexity without clear
-benefit. Native controls are theme-aware in Chromium (VSCode's Webview engine).
-
-**Leaning:** Native `<video controls autoplay loop>` for MP4/WebM. `<img>` for
-GIF (which auto-loops natively).
+**Rationale:** VSCode Webview runs Chromium, whose native `<video>` controls
+provide play, pause, seek, volume, and fullscreen for free. Custom controls
+for a secondary output format (GIF is primary for VHS) are not justified.

@@ -2,10 +2,16 @@
 
 **Phase:** 3 — VSCode Extension Client
 **Work Stream:** WS-3 (CodeLens)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** WS-1 (SPEC_CLIENT.md — extension activation, configuration schema), WS-2 (SPEC_PREVIEW.md — preview panel, VHS execution)
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-20
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-20.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -390,53 +396,53 @@ class VhsCodeLensProvider implements CodeLensProvider {
 }
 ```
 
-## 10. Freeze Candidates
+## 10. Resolved Design Decisions
 
-### FC-CLS-01 — File-Level CodeLens Position
+> All Freeze Candidates resolved through collaborative Architect–Orchestrator
+> discussion on 2026-03-20.
 
-**Question:** Should the file-level CodeLens be at absolute line 0, or at the
-first non-comment, non-blank line?
+### RD-CLS-01 — File-Level CodeLens Position
 
-**Analysis:** If a file starts with comments (`# VHS tape description`), a
-CodeLens at line 0 appears above the comment — visually displaced from the
-actual code. Placing it at the first directive line is more natural. However,
-most tape files start with `Output` or `Set` directives (no leading comments).
+**Decision:** The file-level CodeLens MUST be placed at the first non-trivial
+line — skip leading blank lines and `#` comment lines. If the file contains
+only comments or is empty, fall back to line 0.
 
-**Leaning:** First non-trivial line (skip leading blank lines and comments).
+**Rationale:** VHS tape files may start with descriptive comments. Placing the
+CodeLens at the first directive line (e.g., `Output`, `Set`) creates a tighter
+visual association between the run button and the executable code. This matches
+the Test Explorer pattern (file-level "Run All" above the first test).
 
-### FC-CLS-02 — Output-Level CodeLens: Preview vs. Run
+### RD-CLS-02 — Output-Level CodeLens Action
 
-**Question:** Should Output-level CodeLens trigger "Run & Preview" (runs VHS
-and opens preview) or just "Preview" (opens preview panel showing last output)?
+**Decision:** Output-level CodeLens MUST trigger "Run & Preview" (execute VHS
+and open the preview panel for that specific output artifact).
 
-**Analysis:** "Run & Preview" is the most useful action — users click the lens
-because they want to see the output. "Just Preview" is only useful if the
-output already exists. For first-time files, "Just Preview" would show an
-empty panel. "Run & Preview" is always actionable.
+**Rationale:** The `▶` icon implies execution. For first-time files where the
+output does not yet exist, a "Preview only" action would show an empty panel —
+a poor first experience. "Run & Preview" is always actionable. The file-level
+CodeLens already provides a "Run this tape" (no preview) option for
+differentiation.
 
-**Leaning:** "Run & Preview" for Output-level CodeLens.
+### RD-CLS-03 — Execution Context Variable
 
-### FC-CLS-03 — Execution Context Variable for Menu Visibility
+**Decision:** The extension MUST use
+`vscode.commands.executeCommand("setContext", "vhs-analyzer.isRunning",
+true/false)` to control menu item visibility. The ExecutionManager MUST update
+this context variable on every state change.
 
-**Question:** The `vhs-analyzer.stopRunning` command should only be visible
-when a VHS process is running. How should this be tracked?
+**Rationale:** CLS-003 enforces single-execution-per-file, so at most one tape
+is running at any time. A global boolean context variable is sufficient.
+`setContext` is the official VSCode mechanism for `when`-clause menu visibility
+control.
 
-**Analysis:** Use `vscode.commands.executeCommand("setContext",
-"vhs-analyzer.isRunning", true/false)` to set a context variable.
-The menu `when` clause references this context. The ExecutionManager
-updates the context on state changes.
+### RD-CLS-04 — Multiple Output Preview Target
 
-**Leaning:** Context variable `vhs-analyzer.isRunning` set by ExecutionManager.
+**Decision:** When a file has multiple `Output` directives, the file-level
+"Run & Preview" CodeLens MUST show the first `Output` directive's artifact.
+Users MAY preview specific outputs via the Output-level CodeLens placed above
+each `Output` directive.
 
-### FC-CLS-04 — Multiple Output Directives: Which One to Preview?
-
-**Question:** When a file has multiple `Output` directives and the user clicks
-the file-level "Run & Preview", which output should the preview panel display?
-
-**Analysis:** VHS produces all outputs declared in the tape file. The preview
-should show the first Output. The Output-level CodeLens allows previewing
-specific outputs. For the file-level action, showing the first output is the
-most predictable behavior.
-
-**Leaning:** File-level "Run & Preview" shows the first Output directive's
-artifact. Output-level CodeLens shows the specific artifact.
+**Rationale:** The first `Output` is the most predictable default. Most tape
+files have only one Output. Per-Output CodeLens (RD-CLS-02) provides access to
+any specific artifact. A Quick Pick selector would add unnecessary interaction
+for the common single-Output case.

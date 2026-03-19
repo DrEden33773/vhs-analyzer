@@ -47,8 +47,9 @@ phases:
     completed_at: "2026-03-19"
     archive: trace/phase2/
   phase3:
-    status: in_progress
+    status: spec_frozen
     started_at: "2026-03-19"
+    frozen_at: "2026-03-20"
 
 next_execution_targets:
   - phase3

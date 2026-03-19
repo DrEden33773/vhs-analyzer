@@ -2,10 +2,16 @@
 
 **Phase:** 3 — VSCode Extension Client
 **Work Stream:** WS-4 (Packaging)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** WS-1 (SPEC_CLIENT.md — extension manifest, activation), Phase 1+2 Rust binary
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-20
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-20.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -21,13 +27,13 @@ distributable VSIX files for each target platform.
 
 | Phase 1/2 Contract | Usage in This Spec |
 | --- | --- |
-| SPEC_LSP_CORE.md — LSP-001 (stdio transport) | The packaged binary MUST be the same `vhs-analyzer-lsp` that communicates via stdio |
+| SPEC_LSP_CORE.md — LSP-001 (stdio transport) | The packaged binary MUST be the same `vhs-analyzer` that communicates via stdio |
 | SPEC_LSP_CORE.md — FC-LSP-04 (MSRV 1.85) | Cross-compilation MUST use Rust ≥1.85 toolchain |
 | Phase 1+2 CI (`.github/workflows/ci.yml`) | Phase 3 CI extends existing Rust CI with TypeScript checks |
 
 | Phase 3 Spec | Integration |
 | --- | --- |
-| SPEC_CLIENT.md — CLI-001 (Binary discovery) | Bundled binary path: `{extensionPath}/server/vhs-analyzer-lsp[.exe]` |
+| SPEC_CLIENT.md — CLI-001 (Binary discovery) | Bundled binary path: `{extensionPath}/server/vhs-analyzer[.exe]` |
 | SPEC_CLIENT.md — CLI-008 (TextMate grammar) | Grammar file included in VSIX |
 | SPEC_CLIENT.md — CLI-009 (No-server mode) | Universal VSIX operates in no-server mode |
 
@@ -52,8 +58,8 @@ distributable VSIX files for each target platform.
 | **ID** | PKG-001 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | The CI MUST produce platform-specific VSIX packages for the following targets, each embedding the corresponding Rust binary at `server/vhs-analyzer-lsp[.exe]`: (1) `win32-x64` (Windows x86_64, `.exe`), (2) `darwin-arm64` (macOS Apple Silicon), (3) `darwin-x64` (macOS Intel), (4) `linux-x64` (Linux x86_64, glibc), (5) `linux-arm64` (Linux ARM64, glibc), (6) `alpine-x64` (Linux x86_64, musl — for Alpine/Docker). Additionally, a universal VSIX without bundled binary MUST be produced for unsupported platforms (no-server mode). Total: 7 VSIX packages. |
-| **Verification** | CI matrix produces 7 VSIX files. Each platform-specific VSIX contains the binary at `server/vhs-analyzer-lsp`. Universal VSIX does not contain `server/`. |
+| **Statement** | The CI MUST produce platform-specific VSIX packages for the following targets, each embedding the corresponding Rust binary at `server/vhs-analyzer[.exe]`: (1) `win32-x64` (Windows x86_64, `.exe`), (2) `darwin-arm64` (macOS Apple Silicon), (3) `darwin-x64` (macOS Intel), (4) `linux-x64` (Linux x86_64, glibc), (5) `linux-arm64` (Linux ARM64, glibc), (6) `alpine-x64` (Linux x86_64, musl — for Alpine/Docker). Additionally, a universal VSIX without bundled binary MUST be produced for unsupported platforms (no-server mode). Total: 7 VSIX packages. |
+| **Verification** | CI matrix produces 7 VSIX files. Each platform-specific VSIX contains the binary at `server/vhs-analyzer`. Universal VSIX does not contain `server/`. |
 
 ### PKG-002 — Rust Binary Cross-Compilation
 
@@ -62,7 +68,7 @@ distributable VSIX files for each target platform.
 | **ID** | PKG-002 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | The CI MUST cross-compile the `vhs-analyzer-lsp` binary for each target triple: (1) `x86_64-pc-windows-msvc`, (2) `aarch64-apple-darwin`, (3) `x86_64-apple-darwin`, (4) `x86_64-unknown-linux-gnu`, (5) `aarch64-unknown-linux-gnu`, (6) `x86_64-unknown-linux-musl`. Binaries MUST be built in `--release` mode with LTO enabled (`lto = true` in `Cargo.toml` release profile). Binaries MUST be stripped of debug symbols (`strip = true`). |
+| **Statement** | The CI MUST cross-compile the `vhs-analyzer` binary for each target triple: (1) `x86_64-pc-windows-msvc`, (2) `aarch64-apple-darwin`, (3) `x86_64-apple-darwin`, (4) `x86_64-unknown-linux-gnu`, (5) `aarch64-unknown-linux-gnu`, (6) `x86_64-unknown-linux-musl`. Binaries MUST be built in `--release` mode with LTO enabled (`lto = true` in `Cargo.toml` release profile). Binaries MUST be stripped of debug symbols (`strip = true`). |
 | **Verification** | Each binary runs on its target platform. `file` command confirms correct architecture. Binary size is reasonable (<15 MB stripped). |
 
 ### PKG-003 — Extension Manifest (package.json)
@@ -208,7 +214,7 @@ pattern.
 
 **Recommended: Option A (vsce package --target).** The official method.
 The CI workflow downloads the correct binary artifact, places it at
-`server/vhs-analyzer-lsp`, then runs `vsce package --target {platform}
+`server/vhs-analyzer`, then runs `vsce package --target {platform}
 --no-dependencies`. After packaging, the binary is removed before the
 next target. This is exactly what rust-analyzer does.
 
@@ -229,12 +235,12 @@ via their editor's built-in marketplace. The additional CI step is trivial.
 
 | vsce Target | Rust Triple | Runner OS | Build Method | Binary Name |
 | --- | --- | --- | --- | --- |
-| `win32-x64` | `x86_64-pc-windows-msvc` | `windows-latest` | Native cargo | `vhs-analyzer-lsp.exe` |
-| `darwin-arm64` | `aarch64-apple-darwin` | `macos-14` (ARM) | Native cargo | `vhs-analyzer-lsp` |
-| `darwin-x64` | `x86_64-apple-darwin` | `macos-13` (Intel) | Native cargo | `vhs-analyzer-lsp` |
-| `linux-x64` | `x86_64-unknown-linux-gnu` | `ubuntu-latest` | Native cargo | `vhs-analyzer-lsp` |
-| `linux-arm64` | `aarch64-unknown-linux-gnu` | `ubuntu-latest` | cross-rs | `vhs-analyzer-lsp` |
-| `alpine-x64` | `x86_64-unknown-linux-musl` | `ubuntu-latest` | cross-rs | `vhs-analyzer-lsp` |
+| `win32-x64` | `x86_64-pc-windows-msvc` | `windows-latest` | Native cargo | `vhs-analyzer.exe` |
+| `darwin-arm64` | `aarch64-apple-darwin` | `macos-14` (ARM) | Native cargo | `vhs-analyzer` |
+| `darwin-x64` | `x86_64-apple-darwin` | `macos-13` (Intel) | Native cargo | `vhs-analyzer` |
+| `linux-x64` | `x86_64-unknown-linux-gnu` | `ubuntu-latest` | Native cargo | `vhs-analyzer` |
+| `linux-arm64` | `aarch64-unknown-linux-gnu` | `ubuntu-latest` | cross-rs | `vhs-analyzer` |
+| `alpine-x64` | `x86_64-unknown-linux-musl` | `ubuntu-latest` | cross-rs | `vhs-analyzer` |
 | (universal) | — | — | No binary | — |
 
 ## 7. Release Workflow Pseudocode
@@ -277,8 +283,8 @@ jobs:
       - checkout
       - install rust toolchain (stable, target: ${{ matrix.target }})
       - if use-cross: cargo install cross
-      - build: cross/cargo build --release --target ${{ matrix.target }} -p vhs-analyzer-lsp
-      - upload artifact: target/${{ matrix.target }}/release/vhs-analyzer-lsp[.exe]
+      - build: cross/cargo build --release --target ${{ matrix.target }} -p vhs-analyzer
+      - upload artifact: target/${{ matrix.target }}/release/vhs-analyzer[.exe]
 
   package-vsix:
     needs: build-rust
@@ -286,12 +292,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - { vsce-target: win32-x64,     rust-target: x86_64-pc-windows-msvc,   binary: vhs-analyzer-lsp.exe }
-          - { vsce-target: darwin-arm64,   rust-target: aarch64-apple-darwin,       binary: vhs-analyzer-lsp }
-          - { vsce-target: darwin-x64,     rust-target: x86_64-apple-darwin,        binary: vhs-analyzer-lsp }
-          - { vsce-target: linux-x64,      rust-target: x86_64-unknown-linux-gnu,   binary: vhs-analyzer-lsp }
-          - { vsce-target: linux-arm64,    rust-target: aarch64-unknown-linux-gnu,  binary: vhs-analyzer-lsp }
-          - { vsce-target: alpine-x64,     rust-target: x86_64-unknown-linux-musl,  binary: vhs-analyzer-lsp }
+          - { vsce-target: win32-x64,     rust-target: x86_64-pc-windows-msvc,   binary: vhs-analyzer.exe }
+          - { vsce-target: darwin-arm64,   rust-target: aarch64-apple-darwin,       binary: vhs-analyzer }
+          - { vsce-target: darwin-x64,     rust-target: x86_64-apple-darwin,        binary: vhs-analyzer }
+          - { vsce-target: linux-x64,      rust-target: x86_64-unknown-linux-gnu,   binary: vhs-analyzer }
+          - { vsce-target: linux-arm64,    rust-target: aarch64-unknown-linux-gnu,  binary: vhs-analyzer }
+          - { vsce-target: alpine-x64,     rust-target: x86_64-unknown-linux-musl,  binary: vhs-analyzer }
     steps:
       - checkout
       - setup-node, setup-pnpm
@@ -390,6 +396,7 @@ jobs:
     "package": "vsce package --no-dependencies",
     "publish": "vsce publish --no-dependencies"
   },
+  "packageManager": "pnpm@10.32.1",
   "devDependencies": {
     "@biomejs/biome": "^1.x",
     "@types/node": "^18",
@@ -442,79 +449,73 @@ runs when Rust code changes. Both are required status checks for merge.
 The release workflow (`release.yml`) runs both Rust and TypeScript checks
 unconditionally.
 
-## 11. Freeze Candidates
+## 11. Resolved Design Decisions
 
-### FC-PKG-01 — macOS Universal Binary
+> All Freeze Candidates resolved through collaborative Architect–Orchestrator
+> discussion on 2026-03-20.
 
-**Question:** Should macOS produce a universal binary (fat binary containing
-both ARM64 and x86_64), or separate binaries per architecture?
+### RD-PKG-01 — macOS Binary Strategy
 
-**Analysis:** A universal binary via `lipo -create` produces a single binary
-that runs natively on both Intel and Apple Silicon Macs. This allows publishing
-a single `darwin-universal` VSIX instead of two separate macOS VSIXes.
-However, `vsce` supports `darwin-arm64` and `darwin-x64` as separate targets.
-rust-analyzer publishes separate per-architecture VSIXes.
+**Decision:** macOS MUST produce separate per-architecture VSIXes
+(`darwin-arm64` + `darwin-x64`), not a universal fat binary.
 
-**Leaning:** Separate per-architecture VSIXes (`darwin-arm64` + `darwin-x64`),
-matching rust-analyzer. A universal binary may be added later.
+**Rationale:** Matches the rust-analyzer CI blueprint. VSCode Marketplace
+automatically serves the correct architecture to each user.
+`darwin-universal` is not yet an officially supported vsce target
+(microsoft/vscode-vsce#1049). Separate binaries are smaller than a fat
+binary, resulting in faster downloads.
 
-### FC-PKG-02 — Binary Size Optimization Level
+### RD-PKG-02 — Binary Size Optimization
 
-**Question:** Should the release profile use `opt-level = "s"` (size) or
-`opt-level = 3` (speed)?
+**Decision:** The release profile MUST use `opt-level = "s"` (size
+optimization), along with `lto = true`, `strip = true`, and
+`codegen-units = 1`.
 
-**Analysis:** An LSP server is I/O-bound (waiting for JSON-RPC messages,
-parsing small files). CPU throughput is not the bottleneck. Smaller binary
-= faster extension installation and smaller VSIX download. `opt-level = "s"`
-typically produces 20-30% smaller binaries with negligible performance impact
-for I/O-bound workloads.
+**Rationale:** The LSP server is I/O-bound (JSON-RPC messages, parsing small
+tape files). CPU throughput is not the bottleneck. `opt-level = "s"` produces
+20–30% smaller binaries with negligible performance impact for I/O-bound
+workloads, resulting in faster VSIX installation and smaller downloads.
 
-**Leaning:** `opt-level = "s"` for size optimization.
+### RD-PKG-03 — pnpm Version Pinning
 
-### FC-PKG-03 — pnpm Version Pinning
+**Decision:** pnpm MUST be pinned via `"packageManager": "pnpm@10.32.1"` in
+`package.json`. CI MUST use `corepack enable` to resolve this version
+automatically.
 
-**Question:** Should the CI pin a specific pnpm version or use `latest`?
+**Rationale:** pnpm has no LTS program. v10.32.1 is the latest stable release
+(2026-03-11). v9 EOL is 2026-04-30. v11 is in alpha. The `packageManager`
+field ensures local development and CI use identical pnpm versions. pnpm v10
+requires Node >=18, matching our locked Node.js target.
 
-**Analysis:** Pinning ensures reproducible builds. `pnpm-lock.yaml` format
-may change between major versions. Using `corepack enable && corepack prepare
-pnpm@9 --activate` (or `packageManager` field in root `package.json`)
-provides deterministic pnpm version resolution.
+### RD-PKG-04 — Extension Version Scheme
 
-**Leaning:** Pin via `"packageManager": "pnpm@9.x.x"` in `package.json`.
+**Decision:** The extension MUST use independent semver, starting at `0.3.0`
+for the Phase 3 launch. The Rust crate version remains independent (currently
+`0.2.x`).
 
-### FC-PKG-04 — Extension Version Scheme
+**Rationale:** Extension and Rust crate have different release cadences.
+Extension-only changes (UI, Preview improvements) should not force a Rust
+crate version bump. `0.3.0` signals the third major milestone (Phase 1 =
+0.1.x, Phase 2 = 0.2.x, Phase 3 = 0.3.x) progressing toward `1.0.0`.
 
-**Question:** What versioning scheme should the extension follow? Should it
-track the Rust crate version or have its own?
+### RD-PKG-05 — Pre-release Strategy
 
-**Analysis:** The extension and the Rust LSP server are tightly coupled but
-have different release cadences. rust-analyzer uses a date-based scheme
-(`YYYY-MM-DD`). Traditional `semver` is clearer for marketplace users.
-The extension version should be independent of the Rust crate version, since
-extension-only changes (UI, Preview improvements) do not require a Rust
-release.
+**Decision:** Tags matching `v*-*` (e.g., `v0.3.0-beta.1`) MUST be published
+as pre-release on both GitHub Releases and VSCode Marketplace (`vsce publish
+--pre-release`). Tags without hyphens (e.g., `v0.3.0`) MUST be published as
+stable.
 
-**Leaning:** Independent semver for the extension (`0.3.0` = first Phase 3
-release). The Rust crate remains at `0.2.x` from Phase 2.
+**Rationale:** Pre-release allows beta testing with the Charmbracelet
+community before stable launch. VSCode Marketplace natively supports
+pre-release extensions. The CI detects pre-release from the tag format — no
+manual flag required.
 
-### FC-PKG-05 — GitHub Releases: Pre-release vs. Release
+### RD-PKG-06 — Open VSX Publishing Method
 
-**Question:** Should early releases be marked as pre-release on GitHub?
+**Decision:** CI MUST use `npx ovsx publish` for direct Open VSX publishing,
+not the `open-vsx/publish-extensions` GitHub Action.
 
-**Analysis:** Pre-release tags (`v0.3.0-beta.1`) allow early adopters to
-test while stable users are not notified. The VSCode Marketplace supports
-pre-release extensions via the `--pre-release` flag.
-
-**Leaning:** Use pre-release for `v0.3.0-beta.*` and stable for `v0.3.0`.
-The release workflow detects pre-release from the tag format.
-
-### FC-PKG-06 — ovsx CLI Installation in CI
-
-**Question:** Should the CI use the `ovsx` npm package directly or the
-`open-vsx/publish-extensions` GitHub Action?
-
-**Analysis:** The `ovsx` CLI (`npx ovsx publish`) is the direct approach.
-The GitHub Action wraps it with additional features (retry, error handling).
-For simplicity, `npx ovsx publish` is sufficient.
-
-**Leaning:** Direct `npx ovsx publish` invocation.
+**Rationale:** `npx ovsx publish` is symmetric with `vsce publish` in the
+workflow, keeping the CI script simple and readable. Retry logic can be handled
+at the CI step level. Minimizing third-party action dependencies is a CI
+security best practice.
