@@ -33,8 +33,7 @@ async fn main() {
 
     // vscode-languageclient v9 appends --stdio; the server already speaks stdio,
     // so we accept that flag as a no-op and ignore any extra startup arguments.
-    let ignored_arguments =
-        collect_ignored_startup_arguments(std::env::args_os().skip(1));
+    let ignored_arguments = collect_ignored_startup_arguments(std::env::args_os().skip(1));
     if !ignored_arguments.is_empty() {
         tracing::warn!(?ignored_arguments, "ignoring unsupported startup arguments");
     }

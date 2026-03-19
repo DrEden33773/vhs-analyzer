@@ -323,6 +323,8 @@ Batch 5 — Integration Test + Closeout:
   T-INT3-005: Universal VSIX → no-server mode (E2E, MAY).
 
   Regression:
+    - cargo fmt --all -- --check
+    - cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
     - pnpm run lint (biome check .)
     - pnpm run typecheck (tsc --noEmit)
     - pnpm run test (vitest run)
@@ -579,6 +581,8 @@ Test naming: use descriptive names that read like specifications:
   - execution_cancel_sends_sigterm_then_sigkill()
 
 [Quality Gate — All Must Pass Before Marking a Batch Complete]
+- [ ] cargo fmt --all -- --check
+- [ ] cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 - [ ] pnpm run lint (biome check . — zero errors)
 - [ ] pnpm run typecheck (tsc --noEmit — zero errors)
 - [ ] pnpm run test (vitest run — all tests pass)
