@@ -1,0 +1,24 @@
+{
+  "files": {
+    "include": ["editors/code/**"],
+    "ignore": [
+      "editors/code/dist/**",
+      "editors/code/node_modules/**",
+      "editors/code/**/*.json"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
