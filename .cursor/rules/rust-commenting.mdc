@@ -1,0 +1,23 @@
+---
+description: Rust comment strategy for library and binary crates
+globs: **/*.rs
+alwaysApply: false
+---
+
+# Rust Comment Strategy
+
+- Prefer self-documenting code first; add comments only when the "why" is not obvious from names, types, and structure.
+- Use `//` comments for design rationale, protocol constraints, concurrency assumptions, UTF-16/range conversion details, workarounds, and other non-obvious trade-offs.
+- Library crates must document public APIs with `///` and keep `#![warn(missing_docs)]` at the crate root.
+- Binary crates should not receive blanket `///` coverage. Prefer brief `//!` docs at the crate root and major modules, plus targeted `//` why-comments in tricky logic.
+- In `vhs-analyzer-lsp`, prioritize `//!` docs for `main.rs`, `server.rs`, and `hover.rs`, and use `//` comments for protocol behavior, cached-tree reuse, UTF-16 position mapping, and hover context resolution.
+- Avoid comments that narrate obvious control flow or duplicate the code.
+- If a binary-crate `pub` item becomes a stable reusable API across crates, promote it to proper `///` documentation instead of leaving it as an implementation detail.
+
+```rust
+// GOOD: explains why the transport must stay separated
+// LSP traffic owns stdout, so tracing must stay on stderr.
+
+// BAD: repeats what the code already says
+// Create the server.
+```

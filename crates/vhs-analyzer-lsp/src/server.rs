@@ -1,3 +1,9 @@
+//! Language-server state and `LanguageServer` trait implementation.
+//!
+//! This module owns document synchronization, parse-diagnostic publication,
+//! hover dispatch, and formatting bridges over the cached `vhs-analyzer-core`
+//! syntax trees.
+
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -73,6 +79,9 @@ impl VhsLanguageServer {
     pub(crate) fn initialize_params(&self) -> Option<InitializeParams> {
         match self.initialize_params.lock() {
             Ok(guard) => guard.clone(),
+            // Preserve the captured client configuration even if a previous caller
+            // panicked while holding the mutex; losing it would make later behavior
+            // harder to reason about than recovering the inner value.
             Err(poisoned) => poisoned.into_inner().clone(),
         }
     }
@@ -141,6 +150,8 @@ impl VhsLanguageServer {
 
     fn position_for_offset(source: &str, offset: usize) -> Position {
         let mut safe_offset = offset.min(source.len());
+        // LSP positions are expressed in UTF-16 code units, so byte offsets from
+        // rowan must first be clamped back to a valid UTF-8 character boundary.
         while safe_offset > 0 && !source.is_char_boundary(safe_offset) {
             safe_offset -= 1;
         }
@@ -178,6 +189,8 @@ impl VhsLanguageServer {
         let mut character = 0_usize;
         let mut last_boundary = 0_usize;
 
+        // Walk the source by Unicode scalar values so the reverse mapping matches
+        // the UTF-16 character counting used by LSP clients.
         for (byte_index, ch) in source.char_indices() {
             if line == target_line && character >= target_character {
                 return byte_index;
@@ -277,6 +290,8 @@ impl LanguageServer for VhsLanguageServer {
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>> {
         let uri = &params.text_document_position_params.text_document.uri;
         let state = self.require_document(uri)?;
+        // Rebuild a syntax root from the cached green tree so hover always reads
+        // the same parsed snapshot that diagnostics and formatting are based on.
         let syntax = SyntaxNode::new_root(state.green.clone());
         let offset =
             Self::offset_for_position(&state.source, params.text_document_position_params.position);
@@ -298,6 +313,8 @@ impl LanguageServer for VhsLanguageServer {
         params: DocumentFormattingParams,
     ) -> Result<Option<Vec<LspTextEdit>>> {
         let state = self.require_document(&params.text_document.uri)?;
+        // Formatting reuses the cached parse result to keep edits aligned with the
+        // latest synchronized document snapshot without doing an extra parse pass.
         let syntax = SyntaxNode::new_root(state.green.clone());
         let edits = format_document(
             &syntax,

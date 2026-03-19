@@ -1,3 +1,9 @@
+//! Hover registry and token-resolution helpers for VHS keywords.
+//!
+//! Phase 1 keeps hover content embedded in Rust so the frozen mapping stays
+//! compiler-checked, zero-dependency, and close to the context-resolution code
+//! that decides which documentation to show.
+
 use vhs_analyzer_core::syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 pub(crate) struct HoverInfo {
@@ -24,6 +30,9 @@ fn pick_token(syntax: &SyntaxNode, offset: usize) -> Option<SyntaxToken> {
 
     if let Some(token) = right.as_ref() {
         let start = usize::try_from(u32::from(token.text_range().start())).ok()?;
+        // Prefer the token starting at the cursor when hovering on a token
+        // boundary so line-start hovers resolve to the symbol under the cursor
+        // instead of the trivia or token that ends immediately before it.
         if start == offset {
             return right;
         }
@@ -440,6 +449,8 @@ fn command_context(token: &SyntaxToken) -> Option<SyntaxKind> {
         .parent()?
         .ancestors()
         .map(|node| node.kind())
+        // The same token kind can need different docs depending on the command
+        // shape above it, such as `Enter` as a standalone key vs `Ctrl+Enter`.
         .find(|kind| is_command_kind(*kind))
 }
 

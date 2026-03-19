@@ -389,6 +389,16 @@ Rules (derived from Rust Best Practices, Chapter 8):
     design rationale, performance trade-offs. Do NOT narrate what the code does.
   - `///` doc comments explain *what* and *how* for all public APIs. These are
     REQUIRED for pub items in library crates.
+  - `//!` doc comments explain the purpose of a crate or module. Library crates
+    SHOULD use them at the crate root, and binary crates SHOULD use them at the
+    crate root plus major internal modules when that context helps future
+    maintainers orient themselves quickly.
+  - Binary crates (including `vhs-analyzer-lsp`) do NOT require blanket `///`
+    coverage, but they SHOULD include concise `//!` top-of-file docs for the
+    crate root and major modules, and they MUST include concise `//` comments on
+    non-obvious protocol, concurrency, UTF-16/offset conversion, and
+    context-resolution logic where the "why" is not self-evident from the code
+    alone.
   - Do NOT write comments like "// Parse the token", "// Return the result",
     "// Handle the error". If the code is that obvious, no comment is needed.
   - Every `TODO` needs a linked issue or spec ID: `// TODO(LEX-003): ...`
@@ -431,6 +441,12 @@ Test naming: use descriptive names that read like specifications:
 - [ ] cargo test --workspace --all-targets --locked
 - [ ] No `unwrap()` or `expect()` in non-test code (use `?` or proper error handling)
 - [ ] All pub items in vhs-analyzer-core have `///` doc comments
+- [ ] `vhs-analyzer-lsp` crate/module roots have concise `//!` docs where they
+      add orientation value, without turning internal implementation details
+      into a public API contract
+- [ ] Non-obvious `vhs-analyzer-lsp` logic (protocol behavior, concurrency,
+      UTF-16/range conversion, hover resolution) has concise `//` comments that
+      explain *why* without narrating obvious control flow
 - [ ] spec/phase1/SPEC_TRACEABILITY.md updated with Implementation and Tests columns
 - [ ] trace/phase1/status.yaml updated with batch progress entry
       *** THIS IS MANDATORY FOR EVERY BATCH, NOT JUST THE FINAL ONE. ***
