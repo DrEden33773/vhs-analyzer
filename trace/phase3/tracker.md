@@ -1,14 +1,14 @@
 # Phase 3 Execution Tracker
 
 Phase: VSCode Extension Client (Client, Preview, CodeLens, Packaging)
-Status: Not Started
-Started: —
+Status: In Progress (Architect Stage A complete)
+Started: 2026-03-19
 
 ## 1. Stage Progress
 
 | Stage | Owner | Status | Completed | Deliverables |
 | --- | --- | --- | --- | --- |
-| Architect Stage A | Claude | Not Started | — | 4 exploratory specs (Client, Preview, CodeLens, Packaging) |
+| Architect Stage A | Claude | Completed | 2026-03-19 | 4 exploratory specs + updated README (43 reqs, 19 FCs) |
 | Architect Stage B | Claude | Not Started | — | 6 frozen specs + test matrix + traceability |
 | Builder | Builder | Not Started | — | 5 batches (scaffold + client, preview, codelens, packaging, integration) |
 

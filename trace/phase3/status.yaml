@@ -1,23 +1,24 @@
 phase: phase3_vscode_extension_client
-status: not_started
-started_at: null
+status: in_progress
+started_at: "2026-03-19"
 completed_at: null
 
 stages:
   architect_stage_a:
-    status: not_started
-    completed_at: null
+    status: completed
+    completed_at: "2026-03-19"
     deliverables:
       - spec/phase3/SPEC_CLIENT.md
       - spec/phase3/SPEC_PREVIEW.md
       - spec/phase3/SPEC_CODELENS.md
       - spec/phase3/SPEC_PACKAGING.md
+      - spec/phase3/README.md (updated)
     stats:
-      requirements_total: 0
-      requirements_p0_must: 0
-      requirements_p1_should: 0
-      requirements_p2_may: 0
-      freeze_candidates: 0
+      requirements_total: 43
+      requirements_p0_must: 29
+      requirements_p1_should: 11
+      requirements_p2_may: 3
+      freeze_candidates: 19
   architect_stage_b:
     status: not_started
     completed_at: null
@@ -50,10 +51,10 @@ spec_files:
   - spec/phase3/SPEC_TRACEABILITY.md
 
 requirement_ids:
-  client: []
-  preview: []
-  codelens: []
-  packaging: []
+  client: [CLI-001, CLI-002, CLI-003, CLI-004, CLI-005, CLI-006, CLI-007, CLI-008, CLI-009, CLI-010, CLI-011]
+  preview: [PRV-001, PRV-002, PRV-003, PRV-004, PRV-005, PRV-006, PRV-007, PRV-008, PRV-009, PRV-010]
+  codelens: [CLS-001, CLS-002, CLS-003, CLS-004, CLS-005, CLS-006, CLS-007, CLS-008, CLS-009, CLS-010]
+  packaging: [PKG-001, PKG-002, PKG-003, PKG-004, PKG-005, PKG-006, PKG-007, PKG-008, PKG-009, PKG-010, PKG-011, PKG-012]
 
 test_scenarios:
   total: 0
