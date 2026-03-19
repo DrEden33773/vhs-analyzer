@@ -26,7 +26,7 @@ trace/
 ├── phase2/        (Phase 2: Intelligence & Diagnostics)
 │   ├── status.yaml
 │   └── tracker.md
-└── phase3/        (Phase 3: VSCode Extension Client — to be created)
+└── phase3/        (Phase 3: VSCode Extension Client)
     ├── status.yaml
     └── tracker.md
 ```

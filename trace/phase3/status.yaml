@@ -1,0 +1,111 @@
+phase: phase3_vscode_extension_client
+status: not_started
+started_at: null
+completed_at: null
+
+stages:
+  architect_stage_a:
+    status: not_started
+    completed_at: null
+    deliverables:
+      - spec/phase3/SPEC_CLIENT.md
+      - spec/phase3/SPEC_PREVIEW.md
+      - spec/phase3/SPEC_CODELENS.md
+      - spec/phase3/SPEC_PACKAGING.md
+    stats:
+      requirements_total: 0
+      requirements_p0_must: 0
+      requirements_p1_should: 0
+      requirements_p2_may: 0
+      freeze_candidates: 0
+  architect_stage_b:
+    status: not_started
+    completed_at: null
+    description: "Freeze all specs — resolve Freeze Candidates, produce MUST/SHOULD/MAY contracts"
+    deliverables:
+      - spec/phase3/SPEC_CLIENT.md (CONTRACT_FROZEN)
+      - spec/phase3/SPEC_PREVIEW.md (CONTRACT_FROZEN)
+      - spec/phase3/SPEC_CODELENS.md (CONTRACT_FROZEN)
+      - spec/phase3/SPEC_PACKAGING.md (CONTRACT_FROZEN)
+      - spec/phase3/SPEC_TEST_MATRIX.md (CONTRACT_FROZEN)
+      - spec/phase3/SPEC_TRACEABILITY.md (CONTRACT_FROZEN)
+    stats:
+      requirements_total: 0
+      requirements_p0_must: 0
+      requirements_p1_should: 0
+      requirements_p2_may: 0
+      freeze_candidates_resolved: 0
+      test_scenarios_total: 0
+  builder:
+    status: not_started
+    completed_at: null
+    description: "Implement from frozen specs — Client, Preview, CodeLens, Packaging (5 batches)"
+
+spec_files:
+  - spec/phase3/SPEC_CLIENT.md
+  - spec/phase3/SPEC_PREVIEW.md
+  - spec/phase3/SPEC_CODELENS.md
+  - spec/phase3/SPEC_PACKAGING.md
+  - spec/phase3/SPEC_TEST_MATRIX.md
+  - spec/phase3/SPEC_TRACEABILITY.md
+
+requirement_ids:
+  client: []
+  preview: []
+  codelens: []
+  packaging: []
+
+test_scenarios:
+  total: 0
+  by_category:
+    client: 0
+    preview: 0
+    codelens: 0
+    packaging: 0
+    integration: 0
+
+batches:
+  batch1:
+    name: "LSP Client + Project Scaffold (WS-1 + WS-4 scaffold)"
+    work_packages: [WS-1, WS-4]
+    requirements: []
+    test_ids: "T-CLI-*"
+    crate: editors/vscode
+    status: not_started
+  batch2:
+    name: "Live Preview Webview (WS-2)"
+    work_packages: [WS-2]
+    requirements: []
+    test_ids: "T-PRV-*"
+    crate: editors/vscode
+    depends_on: [batch1]
+    status: not_started
+  batch3:
+    name: "CodeLens & Commands (WS-3)"
+    work_packages: [WS-3]
+    requirements: []
+    test_ids: "T-CLS-*"
+    crate: editors/vscode
+    depends_on: [batch1]
+    status: not_started
+  batch4:
+    name: "Platform Packaging & CI/CD (WS-4 completion)"
+    work_packages: [WS-4]
+    requirements: []
+    test_ids: "T-PKG-*"
+    crate: editors/vscode
+    depends_on: [batch2, batch3]
+    status: not_started
+  batch5:
+    name: "Integration Test + Closeout"
+    work_packages: []
+    requirements: []
+    test_ids: "T-INT3-*"
+    crate: editors/vscode
+    depends_on: [batch4]
+    status: not_started
+
+builder_progress:
+  automated_tests: 0
+  ci_gate: false
+  entries: []
