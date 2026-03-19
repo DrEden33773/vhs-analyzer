@@ -4,18 +4,20 @@
 //! hover dispatch, and formatting bridges over the cached `vhs-analyzer-core`
 //! syntax trees.
 
+#[path = "diagnostics.rs"]
+mod diagnostics;
+
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use dashmap::DashMap;
 use tower_lsp_server::jsonrpc::{Error, ErrorCode, Result};
 use tower_lsp_server::ls_types::{
-    Diagnostic, DiagnosticSeverity, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
-    DidOpenTextDocumentParams, DocumentFormattingParams, Hover, HoverContents, HoverParams,
-    HoverProviderCapability, InitializeParams, InitializeResult, InitializedParams, MarkupContent,
-    MarkupKind, MessageType, OneOf, Position, Range, ServerCapabilities, ServerInfo,
-    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
-    TextEdit as LspTextEdit, Uri,
+    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+    DocumentFormattingParams, Hover, HoverContents, HoverParams, HoverProviderCapability,
+    InitializeParams, InitializeResult, InitializedParams, MarkupContent, MarkupKind, MessageType,
+    OneOf, Position, Range, ServerCapabilities, ServerInfo, TextDocumentSyncCapability,
+    TextDocumentSyncKind, TextDocumentSyncOptions, TextEdit as LspTextEdit, Uri,
 };
 use tower_lsp_server::{Client, LanguageServer};
 use tracing::{error, info};
@@ -111,20 +113,6 @@ impl VhsLanguageServer {
             green: parsed.green(),
             errors: parsed.errors().to_vec(),
         }
-    }
-
-    fn diagnostics_for_state(state: &DocumentState) -> Vec<Diagnostic> {
-        state
-            .errors
-            .iter()
-            .map(|error| Diagnostic {
-                range: Self::range_for_error(&state.source, error),
-                severity: Some(DiagnosticSeverity::ERROR),
-                source: Some("vhs-analyzer".to_owned()),
-                message: error.message.clone(),
-                ..Default::default()
-            })
-            .collect()
     }
 
     fn range_for_error(source: &str, error: &ParseError) -> Range {
@@ -224,7 +212,11 @@ impl VhsLanguageServer {
 
     async fn publish_diagnostics(&self, uri: Uri, state: &DocumentState) {
         self.client
-            .publish_diagnostics(uri, Self::diagnostics_for_state(state), None)
+            .publish_diagnostics(
+                uri.clone(),
+                diagnostics::diagnostics_for_state(&uri, state),
+                None,
+            )
             .await;
     }
 

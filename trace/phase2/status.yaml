@@ -34,7 +34,7 @@ stages:
       freeze_candidates_resolved: 11
       test_scenarios_total: 67
   builder:
-    status: not_started
+    status: in_progress
     description: "Implement from frozen specs — Diagnostics, Safety, Completion (5 batches)"
 
 spec_files:
@@ -64,7 +64,18 @@ batches:
     requirements: [DIA-001, DIA-002, DIA-003, DIA-004, DIA-005, DIA-006, DIA-007, DIA-013]
     test_ids: "T-DIA-001~T-DIA-065"
     crate: vhs-analyzer-lsp
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-lsp/src/server.rs
+      - crates/vhs-analyzer-lsp/src/diagnostics.rs
+      - crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs
+      - crates/vhs-analyzer-lsp/tests/diagnostics_tests.rs
+      - crates/vhs-analyzer-lsp/tests/integration_test.rs
+      - crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs
+      - spec/phase2/SPEC_TRACEABILITY.md
+      - trace/phase2/status.yaml
+      - trace/phase2/tracker.md
   batch2:
     name: "Safety Engine (WS-3)"
     work_packages: [WS-3]
@@ -99,6 +110,34 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 0
-  ci_gate: false
-  entries: []
+  automated_tests: 163
+  ci_gate: true
+  entries:
+    - batch: batch1
+      name: "Lightweight Diagnostic Rules (WS-2 partial)"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - DIA-001
+        - DIA-002
+        - DIA-003
+        - DIA-004
+        - DIA-005
+        - DIA-006
+        - DIA-007
+        - DIA-013
+      scenarios:
+        implemented:
+          - T-DIA-001 through T-DIA-002
+          - T-DIA-010 through T-DIA-065
+        additional:
+          - Existing stdio integration and LSP service tests updated to reflect Phase 2 lightweight diagnostics on didChange
+      notes:
+        - "Added a unified lightweight diagnostic publication layer in crates/vhs-analyzer-lsp/src/diagnostics.rs and wired it into didOpen/didChange in crates/vhs-analyzer-lsp/src/server.rs."
+        - "Implemented missing Output, invalid Output extension, invalid Screenshot extension, duplicate Set, invalid MarginFill hex, and numeric range validation in crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs."
+        - "Added 28 passing acceptance tests in crates/vhs-analyzer-lsp/tests/diagnostics_tests.rs covering T-DIA-001 through T-DIA-065 for the Batch 1 scope."
+        - "Added a compatibility shim that suppresses specific Phase 1 parse errors for recoverable Output/Screenshot path variants and signed numeric setting values so the frozen Phase 2 semantic rules can run without mutating the Phase 1 lexer/parser baseline."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass

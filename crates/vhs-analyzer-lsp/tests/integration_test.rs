@@ -278,7 +278,19 @@ fn hover_returns_markdown_over_stdio_after_initialize_and_did_open() {
 
     let cleared_diagnostics = server.publish_diagnostics();
     assert_eq!(cleared_diagnostics["params"]["uri"], uri);
-    assert_eq!(cleared_diagnostics["params"]["diagnostics"], json!([]));
+    assert_eq!(
+        cleared_diagnostics["params"]["diagnostics"],
+        json!([{
+            "code": "missing-output",
+            "message": "Missing Output directive. VHS will not produce an output file.",
+            "range": {
+                "start": { "line": 0, "character": 0 },
+                "end": { "line": 0, "character": 0 }
+            },
+            "severity": 2,
+            "source": "vhs-analyzer"
+        }])
+    );
 
     let shutdown_response = server.shutdown();
     assert_eq!(shutdown_response["id"], 4);

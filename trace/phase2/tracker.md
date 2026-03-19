@@ -1,7 +1,7 @@
 # Phase 2 Execution Tracker
 
 Phase: Intelligence & Diagnostics (Completion, Diagnostics, Safety)
-Status: In Progress — Builder implementation pending
+Status: In Progress — Batch 1 completed, Batch 2 pending
 Started: 2026-03-19
 
 ## 1. Stage Progress
@@ -10,13 +10,13 @@ Started: 2026-03-19
 | --- | --- | --- | --- | --- |
 | Architect Stage A | Claude | Completed | 2026-03-19 | 3 exploratory specs, 30 reqs, 11 FC identified |
 | Architect Stage B | Claude | Completed | 2026-03-19 | 5 frozen specs, 30 reqs, 67 test scenarios |
-| Builder | Builder | Not started | — | 5 batches planned |
+| Builder | Builder | In Progress | — | 5 batches planned |
 
 ## 2. Builder Batch Plan (5 Batches)
 
 | Batch | Name | WS | Crate | Requirements | Depends On | Milestone | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Lightweight Diagnostic Rules | WS-2 | lsp | DIA-001~007, DIA-013 | — | — | not started |
+| 1 | Lightweight Diagnostic Rules | WS-2 | lsp | DIA-001~007, DIA-013 | — | — | completed |
 | 2 | Safety Engine | WS-3 | lsp | SAF-001~007 | B1 | — | not started |
 | 3 | Heavyweight Diagnostics + Pipeline | WS-2 | lsp | DIA-008~012 | B2 | Pipeline complete | not started |
 | 4 | Completion Provider | WS-1 | lsp | CMP-001~010 | B3 | All features complete | not started |
@@ -50,3 +50,31 @@ Key architectural decisions resolved during Phase 2 Stage B (2026-03-19):
 ## 5. Builder Batch Records
 
 Builder appends one record per completed batch below this line.
+
+### Batch 1 — Lightweight Diagnostic Rules
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `DIA-001`, `DIA-002`, `DIA-003`, `DIA-004`, `DIA-005`, `DIA-006`, `DIA-007`, `DIA-013`
+- Files:
+  - `crates/vhs-analyzer-lsp/src/server.rs`
+  - `crates/vhs-analyzer-lsp/src/diagnostics.rs`
+  - `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs`
+  - `crates/vhs-analyzer-lsp/tests/diagnostics_tests.rs`
+  - `crates/vhs-analyzer-lsp/tests/integration_test.rs`
+  - `crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`
+  - `spec/phase2/SPEC_TRACEABILITY.md`
+  - `trace/phase2/status.yaml`
+  - `trace/phase2/tracker.md`
+- Deliverables:
+  - Added a dedicated lightweight diagnostic layer that publishes parse diagnostics and semantic diagnostics together on `didOpen` and `didChange`.
+  - Implemented missing `Output`, invalid `Output` extension, invalid `Screenshot` extension, duplicate `Set`, invalid `MarginFill` hex, and numeric range validation rules.
+  - Added 28 passing acceptance tests in `crates/vhs-analyzer-lsp/tests/diagnostics_tests.rs` covering the Batch 1 `T-DIA-001` through `T-DIA-065` scope.
+  - Updated existing LSP integration tests so Phase 2's lightweight diagnostics remain visible after syntax errors are fixed but semantic issues still exist.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
+- Notes:
+  - Added a compatibility shim in `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` that suppresses specific Phase 1 parse diagnostics for recoverable `Output` and `Screenshot` path variants plus signed numeric setting values, allowing the frozen Phase 2 semantic contracts to hold without modifying the frozen Phase 1 lexer/parser behavior.
+  - `DIA-010` and `DIA-011` are now partially wired for the `didChange` lightweight path and remain in progress until Batch 3 completes the heavyweight and save-time pipeline.

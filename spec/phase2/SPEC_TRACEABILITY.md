@@ -43,19 +43,19 @@ module and test references. The Builder MUST update the "Impl Module" and
 
 | Req ID | Description | Priority | Planned Impl Module | Test IDs | Phase 1 Baseline | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| DIA-001 | Diagnostic source tag | P0 | `crates/vhs-analyzer-lsp/src/diagnostics.rs` | T-DIA-001, T-DIA-002 | LSP-008 (parse diagnostics) | Not started |
-| DIA-002 | Severity mapping | P0 | `crates/vhs-analyzer-lsp/src/diagnostics.rs` | T-DIA-001–T-DIA-093 | — | Not started |
-| DIA-003 | Missing Output directive | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-010–T-DIA-012 | PAR-001 (SOURCE_FILE) | Not started |
-| DIA-004 | Invalid Output path extension | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-020–T-DIA-025 | PAR-007 (OutputCommand) | Not started |
-| DIA-005 | Duplicate Set for same setting | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-040–T-DIA-041 | PAR-007 (SetCommand) | Not started |
-| DIA-006 | Invalid hex color in MarginFill | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-050–T-DIA-055 | PAR-007 (SetCommand) | Not started |
-| DIA-007 | Numeric value out of range | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-060–T-DIA-065 | PAR-007 (SetCommand) | Not started |
+| DIA-001 | Diagnostic source tag | P0 | `crates/vhs-analyzer-lsp/src/diagnostics.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-001, T-DIA-002 | LSP-008 (parse diagnostics) | Completed |
+| DIA-002 | Severity mapping | P0 | `crates/vhs-analyzer-lsp/src/diagnostics.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-001–T-DIA-093 | — | Completed |
+| DIA-003 | Missing Output directive | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-010–T-DIA-012 | PAR-001 (SOURCE_FILE) | Completed |
+| DIA-004 | Invalid Output path extension | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-020–T-DIA-025 | PAR-007 (OutputCommand) | Completed |
+| DIA-005 | Duplicate Set for same setting | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-040–T-DIA-041 | PAR-007 (SetCommand) | Completed |
+| DIA-006 | Invalid hex color in MarginFill | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-050–T-DIA-055 | PAR-007 (SetCommand) | Completed |
+| DIA-007 | Numeric value out of range | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-060–T-DIA-065 | PAR-007 (SetCommand) | Completed |
 | DIA-008 | Require program not found | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-070–T-DIA-072 | PAR-007 (RequireCommand) | Not started |
 | DIA-009 | Source file not found | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-080–T-DIA-081 | PAR-007 (SourceCommand) | Not started |
-| DIA-010 | Diagnostic timing classification | P0 | `crates/vhs-analyzer-lsp/src/server.rs` | T-DIA-090–T-DIA-092 | LSP-003 (didChange) | Not started |
-| DIA-011 | Unified diagnostic pipeline | P0 | `crates/vhs-analyzer-lsp/src/server.rs` | T-DIA-090–T-DIA-092 | LSP-008 (publish_diagnostics) | Not started |
+| DIA-010 | Diagnostic timing classification | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs` | T-DIA-090–T-DIA-092 | LSP-003 (didChange) | In progress |
+| DIA-011 | Unified diagnostic pipeline | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs` | T-DIA-090–T-DIA-092 | LSP-008 (publish_diagnostics) | In progress |
 | DIA-012 | Heavyweight check cancellation | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-091 | — | Not started |
-| DIA-013 | Invalid Screenshot extension | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-030–T-DIA-032 | PAR-007 (ScreenshotCommand) | Not started |
+| DIA-013 | Invalid Screenshot extension | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-030–T-DIA-032 | PAR-007 (ScreenshotCommand) | Completed |
 
 ## 4. WS-3: Safety Traceability
 

@@ -16,7 +16,7 @@ use tower::ServiceExt;
 use tower_lsp_server::jsonrpc::{ErrorCode, Request, Response};
 use tower_lsp_server::ls_types::{
     DiagnosticSeverity, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
-    DidOpenTextDocumentParams, HoverParams, Position, PublishDiagnosticsParams,
+    DidOpenTextDocumentParams, HoverParams, NumberOrString, Position, PublishDiagnosticsParams,
     TextDocumentContentChangeEvent, TextDocumentIdentifier, TextDocumentItem,
     TextDocumentPositionParams, Uri, VersionedTextDocumentIdentifier, WorkDoneProgressParams,
 };
@@ -677,7 +677,7 @@ async fn did_open_publishes_parse_error_diagnostics() {
 }
 
 #[tokio::test(flavor = "current_thread")]
-async fn did_change_clears_diagnostics_after_fixing_parse_errors() {
+async fn did_change_replaces_parse_errors_with_lightweight_diagnostics() {
     let (mut service, mut socket) = LspService::new(VhsLanguageServer::new);
     let _ = initialize_service(&mut service).await;
     let uri: Uri = "file:///workspace/fixme.tape".parse().expect("valid URI");
@@ -740,8 +740,10 @@ async fn did_change_clears_diagnostics_after_fixing_parse_errors() {
     let cleared = parse_publish_diagnostics(&cleared_notification);
     assert_eq!(cleared.uri, uri);
     assert!(
-        cleared.diagnostics.is_empty(),
-        "fixing the document should clear diagnostics"
+        cleared.diagnostics.iter().any(|diagnostic| {
+            diagnostic.code == Some(NumberOrString::String("missing-output".to_owned()))
+        }),
+        "fixing syntax errors should still keep lightweight diagnostics"
     );
 }
 
