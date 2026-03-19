@@ -3,8 +3,12 @@
 //! Phase 2 keeps parse diagnostics and lightweight semantic checks in one place
 //! so the server can publish a single list per document snapshot.
 
+#[path = "diagnostics/heavyweight.rs"]
+mod heavyweight;
 #[path = "diagnostics/semantic.rs"]
 mod semantic;
+
+use std::path::Path;
 
 use tower_lsp_server::ls_types::{Diagnostic, DiagnosticSeverity, Uri};
 use vhs_analyzer_core::syntax::SyntaxNode;
@@ -30,5 +34,24 @@ pub(super) fn diagnostics_for_state(uri: &Uri, state: &DocumentState) -> Vec<Dia
 
     diagnostics.extend(analysis.diagnostics());
     diagnostics.extend(safety::collect_safety_diagnostics(&syntax));
+    diagnostics.extend(state.heavyweight_diagnostics.clone());
     diagnostics
+}
+
+pub(super) fn has_heavyweight_targets(state: &DocumentState) -> bool {
+    let syntax = SyntaxNode::new_root(state.green.clone());
+    heavyweight::has_heavyweight_targets(&syntax)
+}
+
+pub(super) async fn collect_heavyweight_diagnostics(
+    uri: &Uri,
+    state: &DocumentState,
+    workspace_root: Option<&Path>,
+) -> Vec<Diagnostic> {
+    let prepared = {
+        let syntax = SyntaxNode::new_root(state.green.clone());
+        heavyweight::prepare_heavyweight_diagnostics(&syntax)
+    };
+
+    heavyweight::collect_heavyweight_diagnostics(prepared, uri, workspace_root).await
 }

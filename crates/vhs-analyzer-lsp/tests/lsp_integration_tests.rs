@@ -215,7 +215,7 @@ async fn initialize_service_with_params(
 }
 
 #[test]
-fn initialize_response_advertises_hover_and_formatting_providers() {
+fn initialize_response_advertises_hover_formatting_and_save_sync() {
     let mut server = ServerProcess::spawn();
 
     let response = server.initialize();
@@ -225,6 +225,10 @@ fn initialize_response_advertises_hover_and_formatting_providers() {
     assert_eq!(
         response["result"]["capabilities"]["documentFormattingProvider"],
         true
+    );
+    assert_eq!(
+        response["result"]["capabilities"]["textDocumentSync"]["save"]["includeText"],
+        false
     );
 }
 

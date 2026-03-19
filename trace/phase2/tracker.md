@@ -1,7 +1,7 @@
 # Phase 2 Execution Tracker
 
 Phase: Intelligence & Diagnostics (Completion, Diagnostics, Safety)
-Status: In Progress — Batches 1-2 completed, Batch 3 pending
+Status: In Progress — Batches 1-3 completed, Batch 4 pending
 Started: 2026-03-19
 
 ## 1. Stage Progress
@@ -18,7 +18,7 @@ Started: 2026-03-19
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Lightweight Diagnostic Rules | WS-2 | lsp | DIA-001~007, DIA-013 | — | — | completed |
 | 2 | Safety Engine | WS-3 | lsp | SAF-001~007 | B1 | — | completed |
-| 3 | Heavyweight Diagnostics + Pipeline | WS-2 | lsp | DIA-008~012 | B2 | Pipeline complete | not started |
+| 3 | Heavyweight Diagnostics + Pipeline | WS-2 | lsp | DIA-008~012 | B2 | Pipeline complete | completed |
 | 4 | Completion Provider | WS-1 | lsp | CMP-001~010 | B3 | All features complete | not started |
 | 5 | Integration + Closeout | — | both | T-INT2 + property | B4 | Phase 2 complete | not started |
 
@@ -107,3 +107,32 @@ Builder appends one record per completed batch below this line.
 - Notes:
   - Pipe-sensitive remote execution patterns and the fork-bomb signature are matched without weakening per-stage detection for later pipeline stages like `echo hello | sudo rm -rf /`.
   - Batch 3 still owns heavyweight diagnostics, didSave timing, and the final unified cache-aware pipeline described by `DIA-008` through `DIA-012`.
+
+### Batch 3 — Heavyweight Diagnostics + Pipeline
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `DIA-008`, `DIA-009`, `DIA-010`, `DIA-011`, `DIA-012`
+- Files:
+  - `crates/vhs-analyzer-lsp/Cargo.toml`
+  - `crates/vhs-analyzer-lsp/src/server.rs`
+  - `crates/vhs-analyzer-lsp/src/diagnostics.rs`
+  - `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs`
+  - `crates/vhs-analyzer-lsp/tests/diagnostics_heavyweight_tests.rs`
+  - `crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`
+  - `spec/phase2/SPEC_TRACEABILITY.md`
+  - `trace/phase2/status.yaml`
+  - `trace/phase2/tracker.md`
+- Deliverables:
+  - Added async heavyweight diagnostics for missing `Require` programs and missing `Source` files, using `$PATH` lookup plus filesystem metadata checks.
+  - Extended `DocumentState` with heavyweight cache and cancellation token storage, and finalized the unified diagnostics pipeline so `didChange` preserves cached heavyweight results while `didSave` refreshes them asynchronously.
+  - Added `textDocumentSync.save` capability advertising with `includeText = false`, plus cancellation and cleanup wiring so `didClose` aborts in-flight heavyweight work before clearing diagnostics.
+  - Added 9 passing tests in `crates/vhs-analyzer-lsp/tests/diagnostics_heavyweight_tests.rs` covering save-time warnings, save-only timing, cache preservation across edits, initial `didOpen` heavyweight scheduling, workspace-root source resolution, and a no-panic property test for arbitrary document text.
+  - Extended `crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs` with an initialize response regression asserting save sync capability advertisement.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
+- Notes:
+  - Batch 3 keeps the Batch 1 compatibility shim intact by layering heavyweight checks on top of the frozen parse + lightweight + safety pipeline instead of changing the Phase 1 lexer/parser baseline.
+  - Cancellation uses both `CancellationToken` state in `DocumentState` and `JoinHandle::abort()` at the server layer so a newer save supersedes older in-flight heavyweight work without publishing stale results.

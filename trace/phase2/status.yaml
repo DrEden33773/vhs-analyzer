@@ -102,7 +102,18 @@ batches:
     test_ids: "T-DIA-070~T-DIA-093"
     crate: vhs-analyzer-lsp
     depends_on: [batch2]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-lsp/Cargo.toml
+      - crates/vhs-analyzer-lsp/src/server.rs
+      - crates/vhs-analyzer-lsp/src/diagnostics.rs
+      - crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs
+      - crates/vhs-analyzer-lsp/tests/diagnostics_heavyweight_tests.rs
+      - crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs
+      - spec/phase2/SPEC_TRACEABILITY.md
+      - trace/phase2/status.yaml
+      - trace/phase2/tracker.md
   batch4:
     name: "Completion Provider (WS-1)"
     work_packages: [WS-1]
@@ -121,7 +132,7 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 185
+  automated_tests: 194
   ci_gate: true
   entries:
     - batch: batch1
@@ -181,6 +192,33 @@ builder_progress:
         - "Added a static regex-backed pattern database in crates/vhs-analyzer-lsp/src/safety/patterns.rs covering destructive filesystem, privilege escalation, remote execution, permission modification, and data exfiltration risks."
         - "Integrated safety diagnostics into the existing lightweight diagnostic publication flow in crates/vhs-analyzer-lsp/src/diagnostics.rs so didOpen and didChange publish parse, semantic, and safety findings together."
         - "Added 22 passing tests in crates/vhs-analyzer-lsp/tests/safety_tests.rs covering all Batch 2 acceptance scenarios plus a didChange pipeline regression."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass
+    - batch: batch3
+      name: "Heavyweight Diagnostics + Pipeline (WS-2 remainder)"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - DIA-008
+        - DIA-009
+        - DIA-010
+        - DIA-011
+        - DIA-012
+      scenarios:
+        implemented:
+          - T-DIA-070 through T-DIA-072
+          - T-DIA-080 through T-DIA-081
+          - T-DIA-090 through T-DIA-093
+        additional:
+          - Added an initialize capability regression asserting `textDocumentSync.save.includeText = false`
+          - Added initial didOpen heavyweight coverage plus workspace-root source resolution coverage
+      notes:
+        - "Extended DocumentState in crates/vhs-analyzer-lsp/src/server.rs with heavyweight diagnostic cache and cancellation token storage, and advertised save synchronization with includeText disabled."
+        - "Added an async heavyweight collector in crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs for Require PATH checks and Source file existence checks resolved against the current file directory or workspace root."
+        - "Finalized the unified publication pipeline so didChange preserves cached heavyweight diagnostics, didOpen can schedule an initial heavyweight pass, didSave refreshes the cache asynchronously, and didClose cancels in-flight work before clearing diagnostics."
+        - "Added 9 passing acceptance and regression tests in crates/vhs-analyzer-lsp/tests/diagnostics_heavyweight_tests.rs plus an initialize capability assertion in crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs."
       quality_gate:
         cargo_fmt_all_check: pass
         cargo_clippy_workspace_all_targets_all_features_locked: pass

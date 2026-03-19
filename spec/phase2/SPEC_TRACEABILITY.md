@@ -50,11 +50,11 @@ module and test references. The Builder MUST update the "Impl Module" and
 | DIA-005 | Duplicate Set for same setting | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-040–T-DIA-041 | PAR-007 (SetCommand) | Completed |
 | DIA-006 | Invalid hex color in MarginFill | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-050–T-DIA-055 | PAR-007 (SetCommand) | Completed |
 | DIA-007 | Numeric value out of range | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-060–T-DIA-065 | PAR-007 (SetCommand) | Completed |
-| DIA-008 | Require program not found | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-070–T-DIA-072 | PAR-007 (RequireCommand) | Not started |
-| DIA-009 | Source file not found | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-080–T-DIA-081 | PAR-007 (SourceCommand) | Not started |
-| DIA-010 | Diagnostic timing classification | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs` | T-DIA-090–T-DIA-092 | LSP-003 (didChange) | In progress |
-| DIA-011 | Unified diagnostic pipeline | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs` | T-DIA-090–T-DIA-092 | LSP-008 (publish_diagnostics) | In progress |
-| DIA-012 | Heavyweight check cancellation | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-091 | — | Not started |
+| DIA-008 | Require program not found | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs`; `crates/vhs-analyzer-lsp/src/server.rs` | T-DIA-070–T-DIA-072 | PAR-007 (RequireCommand) | Completed |
+| DIA-009 | Source file not found | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs`; `crates/vhs-analyzer-lsp/src/server.rs` | T-DIA-080–T-DIA-081 | PAR-007 (SourceCommand) | Completed |
+| DIA-010 | Diagnostic timing classification | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-072, T-DIA-090–T-DIA-093 | LSP-003 (didChange) | Completed |
+| DIA-011 | Unified diagnostic pipeline | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-090–T-DIA-092 | LSP-008 (publish_diagnostics) | Completed |
+| DIA-012 | Heavyweight check cancellation | P1 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-091 | — | Completed |
 | DIA-013 | Invalid Screenshot extension | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-030–T-DIA-032 | PAR-007 (ScreenshotCommand) | Completed |
 
 ## 4. WS-3: Safety Traceability
