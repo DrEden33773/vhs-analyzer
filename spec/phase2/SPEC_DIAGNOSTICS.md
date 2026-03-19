@@ -270,7 +270,7 @@ async-friendly when called from a spawned task. Per Rust Best Practices:
 
 ## 9. Unified Pipeline Pseudocode
 
-```text
+```rust
 fn on_did_change(uri, source):
     parse = vhs_analyzer_core::parse(&source)
     store.insert(uri, DocumentState { source, parse })

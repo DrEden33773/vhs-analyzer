@@ -218,7 +218,7 @@ from Phase 2 (SPEC_DIAGNOSTICS.md DIA-008).
 
 ## 6. Binary Discovery Algorithm (Pseudocode)
 
-```text
+```typescript
 async function discoverServerBinary(): Promise<string | null>
     // Step 1: User-configured path
     const userPath = config.get("vhs-analyzer.server.path")
@@ -242,7 +242,7 @@ async function discoverServerBinary(): Promise<string | null>
 
 ## 7. Extension Activation Sequence
 
-```text
+```typescript
 export async function activate(context: ExtensionContext):
     // 1. Register language contribution (TextMate grammar registered via package.json)
 

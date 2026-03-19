@@ -222,7 +222,7 @@ The context resolution algorithm maps cursor position to completion category:
 
 ## 7. Completion Context Resolution Algorithm (Pseudocode)
 
-```text
+```rust
 fn resolve_completion_context(root: &SyntaxNode, offset: TextSize) -> CompletionContext:
     token = find_token_at_offset(root, offset)
     if token is None:

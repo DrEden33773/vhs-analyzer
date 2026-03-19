@@ -333,7 +333,7 @@ Transitions:
 
 ## 9. Preview Manager Architecture
 
-```text
+```typescript
 class PreviewManager {
     panels: Map<string, PreviewPanel>  // key: tape file URI
 

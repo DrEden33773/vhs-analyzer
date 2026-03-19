@@ -239,7 +239,7 @@ via their editor's built-in marketplace. The additional CI step is trivial.
 
 ## 7. Release Workflow Pseudocode
 
-```text
+```yaml
 name: Release
 on:
   push:
@@ -407,7 +407,7 @@ jobs:
 
 ## 9. .vscodeignore Configuration
 
-```text
+```gitignore
 **/*.ts
 **/src/
 **/node_modules/

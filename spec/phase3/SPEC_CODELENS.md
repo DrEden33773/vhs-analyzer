@@ -290,7 +290,7 @@ CodeLens.
 
 ## 8. ExecutionManager Architecture
 
-```text
+```typescript
 class ExecutionManager {
     executions: Map<string, ExecutionState>  // key: tape file URI
 
@@ -334,7 +334,7 @@ class ExecutionManager {
 
 ## 9. CodeLensProvider Implementation Outline
 
-```text
+```typescript
 class VhsCodeLensProvider implements CodeLensProvider {
     onDidChangeCodeLenses: Event<void>
     private changeEmitter = new EventEmitter<void>()

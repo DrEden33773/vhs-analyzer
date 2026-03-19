@@ -36,9 +36,13 @@ lint config to work around violations — fix the content instead.
 ### Code Blocks (MD031, MD040, MD046, MD048)
 
 - Use fenced code blocks (triple backticks), not indented blocks.
-- Always specify a language identifier after opening backticks
-  (e.g., ` ```rust `, ` ```json `, ` ```text `).
-- If content is not code and has no specific language, use ` ```text `.
+- Always specify a language identifier after opening backticks.
+- **Prefer the most specific language tag** that accurately describes the
+  content. Common tags: `rust`, `typescript`, `json`, `html`, `css`,
+  `yaml`, `toml`, `bash`, `tape` (VHS tape syntax).
+- Use `text` ONLY as a fallback when the content has no recognizable
+  language — e.g., plain prose, pseudocode, ASCII diagrams, or mixed
+  notation that does not belong to any single language.
 - Surround fenced code blocks with blank lines.
 
 ### Spacing and Whitespace (MD009, MD010, MD047)

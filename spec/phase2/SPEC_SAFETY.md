@@ -265,7 +265,7 @@ does not support trailing comments (LEX-004 specifies comments start from
 
 ## 9. Detection Algorithm Pseudocode
 
-```text
+```rust
 fn collect_safety_diagnostics(root: &SyntaxNode) -> Vec<Diagnostic>:
     diagnostics = []
     patterns = get_compiled_patterns()  // LazyLock<Vec<SafetyPattern>>
