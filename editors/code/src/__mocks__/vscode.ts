@@ -70,7 +70,17 @@ export class ThemeColor {
   constructor(public readonly id: string) {}
 }
 
+export const ColorThemeKind = {
+  Light: 1,
+  Dark: 2,
+  HighContrast: 3,
+  HighContrastLight: 4,
+} as const;
+
 export class Uri {
+  readonly authority: string = "";
+  readonly fragment: string = "";
+
   constructor(
     public readonly scheme: string,
     public readonly fsPath: string,
@@ -98,12 +108,21 @@ export class Uri {
   }
 
   toString(): string {
+    const suffix = this.query ? `?${this.query}` : "";
+
     if (this.scheme === "file") {
-      const suffix = this.query ? `?${this.query}` : "";
       return `file://${this.fsPath}${suffix}`;
     }
 
-    return this.fsPath;
+    return `${this.fsPath}${suffix}`;
+  }
+
+  toJSON(): { fsPath: string; path: string; scheme: string } {
+    return {
+      fsPath: this.fsPath,
+      path: this.path,
+      scheme: this.scheme,
+    };
   }
 }
 
@@ -130,6 +149,11 @@ const configurationValues: ConfigurationStore = {
 const commandHandlers = new Map<string, (...args: unknown[]) => unknown>();
 const commandContexts = new Map<string, unknown>();
 const configurationEmitter = new EventEmitter<ConfigurationChangeEvent>();
+const colorThemeEmitter = new EventEmitter<{ kind: number }>();
+const createdFileSystemWatchers: Array<
+  ReturnType<typeof createFileSystemWatcher>
+> = [];
+const createdWebviewPanels: Array<ReturnType<typeof createWebviewPanel>> = [];
 
 function buildConfigurationKey(
   section: string | undefined,
@@ -215,6 +239,15 @@ function createFileSystemWatcher(pattern: string) {
     onDidChange: changeEmitter.event,
     onDidCreate: createEmitter.event,
     onDidDelete: deleteEmitter.event,
+    __fireDidChange: (uri: Uri) => {
+      changeEmitter.fire(uri);
+    },
+    __fireDidCreate: (uri: Uri) => {
+      createEmitter.fire(uri);
+    },
+    __fireDidDelete: (uri: Uri) => {
+      deleteEmitter.fire(uri);
+    },
     dispose: vi.fn(() => {
       changeEmitter.dispose();
       createEmitter.dispose();
@@ -223,18 +256,99 @@ function createFileSystemWatcher(pattern: string) {
   };
 }
 
+function createWebviewPanel(
+  viewType: string,
+  title: string,
+  viewColumn: number,
+  options: {
+    enableScripts?: boolean;
+    localResourceRoots?: Uri[];
+    retainContextWhenHidden?: boolean;
+  },
+) {
+  const disposeEmitter = new EventEmitter<void>();
+  const receiveMessageEmitter = new EventEmitter<unknown>();
+  const postedMessages: unknown[] = [];
+  const webview = {
+    cspSource: "mock-webview-source",
+    html: "",
+    options: {
+      enableScripts: options.enableScripts ?? false,
+      localResourceRoots: options.localResourceRoots ?? [],
+    },
+    asWebviewUri: vi.fn(
+      (uri: Uri) => new Uri("webview", uri.fsPath, uri.query),
+    ),
+    postMessage: vi.fn(async (message: unknown) => {
+      postedMessages.push(message);
+      return true;
+    }),
+    onDidReceiveMessage: receiveMessageEmitter.event,
+    __fireDidReceiveMessage: (message: unknown) => {
+      receiveMessageEmitter.fire(message);
+    },
+    postedMessages,
+  };
+  const panel = {
+    active: true,
+    iconPath: undefined as Uri | undefined,
+    onDidDispose: disposeEmitter.event,
+    options,
+    reveal: vi.fn((targetViewColumn?: number) => {
+      panel.viewColumn = targetViewColumn ?? panel.viewColumn;
+      panel.visible = true;
+    }),
+    title,
+    viewColumn,
+    viewType,
+    visible: true,
+    webview,
+    dispose: vi.fn(() => {
+      panel.visible = false;
+      disposeEmitter.fire();
+    }),
+    __fireDidDispose: () => {
+      panel.dispose();
+    },
+  };
+
+  return panel;
+}
+
 export const workspace = {
   workspaceFolders: [] as Array<{ uri: Uri }>,
   getConfiguration: vi.fn((section?: string) => createConfiguration(section)),
   onDidChangeConfiguration: configurationEmitter.event,
-  createFileSystemWatcher: vi.fn((pattern: string) =>
-    createFileSystemWatcher(pattern),
-  ),
+  createFileSystemWatcher: vi.fn((pattern: string) => {
+    const watcher = createFileSystemWatcher(pattern);
+    createdFileSystemWatchers.push(watcher);
+    return watcher;
+  }),
 };
 
 export const window = {
+  activeColorTheme: {
+    kind: ColorThemeKind.Dark,
+  } as { kind: number },
+  createWebviewPanel: vi.fn(
+    (
+      viewType: string,
+      title: string,
+      showOptions: number,
+      options: {
+        enableScripts?: boolean;
+        localResourceRoots?: Uri[];
+        retainContextWhenHidden?: boolean;
+      },
+    ) => {
+      const panel = createWebviewPanel(viewType, title, showOptions, options);
+      createdWebviewPanels.push(panel);
+      return panel;
+    },
+  ),
   createOutputChannel: vi.fn((name: string) => createOutputChannel(name)),
   createStatusBarItem: vi.fn(() => createStatusBarItem()),
+  onDidChangeActiveColorTheme: colorThemeEmitter.event,
   showInformationMessage: vi.fn(
     async (_message: string, ...items: string[]) => items[0],
   ),
@@ -320,9 +434,35 @@ export function __getCommandContext(key: string): unknown {
   return commandContexts.get(key);
 }
 
+export function __getCreatedFileSystemWatchers(): Array<
+  ReturnType<typeof createFileSystemWatcher>
+> {
+  return [...createdFileSystemWatchers];
+}
+
+export function __getCreatedWebviewPanels(): Array<
+  ReturnType<typeof createWebviewPanel>
+> {
+  return [...createdWebviewPanels];
+}
+
+export function __getLastCreatedWebviewPanel():
+  | ReturnType<typeof createWebviewPanel>
+  | undefined {
+  return createdWebviewPanels.at(-1);
+}
+
+export function __setActiveColorTheme(kind: number): void {
+  window.activeColorTheme.kind = kind;
+  colorThemeEmitter.fire({
+    kind,
+  });
+}
+
 export function __resetMockVscode(): void {
   workspace.workspaceFolders = [];
   configurationEmitter.dispose();
+  colorThemeEmitter.dispose();
 
   for (const [key, value] of Object.entries({
     "vhs-analyzer.server.path": "",
@@ -336,9 +476,13 @@ export function __resetMockVscode(): void {
 
   commandHandlers.clear();
   commandContexts.clear();
+  createdFileSystemWatchers.length = 0;
+  createdWebviewPanels.length = 0;
+  window.activeColorTheme.kind = ColorThemeKind.Dark;
 
   workspace.getConfiguration.mockClear();
   workspace.createFileSystemWatcher.mockClear();
+  window.createWebviewPanel.mockClear();
   window.createOutputChannel.mockClear();
   window.createStatusBarItem.mockClear();
   window.showInformationMessage.mockClear();

@@ -1,0 +1,94 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-font-family);
+  margin: 0;
+  min-height: 100vh;
+}
+
+#container {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  text-align: center;
+}
+
+#prompt,
+#loading,
+#complete,
+#error {
+  max-width: 960px;
+  width: 100%;
+}
+
+.artifact-image,
+.artifact-video {
+  background: var(--vscode-editorWidget-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  max-height: calc(100vh - 96px);
+  max-width: 100%;
+}
+
+.artifact-video {
+  min-height: 240px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  border: 3px solid var(--vscode-progressBar-background);
+  border-radius: 999px;
+  border-top-color: transparent;
+  height: 28px;
+  margin: 0 auto;
+  width: 28px;
+}
+
+button,
+#install-vhs-link {
+  background: var(--vscode-button-background);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--vscode-button-foreground);
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  margin: 0 4px;
+  padding: 8px 14px;
+  text-decoration: none;
+}
+
+button:hover,
+#install-vhs-link:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+#error-text {
+  color: var(--vscode-errorForeground);
+  white-space: pre-wrap;
+}
+
+#progress-text {
+  color: var(--vscode-descriptionForeground);
+  white-space: pre-wrap;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

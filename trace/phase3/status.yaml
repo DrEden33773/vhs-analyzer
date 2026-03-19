@@ -94,11 +94,22 @@ batches:
   batch2:
     name: "Live Preview Webview (WS-2)"
     work_packages: [WS-2]
-    requirements: []
+    requirements:
+      - PRV-001
+      - PRV-002
+      - PRV-003
+      - PRV-004
+      - PRV-005
+      - PRV-006
+      - PRV-007
+      - PRV-008
+      - PRV-009
+      - PRV-010
     test_ids: "T-PRV-*"
     crate: editors/code
     depends_on: [batch1]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-20"
   batch3:
     name: "CodeLens & Commands (WS-3)"
     work_packages: [WS-3]
@@ -125,7 +136,7 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 22
+  automated_tests: 42
   ci_gate: true
   entries:
     - batch: batch1
@@ -173,4 +184,52 @@ builder_progress:
         typecheck: passed
         test: passed
         build: passed
+        cargo_test: passed
+    - batch: batch2
+      name: "Live Preview Webview (WS-2)"
+      status: completed
+      completed_at: "2026-03-20"
+      requirements:
+        - PRV-001
+        - PRV-002
+        - PRV-003
+        - PRV-004
+        - PRV-005
+        - PRV-006
+        - PRV-007
+        - PRV-008
+        - PRV-009
+        - PRV-010
+      scenarios:
+        - T-PRV-001
+        - T-PRV-002
+        - T-PRV-003
+        - T-PRV-004
+        - T-PRV-005
+        - T-PRV-006
+        - T-PRV-007
+        - T-PRV-008
+        - T-PRV-009
+        - T-PRV-010
+        - T-PRV-011
+        - T-PRV-012
+        - T-PRV-013
+        - T-PRV-014
+        - T-PRV-015
+        - T-PRV-016
+        - T-PRV-017
+        - T-PRV-018
+        - T-PRV-019
+        - T-PRV-020
+      notes:
+        - "Added a shared Output utility, ExecutionManager, and PreviewManager/PreviewPanel implementation for the Batch 2 preview pipeline."
+        - "Implemented Webview HTML/CSS, typed preview messaging, VHS availability checks, auto-refresh debounce, theme change forwarding, and panel reuse per tape file."
+        - "Covered shared execution behavior in unit tests so the same execution engine can be reused by CodeLens in Batch 3."
+      quality_gate:
+        lint: passed
+        typecheck: passed
+        test: passed
+        build: passed
+        cargo_fmt: passed
+        cargo_clippy: passed
         cargo_test: passed

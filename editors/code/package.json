@@ -3,7 +3,7 @@
   "displayName": "VHS Analyzer",
   "description": "Language server, live preview, and CodeLens for VHS .tape files",
   "version": "0.3.0",
-  "publisher": "dreden33773",
+  "publisher": "DrEden33773",
   "license": "MIT",
   "repository": {
     "type": "git",

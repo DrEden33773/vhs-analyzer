@@ -32,16 +32,16 @@ baseline requirement (if consuming one).
 
 | Req ID | Description | Impl Module | Test IDs | Consumes |
 | --- | --- | --- | --- | --- |
-| PRV-001 | Webview panel creation | `src/preview.ts` | T-PRV-001, T-PRV-002 | — |
-| PRV-002 | Webview messaging protocol | `src/preview.ts` | T-PRV-020 | — |
-| PRV-003 | VHS CLI invocation | `src/execution.ts`, `src/preview.ts` | T-PRV-003 | — |
-| PRV-004 | Output artifact discovery | `src/preview.ts` (shared regex utility) | T-PRV-004, T-PRV-005, T-PRV-006 | PAR-001 (OutputCommand node) |
-| PRV-005 | Auto-refresh on output file change | `src/preview.ts` | T-PRV-007, T-PRV-008 | CLI-006 (autoRefresh setting) |
-| PRV-006 | Execution cancellation | `src/execution.ts` | T-PRV-009, T-PRV-010, T-PRV-011, T-PRV-012 | — |
-| PRV-007 | Content Security Policy | `src/preview.ts` (HTML template) | T-PRV-013 | — |
-| PRV-008 | Theme-aware Webview styling | `src/preview.ts`, `media/preview.css` | T-PRV-014 | — |
-| PRV-009 | Loading and error states | `src/preview.ts` (HTML template) | T-PRV-015, T-PRV-016 | — |
-| PRV-010 | VHS missing graceful degradation | `src/preview.ts` | T-PRV-017 | CLI-007 (dependency check) |
+| PRV-001 | Webview panel creation | `editors/code/src/preview.ts` | T-PRV-001, T-PRV-002 (`editors/code/src/preview.test.ts`) | — |
+| PRV-002 | Webview messaging protocol | `editors/code/src/preview.ts` | T-PRV-020 (`editors/code/src/preview.test.ts`) | — |
+| PRV-003 | VHS CLI invocation | `editors/code/src/execution.ts`, `editors/code/src/preview.ts` | T-PRV-003 (`editors/code/src/preview.test.ts`) | — |
+| PRV-004 | Output artifact discovery | `editors/code/src/utils.ts`, `editors/code/src/execution.ts` | T-PRV-004, T-PRV-005 (`editors/code/src/utils.test.ts`), T-PRV-006 (`editors/code/src/execution.test.ts`) | PAR-001 (OutputCommand node) |
+| PRV-005 | Auto-refresh on output file change | `editors/code/src/preview.ts` | T-PRV-007, T-PRV-008 (`editors/code/src/preview.test.ts`) | CLI-006 (autoRefresh setting) |
+| PRV-006 | Execution cancellation | `editors/code/src/execution.ts`, `editors/code/src/preview.ts` | T-PRV-009, T-PRV-010 (`editors/code/src/preview.test.ts`), T-PRV-011, T-PRV-012 (`editors/code/src/execution.test.ts`) | — |
+| PRV-007 | Content Security Policy | `editors/code/src/preview.ts` | T-PRV-013 (`editors/code/src/preview.test.ts`) | — |
+| PRV-008 | Theme-aware Webview styling | `editors/code/src/preview.ts`, `editors/code/media/preview.css` | T-PRV-014 (`editors/code/src/preview.test.ts`) | — |
+| PRV-009 | Loading and error states | `editors/code/src/preview.ts`, `editors/code/media/preview.css` | T-PRV-015, T-PRV-016, T-PRV-018, T-PRV-019 (`editors/code/src/preview.test.ts`) | — |
+| PRV-010 | VHS missing graceful degradation | `editors/code/src/preview.ts` | T-PRV-017 (`editors/code/src/preview.test.ts`) | CLI-007 (dependency check) |
 
 ## 4. CodeLens Requirements (CLS)
 

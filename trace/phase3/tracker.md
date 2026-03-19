@@ -17,7 +17,7 @@ Started: 2026-03-19
 | Batch | Name | WS | Location | Requirements | Depends On | Milestone | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | LSP Client + Project Scaffold | WS-1 + WS-4 | editors/code | CLI-* + PKG scaffold | — | Extension activates | completed |
-| 2 | Live Preview Webview | WS-2 | editors/code | PRV-* | B1 | Preview renders GIF | not started |
+| 2 | Live Preview Webview | WS-2 | editors/code | PRV-* | B1 | Preview renders GIF | completed |
 | 3 | CodeLens & Commands | WS-3 | editors/code | CLS-* | B1 | Run button works | not started |
 | 4 | Platform Packaging & CI/CD | WS-4 | editors/code + .github | PKG-* | B2, B3 | VSIX builds for all targets | not started |
 | 5 | Integration + Closeout | — | editors/code | T-INT3 | B4 | Phase 3 complete | not started |
@@ -67,3 +67,28 @@ Builder appends one record per completed batch below this line.
 - Notes:
   - The extension build currently produces a single `dist/extension.js` bundle at 358.6 KB, within the packaging target budget.
   - `vscode-languageclient/node` runtime loading is deferred behind a dynamic import so Vitest can unit-test the controller without a real VSCode host.
+
+### Batch 2 — Completed (2026-03-20)
+
+- Scope: WS-2 live preview plus the shared execution and output-path utilities required by the preview pipeline.
+- Requirements: PRV-001 through PRV-010.
+- Implementation:
+  - Added `editors/code/src/utils.ts` with the shared quote-aware `Output` directive regex and output-path extraction helper.
+  - Added `editors/code/src/execution.ts` with per-file execution state tracking, workspace-aware working-directory resolution, single-execution enforcement, and SIGTERM/SIGKILL cancellation.
+  - Added `editors/code/src/preview.ts` with `PreviewManager`, `PreviewPanel`, typed Webview messaging, auto-refresh debounce, theme forwarding, VHS missing handling, and a CSP-protected HTML template.
+  - Added `editors/code/media/preview.css` with theme-aware preview styling for prompt, loading, complete, and error states.
+- Tests:
+  - TypeScript: `pnpm run test` → 42/42 passing (`server.test.ts`, `config.test.ts`, `dependencies.test.ts`, `extension.test.ts`, `utils.test.ts`, `execution.test.ts`, `preview.test.ts`).
+  - Rust regression: `cargo test --workspace --all-targets --locked` → 225/225 passing.
+- Quality gate:
+  - `pnpm run lint` passed.
+  - `pnpm run typecheck` passed.
+  - `pnpm run test` passed.
+  - `pnpm run build` passed.
+  - `cargo fmt --all -- --check` passed.
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` passed.
+  - `cargo test --workspace --all-targets --locked` passed.
+- Notes:
+  - Preview panel reuse is keyed by tape file path, matching the one-panel-per-file requirement.
+  - Auto-refresh uses a 500ms debounce and cache-busting query strings to avoid flicker while VHS writes output incrementally.
+  - The shared execution layer is ready for Batch 3 CodeLens command reuse without reopening Batch 2 design decisions.
