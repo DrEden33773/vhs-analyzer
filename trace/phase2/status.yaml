@@ -1,0 +1,104 @@
+phase: phase2_intelligence_diagnostics
+status: in_progress
+started_at: "2026-03-19"
+
+stages:
+  architect_stage_a:
+    status: completed
+    completed_at: "2026-03-19"
+    deliverables:
+      - spec/phase2/SPEC_COMPLETION.md
+      - spec/phase2/SPEC_DIAGNOSTICS.md
+      - spec/phase2/SPEC_SAFETY.md
+    stats:
+      requirements_total: 30
+      requirements_p0_must: 18
+      requirements_p1_should: 10
+      requirements_p2_may: 2
+      freeze_candidates: 11
+  architect_stage_b:
+    status: completed
+    completed_at: "2026-03-19"
+    description: "Freeze all specs — resolve 11 Freeze Candidates, produce MUST/SHOULD/MAY contracts"
+    deliverables:
+      - spec/phase2/SPEC_COMPLETION.md (CONTRACT_FROZEN)
+      - spec/phase2/SPEC_DIAGNOSTICS.md (CONTRACT_FROZEN)
+      - spec/phase2/SPEC_SAFETY.md (CONTRACT_FROZEN)
+      - spec/phase2/SPEC_TEST_MATRIX.md (CONTRACT_FROZEN)
+      - spec/phase2/SPEC_TRACEABILITY.md (CONTRACT_FROZEN)
+    stats:
+      requirements_total: 30
+      requirements_p0_must: 18
+      requirements_p1_should: 10
+      requirements_p2_may: 2
+      freeze_candidates_resolved: 11
+      test_scenarios_total: 67
+  builder:
+    status: not_started
+    description: "Implement from frozen specs — Diagnostics, Safety, Completion (5 batches)"
+
+spec_files:
+  - spec/phase2/SPEC_COMPLETION.md
+  - spec/phase2/SPEC_DIAGNOSTICS.md
+  - spec/phase2/SPEC_SAFETY.md
+  - spec/phase2/SPEC_TEST_MATRIX.md
+  - spec/phase2/SPEC_TRACEABILITY.md
+
+requirement_ids:
+  completion: [CMP-001, CMP-002, CMP-003, CMP-004, CMP-005, CMP-006, CMP-007, CMP-008, CMP-009, CMP-010]
+  diagnostics: [DIA-001, DIA-002, DIA-003, DIA-004, DIA-005, DIA-006, DIA-007, DIA-008, DIA-009, DIA-010, DIA-011, DIA-012, DIA-013]
+  safety: [SAF-001, SAF-002, SAF-003, SAF-004, SAF-005, SAF-006, SAF-007]
+
+test_scenarios:
+  total: 67
+  by_category:
+    completion: 20
+    diagnostics: 25
+    safety: 18
+    integration: 4
+
+batches:
+  batch1:
+    name: "Lightweight Diagnostic Rules (WS-2 partial)"
+    work_packages: [WS-2]
+    requirements: [DIA-001, DIA-002, DIA-003, DIA-004, DIA-005, DIA-006, DIA-007, DIA-013]
+    test_ids: "T-DIA-001~T-DIA-065"
+    crate: vhs-analyzer-lsp
+    status: not_started
+  batch2:
+    name: "Safety Engine (WS-3)"
+    work_packages: [WS-3]
+    requirements: [SAF-001, SAF-002, SAF-003, SAF-004, SAF-005, SAF-006, SAF-007]
+    test_ids: "T-SAF-*"
+    crate: vhs-analyzer-lsp
+    depends_on: [batch1]
+    status: not_started
+  batch3:
+    name: "Heavyweight Diagnostics + Pipeline (WS-2 remainder)"
+    work_packages: [WS-2]
+    requirements: [DIA-008, DIA-009, DIA-010, DIA-011, DIA-012]
+    test_ids: "T-DIA-070~T-DIA-093"
+    crate: vhs-analyzer-lsp
+    depends_on: [batch2]
+    status: not_started
+  batch4:
+    name: "Completion Provider (WS-1)"
+    work_packages: [WS-1]
+    requirements: [CMP-001, CMP-002, CMP-003, CMP-004, CMP-005, CMP-006, CMP-007, CMP-008, CMP-009, CMP-010]
+    test_ids: "T-CMP-*"
+    crate: vhs-analyzer-lsp
+    depends_on: [batch3]
+    status: not_started
+  batch5:
+    name: "Integration + Closeout"
+    work_packages: []
+    requirements: []
+    test_ids: "T-INT2-*"
+    crate: both
+    depends_on: [batch4]
+    status: not_started
+
+builder_progress:
+  automated_tests: 0
+  ci_gate: false
+  entries: []
