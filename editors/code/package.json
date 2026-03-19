@@ -1,0 +1,127 @@
+{
+  "name": "vhs-analyzer",
+  "displayName": "VHS Analyzer",
+  "description": "Language server, live preview, and CodeLens for VHS .tape files",
+  "version": "0.3.0",
+  "publisher": "dreden33773",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DrEden33773/vhs-analyzer"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Formatters"
+  ],
+  "keywords": [
+    "vhs",
+    "tape",
+    "terminal",
+    "recording",
+    "gif",
+    "lsp"
+  ],
+  "activationEvents": [
+    "onLanguage:tape"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "tape",
+        "extensions": [
+          ".tape"
+        ],
+        "aliases": [
+          "VHS Tape",
+          "tape"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "tape",
+        "scopeName": "source.tape",
+        "path": "./syntaxes/tape.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "VHS Analyzer",
+      "properties": {
+        "vhs-analyzer.server.path": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute path to the `vhs-analyzer` binary. Leave empty to use the bundled binary or `$PATH`.",
+          "scope": "machine-overridable"
+        },
+        "vhs-analyzer.server.args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Extra arguments passed to the LSP server binary.",
+          "scope": "machine-overridable"
+        },
+        "vhs-analyzer.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Trace level for LSP protocol communication.",
+          "scope": "window"
+        },
+        "vhs-analyzer.preview.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refresh preview when the output file changes.",
+          "scope": "resource"
+        },
+        "vhs-analyzer.codelens.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline run buttons above tape files.",
+          "scope": "resource"
+        }
+      }
+    },
+    "commands": [],
+    "menus": {
+      "editor/context": [],
+      "explorer/context": []
+    },
+    "keybindings": []
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
+    "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1",
+    "which": "^6.0.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^18.19.130",
+    "@types/vscode": "1.85.0",
+    "@vscode/vsce": "^3.7.1",
+    "esbuild": "^0.27.4",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "name": "VHS Tape",
+  "scopeName": "source.tape",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#outputDirective" },
+    { "include": "#screenshotDirective" },
+    { "include": "#setDirective" },
+    { "include": "#waitScope" },
+    { "include": "#commandKeywords" },
+    { "include": "#modifierKeywords" },
+    { "include": "#settingKeywords" },
+    { "include": "#regex" },
+    { "include": "#strings" },
+    { "include": "#json" },
+    { "include": "#booleans" },
+    { "include": "#time" },
+    { "include": "#float" },
+    { "include": "#integer" },
+    { "include": "#punctuation" },
+    { "include": "#identifier" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.number-sign.tape",
+      "match": "^\\s*#.*$"
+    },
+    "outputDirective": {
+      "name": "meta.output-command.tape",
+      "match": "^\\s*(Output)\\s+(?:([^\\s\"'`#]+)|\"([^\"]+)\"|'([^']+)'|`([^`]+)`)",
+      "captures": {
+        "1": { "name": "keyword.control.tape" },
+        "2": { "name": "string.unquoted.path.tape" },
+        "3": { "name": "string.quoted.double.tape" },
+        "4": { "name": "string.quoted.single.tape" },
+        "5": { "name": "string.quoted.backtick.tape" }
+      }
+    },
+    "screenshotDirective": {
+      "name": "meta.screenshot-command.tape",
+      "match": "^\\s*(Screenshot)\\s+(?:([^\\s\"'`#]+)|\"([^\"]+)\"|'([^']+)'|`([^`]+)`)",
+      "captures": {
+        "1": { "name": "keyword.control.tape" },
+        "2": { "name": "string.unquoted.path.tape" },
+        "3": { "name": "string.quoted.double.tape" },
+        "4": { "name": "string.quoted.single.tape" },
+        "5": { "name": "string.quoted.backtick.tape" }
+      }
+    },
+    "setDirective": {
+      "name": "meta.set-command.tape",
+      "match": "^\\s*(Set)\\s+(Shell|FontFamily|FontSize|Framerate|PlaybackSpeed|Height|Width|LetterSpacing|TypingSpeed|LineHeight|Padding|Theme|LoopOffset|BorderRadius|Margin|MarginFill|WindowBar|WindowBarSize|CursorBlink)\\b",
+      "captures": {
+        "1": { "name": "keyword.control.tape" },
+        "2": { "name": "support.type.property-name.tape" }
+      }
+    },
+    "waitScope": {
+      "match": "\\+(Screen|Line)\\b",
+      "captures": {
+        "0": { "name": "meta.wait-scope.tape" },
+        "1": { "name": "keyword.other.tape" }
+      }
+    },
+    "commandKeywords": {
+      "name": "keyword.control.tape",
+      "match": "\\b(?:Output|Set|Env|Sleep|Type|Backspace|Down|Enter|Escape|Left|Right|Space|Tab|Up|PageUp|PageDown|ScrollUp|ScrollDown|Wait|Require|Source|Hide|Show|Copy|Paste|Screenshot)\\b"
+    },
+    "modifierKeywords": {
+      "name": "keyword.operator.modifier.tape",
+      "match": "\\b(?:Ctrl|Alt|Shift)\\b"
+    },
+    "settingKeywords": {
+      "name": "support.type.property-name.tape",
+      "match": "\\b(?:Shell|FontFamily|FontSize|Framerate|PlaybackSpeed|Height|Width|LetterSpacing|TypingSpeed|LineHeight|Padding|Theme|LoopOffset|BorderRadius|Margin|MarginFill|WindowBar|WindowBarSize|CursorBlink)\\b"
+    },
+    "regex": {
+      "name": "string.regexp.tape",
+      "match": "/(?:\\\\.|[^/\\n])+/[a-z]*"
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.tape",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.tape" }]
+        },
+        {
+          "name": "string.quoted.single.tape",
+          "begin": "'",
+          "end": "'",
+          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.tape" }]
+        },
+        {
+          "name": "string.quoted.backtick.tape",
+          "begin": "`",
+          "end": "`",
+          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.tape" }]
+        }
+      ]
+    },
+    "json": {
+      "name": "meta.embedded.json.tape",
+      "begin": "\\{",
+      "end": "\\}"
+    },
+    "booleans": {
+      "name": "constant.language.boolean.tape",
+      "match": "\\b(?:true|false)\\b"
+    },
+    "time": {
+      "name": "constant.numeric.time.tape",
+      "match": "\\b(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:ms|s)\\b"
+    },
+    "float": {
+      "name": "constant.numeric.float.tape",
+      "match": "\\b\\d+\\.\\d+\\b|\\B\\.\\d+\\b"
+    },
+    "integer": {
+      "name": "constant.numeric.integer.tape",
+      "match": "\\b\\d+\\b"
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.definition.annotation.tape",
+          "match": "@"
+        },
+        {
+          "name": "punctuation.separator.modifier.tape",
+          "match": "\\+"
+        },
+        {
+          "name": "punctuation.definition.percent.tape",
+          "match": "%"
+        }
+      ]
+    },
+    "identifier": {
+      "name": "variable.other.tape",
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+    }
+  }
+}

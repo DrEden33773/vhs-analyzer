@@ -1,0 +1,15 @@
+{
+  "folders": [
+    {
+      "name": "vhs-analyzer",
+      "path": "."
+    },
+    {
+      "name": "vhs-analyzer-extension",
+      "path": "editors/code"
+    }
+  ],
+  "settings": {
+    "biome.enabled": false
+  }
+}

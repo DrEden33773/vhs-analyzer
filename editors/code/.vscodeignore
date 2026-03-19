@@ -1,0 +1,10 @@
+src/
+node_modules/
+*.ts
+tsconfig.json
+biome.json
+vitest.config.ts
+pnpm-lock.yaml
+.github/
+.gitignore
+coverage/

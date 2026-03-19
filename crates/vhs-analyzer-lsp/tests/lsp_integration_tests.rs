@@ -34,12 +34,12 @@ struct ServerProcess {
 
 impl ServerProcess {
     fn spawn() -> Self {
-        let mut child = Command::new(env!("CARGO_BIN_EXE_vhs-analyzer-lsp"))
+        let mut child = Command::new(env!("CARGO_BIN_EXE_vhs-analyzer"))
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
-            .expect("failed to spawn vhs-analyzer-lsp");
+            .expect("failed to spawn vhs-analyzer");
 
         let stdin = child.stdin.take().expect("child stdin was not piped");
         let stdout = child.stdout.take().expect("child stdout was not piped");

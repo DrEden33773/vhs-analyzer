@@ -1,0 +1,322 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import type { ExtensionContext } from "vscode";
+
+import {
+  type ThemeColor,
+  __fireConfigurationChange,
+  __resetMockVscode,
+  __setConfigurationValue,
+  createMockExtensionContext,
+  window,
+  workspace,
+} from "./__mocks__/vscode";
+import {
+  ExtensionController,
+  type LanguageClientLike,
+  buildLanguageClientOptions,
+} from "./extension";
+import { ClientTransportKind } from "./server";
+import { StatusController } from "./status";
+
+function flushMicrotasks(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+}
+
+describe("buildLanguageClientOptions", () => {
+  afterEach(() => {
+    __resetMockVscode();
+    vi.restoreAllMocks();
+  });
+
+  it("language_client_options_include_batch1_contract_values", () => {
+    const fileWatcher = workspace.createFileSystemWatcher(
+      "**/*.tape",
+    ) as unknown as import("vscode").FileSystemWatcher;
+    const outputChannel = window.createOutputChannel("output");
+    const traceOutputChannel = window.createOutputChannel("trace");
+    const errorHandler = {
+      error: vi.fn(),
+      closed: vi.fn(),
+    } as never;
+    const initializationFailedHandler = vi.fn(() => false);
+
+    const options = buildLanguageClientOptions({
+      errorHandler,
+      fileWatcher,
+      initializationFailedHandler,
+      outputChannel,
+      traceOutputChannel,
+    });
+
+    expect(options.documentSelector).toEqual([
+      { scheme: "file", language: "tape" },
+    ]);
+    expect(options.synchronize).toEqual({
+      fileEvents: fileWatcher,
+    });
+    expect(options.outputChannel).toBe(outputChannel);
+    expect(options.traceOutputChannel).toBe(traceOutputChannel);
+  });
+});
+
+describe("StatusController", () => {
+  afterEach(() => {
+    __resetMockVscode();
+    vi.restoreAllMocks();
+  });
+
+  it("status_bar_indicator_updates_for_server_states", () => {
+    const status = new StatusController({
+      onRestartServer: vi.fn(),
+      onShowOutput: vi.fn(),
+      onShowTrace: vi.fn(),
+    });
+    const item = status.statusBarItem;
+
+    status.setServerStatus("running");
+    expect(item.text).toBe("VHS $(check)");
+    expect((item.color as ThemeColor).id).toBe("charts.green");
+
+    status.setServerStatus("starting");
+    expect(item.text).toBe("VHS $(warning)");
+    expect((item.color as ThemeColor).id).toBe("charts.yellow");
+
+    status.setServerStatus("failed");
+    expect(item.text).toBe("VHS $(error)");
+    expect((item.color as ThemeColor).id).toBe("charts.red");
+
+    status.setExecutionStatus("demo.tape");
+    expect(item.text).toBe("$(sync~spin) VHS: Running demo.tape...");
+  });
+
+  it("status_bar_quick_pick_dispatches_selected_action", async () => {
+    const onRestartServer = vi.fn();
+    const onShowOutput = vi.fn();
+    const onShowTrace = vi.fn();
+    const status = new StatusController({
+      onRestartServer,
+      onShowOutput,
+      onShowTrace,
+    });
+
+    window.showQuickPick.mockResolvedValueOnce("Restart Server");
+    await status.showActions();
+    expect(onRestartServer).toHaveBeenCalledTimes(1);
+
+    window.showQuickPick.mockResolvedValueOnce("Show Output");
+    await status.showActions();
+    expect(onShowOutput).toHaveBeenCalledTimes(1);
+
+    window.showQuickPick.mockResolvedValueOnce("Show Trace");
+    await status.showActions();
+    expect(onShowTrace).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("ExtensionController", () => {
+  afterEach(() => {
+    __resetMockVscode();
+    vi.restoreAllMocks();
+  });
+
+  it("activation_starts_client_when_binary_is_available", async () => {
+    __setConfigurationValue("vhs-analyzer.server.args", ["--log=debug"]);
+    __setConfigurationValue("vhs-analyzer.trace.server", "verbose");
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    const client = createMockClient();
+    const checkDependencies = vi.fn().mockResolvedValue(undefined);
+    const createLanguageClient = vi.fn().mockResolvedValue(client);
+
+    const controller = new ExtensionController(context, {
+      checkRuntimeDependencies: checkDependencies,
+      createLanguageClient,
+      discoverServerBinary: vi
+        .fn()
+        .mockResolvedValue("/extension/server/vhs-analyzer"),
+      isExecutableFile: vi.fn().mockResolvedValue(true),
+      scheduleRestart: vi.fn(),
+    });
+
+    await controller.activate();
+
+    expect(createLanguageClient).toHaveBeenCalledTimes(1);
+    expect(createLanguageClient.mock.calls[0]?.[0]).toEqual({
+      command: "/extension/server/vhs-analyzer",
+      args: ["--log=debug"],
+      options: {
+        env: process.env,
+      },
+      transport: ClientTransportKind.stdio,
+    });
+    expect(client.start).toHaveBeenCalledTimes(1);
+    expect(client.setTrace).toHaveBeenCalledWith("verbose");
+    expect(checkDependencies).toHaveBeenCalledTimes(1);
+    expect(window.createStatusBarItem.mock.results[0]?.value.text).toBe(
+      "VHS $(check)",
+    );
+  });
+
+  it("activation_enters_no_server_mode_when_binary_is_missing", async () => {
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    const createLanguageClient = vi.fn();
+    const controller = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient,
+      discoverServerBinary: vi.fn().mockResolvedValue(null),
+      isExecutableFile: vi.fn().mockResolvedValue(false),
+      scheduleRestart: vi.fn(),
+    });
+
+    await controller.activate();
+
+    expect(createLanguageClient).not.toHaveBeenCalled();
+    expect(window.showInformationMessage).toHaveBeenCalledWith(
+      "VHS Analyzer LSP server not found. Install the platform-specific extension for full language support.",
+      "Install",
+      "Don't show again",
+    );
+    expect(window.createStatusBarItem.mock.results[0]?.value.text).toBe(
+      "VHS $(error)",
+    );
+  });
+
+  it("no_server_notification_is_suppressed_after_dismissal", async () => {
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    window.showInformationMessage.mockResolvedValueOnce("Don't show again");
+
+    const firstController = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient: vi.fn(),
+      discoverServerBinary: vi.fn().mockResolvedValue(null),
+      isExecutableFile: vi.fn().mockResolvedValue(false),
+      scheduleRestart: vi.fn(),
+    });
+
+    await firstController.activate();
+
+    window.showInformationMessage.mockClear();
+
+    const secondController = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient: vi.fn(),
+      discoverServerBinary: vi.fn().mockResolvedValue(null),
+      isExecutableFile: vi.fn().mockResolvedValue(false),
+      scheduleRestart: vi.fn(),
+    });
+
+    await secondController.activate();
+
+    expect(window.showInformationMessage).not.toHaveBeenCalled();
+  });
+
+  it("deactivate_stops_the_running_client", async () => {
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    const client = createMockClient();
+    const controller = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient: vi.fn().mockResolvedValue(client),
+      discoverServerBinary: vi
+        .fn()
+        .mockResolvedValue("/extension/server/vhs-analyzer"),
+      isExecutableFile: vi.fn().mockResolvedValue(true),
+      scheduleRestart: vi.fn(),
+    });
+
+    await controller.activate();
+    await controller.deactivate();
+
+    expect(client.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it("config_change_to_invalid_server_path_keeps_the_client_stopped", async () => {
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    const client = createMockClient();
+    const controller = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient: vi.fn().mockResolvedValue(client),
+      discoverServerBinary: vi
+        .fn()
+        .mockResolvedValue("/extension/server/vhs-analyzer"),
+      isExecutableFile: vi.fn().mockResolvedValue(false),
+      scheduleRestart: vi.fn(),
+    });
+
+    await controller.activate();
+    client.stop.mockClear();
+
+    __setConfigurationValue(
+      "vhs-analyzer.server.path",
+      "/missing/vhs-analyzer",
+    );
+    window.showErrorMessage.mockResolvedValueOnce(undefined);
+    __fireConfigurationChange(["vhs-analyzer.server.path"]);
+    await flushMicrotasks();
+
+    expect(client.stop).toHaveBeenCalledTimes(1);
+    expect(window.showErrorMessage).toHaveBeenCalledWith(
+      "Configured VHS Analyzer server not found at /missing/vhs-analyzer.",
+      "Restart Server",
+    );
+    expect(window.createStatusBarItem.mock.results[0]?.value.text).toBe(
+      "VHS $(error)",
+    );
+  });
+
+  it("trace_change_updates_the_running_client_without_restart", async () => {
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    const client = createMockClient();
+    const controller = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient: vi.fn().mockResolvedValue(client),
+      discoverServerBinary: vi
+        .fn()
+        .mockResolvedValue("/extension/server/vhs-analyzer"),
+      isExecutableFile: vi.fn().mockResolvedValue(true),
+      scheduleRestart: vi.fn(),
+    });
+
+    await controller.activate();
+    client.setTrace.mockClear();
+    client.start.mockClear();
+
+    __setConfigurationValue("vhs-analyzer.trace.server", "messages");
+    __fireConfigurationChange(["vhs-analyzer.trace.server"]);
+    await flushMicrotasks();
+
+    expect(client.setTrace).toHaveBeenCalledWith("messages");
+    expect(client.start).not.toHaveBeenCalled();
+  });
+});
+
+function createMockClient(): LanguageClientLike & {
+  setTrace: ReturnType<typeof vi.fn>;
+  start: ReturnType<typeof vi.fn>;
+  stop: ReturnType<typeof vi.fn>;
+} {
+  return {
+    setTrace: vi.fn().mockResolvedValue(undefined),
+    start: vi.fn().mockResolvedValue(undefined),
+    stop: vi.fn().mockResolvedValue(undefined),
+  };
+}
+
+function createTypedContext(overrides: {
+  extensionPath?: string;
+  globalState?: Record<string, unknown>;
+}): ExtensionContext {
+  return createMockExtensionContext(overrides) as unknown as ExtensionContext;
+}

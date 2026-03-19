@@ -7,6 +7,10 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[[bin]]
+name = "vhs-analyzer"
+path = "src/main.rs"
+
 [dependencies]
 vhs-analyzer-core = { path = "../vhs-analyzer-core" }
 tower-lsp-server = "0.23"

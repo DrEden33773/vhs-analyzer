@@ -16,17 +16,17 @@ baseline requirement (if consuming one).
 
 | Req ID | Description | Impl Module | Test IDs | Consumes |
 | --- | --- | --- | --- | --- |
-| CLI-001 | Binary discovery chain | `src/server.ts` | T-CLI-002, T-CLI-003, T-CLI-004, T-CLI-005 | LSP-001 (stdio) |
-| CLI-002 | ServerOptions configuration | `src/server.ts` | T-CLI-006 | LSP-001, LSP-002 |
-| CLI-003 | LanguageClientOptions configuration | `src/extension.ts` | T-CLI-001, T-CLI-010 | LSP-003 (full sync) |
-| CLI-004 | Extension activation lifecycle | `src/extension.ts` | T-CLI-001, T-CLI-019 | LSP-005 (shutdown) |
-| CLI-005 | Error recovery and auto-restart | `src/server.ts` | T-CLI-017, T-CLI-018 | — |
-| CLI-006 | Extension configuration schema | `package.json` (contributes) | T-CLI-007, T-CLI-008, T-CLI-009 | — |
-| CLI-007 | Runtime dependency detection | `src/dependencies.ts` | T-CLI-011, T-CLI-012, T-CLI-021 | — |
-| CLI-008 | Language contribution (TextMate grammar) | `syntaxes/tape.tmLanguage.json`, `package.json` | T-CLI-013 | LEX-001..LEX-006 (token kinds) |
-| CLI-009 | No-server fallback mode | `src/extension.ts`, `src/server.ts` | T-CLI-005, T-CLI-014, T-CLI-015, T-CLI-016 | — |
-| CLI-010 | Configuration change handling | `src/config.ts` | T-CLI-008, T-CLI-009, T-CLI-010 | — |
-| CLI-011 | Status bar indicator | `src/status.ts` | T-CLI-020 | — |
+| CLI-001 | Binary discovery chain | `editors/code/src/server.ts` | T-CLI-002, T-CLI-003, T-CLI-004, T-CLI-005 (`editors/code/src/server.test.ts`) | LSP-001 (stdio) |
+| CLI-002 | ServerOptions configuration | `editors/code/src/server.ts` | T-CLI-006 (`editors/code/src/server.test.ts`) | LSP-001, LSP-002 |
+| CLI-003 | LanguageClientOptions configuration | `editors/code/src/extension.ts` | T-CLI-001, T-CLI-010 (`editors/code/src/extension.test.ts`) | LSP-003 (full sync) |
+| CLI-004 | Extension activation lifecycle | `editors/code/src/extension.ts` | T-CLI-001, T-CLI-019 (`editors/code/src/extension.test.ts`) | LSP-005 (shutdown) |
+| CLI-005 | Error recovery and auto-restart | `editors/code/src/server.ts`, `editors/code/src/extension.ts` | T-CLI-017, T-CLI-018 (`editors/code/src/server.test.ts`) | — |
+| CLI-006 | Extension configuration schema | `editors/code/package.json` | T-CLI-007, T-CLI-008, T-CLI-009 (`editors/code/src/config.test.ts`) | — |
+| CLI-007 | Runtime dependency detection | `editors/code/src/dependencies.ts` | T-CLI-011, T-CLI-012, T-CLI-021 (`editors/code/src/dependencies.test.ts`) | — |
+| CLI-008 | Language contribution (TextMate grammar) | `editors/code/syntaxes/tape.tmLanguage.json`, `editors/code/package.json` | T-CLI-013 | LEX-001..LEX-006 (token kinds) |
+| CLI-009 | No-server fallback mode | `editors/code/src/extension.ts`, `editors/code/src/server.ts` | T-CLI-005, T-CLI-014, T-CLI-015, T-CLI-016 (`editors/code/src/extension.test.ts`) | — |
+| CLI-010 | Configuration change handling | `editors/code/src/config.ts` | T-CLI-008, T-CLI-009, T-CLI-010 (`editors/code/src/config.test.ts`) | — |
+| CLI-011 | Status bar indicator | `editors/code/src/status.ts`, `editors/code/src/extension.ts` | T-CLI-020 (`editors/code/src/extension.test.ts`) | — |
 
 ## 3. Preview Requirements (PRV)
 
@@ -64,15 +64,15 @@ baseline requirement (if consuming one).
 | --- | --- | --- | --- | --- |
 | PKG-001 | Target platform matrix | `.github/workflows/release.yml` | T-PKG-001..T-PKG-007 | — |
 | PKG-002 | Rust binary cross-compilation | `.github/workflows/release.yml` | T-PKG-008, T-PKG-009 | LSP-001 (binary) |
-| PKG-003 | Extension manifest | `package.json` | T-PKG-015 | CLI-006, CLI-008, CLS-002 |
-| PKG-004 | esbuild bundle configuration | `package.json` (build script) | T-PKG-010, T-PKG-011 | — |
-| PKG-005 | pnpm + vsce compatibility | `.vscodeignore`, `package.json` | T-PKG-015 | — |
+| PKG-003 | Extension manifest | `editors/code/package.json` | T-PKG-015 | CLI-006, CLI-008, CLS-002 |
+| PKG-004 | esbuild bundle configuration | `editors/code/package.json` (build script) | T-PKG-010, T-PKG-011 | — |
+| PKG-005 | pnpm + vsce compatibility | `editors/code/.vscodeignore`, `editors/code/package.json` | T-PKG-015 | — |
 | PKG-006 | GitHub Actions release workflow | `.github/workflows/release.yml` | T-PKG-016..T-PKG-019 | — |
 | PKG-007 | TypeScript CI pipeline | `.github/workflows/extension-ci.yml` | T-PKG-012, T-PKG-013, T-PKG-014 | — |
 | PKG-008 | Publishing strategy | `.github/workflows/release.yml` | T-PKG-018 | — |
 | PKG-009 | No-server fallback VSIX | `.github/workflows/release.yml` | T-PKG-007 | CLI-009 |
-| PKG-010 | Biome configuration | `biome.json` | T-PKG-012 | — |
-| PKG-011 | Vitest configuration | `vitest.config.ts` | T-PKG-014 | — |
+| PKG-010 | Biome configuration | `editors/code/biome.json` | T-PKG-012 | — |
+| PKG-011 | Vitest configuration | `editors/code/vitest.config.ts` | T-PKG-014 | — |
 | PKG-012 | Rust release profile | `Cargo.toml` (workspace) | T-PKG-009 | — |
 
 ## 6. Resolved Design Decisions Traceability

@@ -1,5 +1,10 @@
 /target
 /.vscode
 /.VSCodeCounter
+/editors/code/node_modules
+/editors/code/dist
+/editors/code/coverage
+/editors/code/out
+/.pnpm-store
 
 .DS_Store

@@ -38,7 +38,7 @@ stages:
       freeze_candidates_resolved: 19
       test_scenarios_total: 87
   builder:
-    status: not_started
+    status: in_progress
     completed_at: null
     description: "Implement from frozen specs — Client, Preview, CodeLens, Packaging (5 batches)"
 
@@ -69,10 +69,28 @@ batches:
   batch1:
     name: "LSP Client + Project Scaffold (WS-1 + WS-4 scaffold)"
     work_packages: [WS-1, WS-4]
-    requirements: []
+    requirements:
+      - CLI-001
+      - CLI-002
+      - CLI-003
+      - CLI-004
+      - CLI-005
+      - CLI-006
+      - CLI-007
+      - CLI-008
+      - CLI-009
+      - CLI-010
+      - CLI-011
+      - PKG-003
+      - PKG-004
+      - PKG-005
+      - PKG-007
+      - PKG-010
+      - PKG-011
     test_ids: "T-CLI-*"
     crate: editors/code
-    status: not_started
+    status: completed
+    completed_at: "2026-03-20"
   batch2:
     name: "Live Preview Webview (WS-2)"
     work_packages: [WS-2]
@@ -107,6 +125,52 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 0
-  ci_gate: false
-  entries: []
+  automated_tests: 22
+  ci_gate: true
+  entries:
+    - batch: batch1
+      name: "LSP Client + Project Scaffold (WS-1 + WS-4 scaffold)"
+      status: completed
+      completed_at: "2026-03-20"
+      requirements:
+        - CLI-001
+        - CLI-002
+        - CLI-003
+        - CLI-004
+        - CLI-005
+        - CLI-006
+        - CLI-007
+        - CLI-008
+        - CLI-009
+        - CLI-010
+        - CLI-011
+        - PKG-003
+        - PKG-004
+        - PKG-005
+        - PKG-007
+        - PKG-010
+        - PKG-011
+      scenarios:
+        - T-CLI-002
+        - T-CLI-005
+        - T-CLI-008
+        - T-CLI-009
+        - T-CLI-010
+        - T-CLI-011
+        - T-CLI-012
+        - T-CLI-015
+        - T-CLI-016
+        - T-CLI-018
+        - T-CLI-019
+        - T-CLI-020
+        - T-CLI-021
+      notes:
+        - "Scaffolded editors/code with pnpm, esbuild, Biome, Vitest, language configuration, TextMate grammar, and vscode test mocks."
+        - "Implemented binary discovery, stdio server options, activation lifecycle, no-server mode, configuration change handling, runtime dependency prompts, and status bar actions."
+        - "Renamed the Rust binary target to vhs-analyzer, accepted --stdio as a no-op, and updated Rust integration tests to the new binary name."
+      quality_gate:
+        lint: passed
+        typecheck: passed
+        test: passed
+        build: passed
+        cargo_test: passed
