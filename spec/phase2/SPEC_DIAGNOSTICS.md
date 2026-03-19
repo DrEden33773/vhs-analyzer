@@ -2,10 +2,16 @@
 
 **Phase:** 2 — Intelligence & Diagnostics
 **Work Stream:** WS-2 (Diagnostics)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** phase1/SPEC_PARSER.md (AST), phase1/SPEC_LSP_CORE.md (server lifecycle, LSP-008 parse diagnostics)
 **Last Updated:** 2026-03-19
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-19.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -76,8 +82,8 @@ and environment checks (file existence, `$PATH` program lookup).
 | **ID** | DIA-004 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | If an `OUTPUT_COMMAND` path does not end with `.gif`, `.mp4`, or `.webm` (case-insensitive), the server MUST emit an `Error` diagnostic on the `PATH` token range with message `"Invalid output format. Supported: .gif, .mp4, .webm"` and code `"invalid-extension"`. |
-| **Verification** | `Output demo.txt` → Error. `Output demo.gif` → no error. `Output demo.MP4` → no error (case-insensitive). |
+| **Statement** | If an `OUTPUT_COMMAND` path has a file extension (contains `.` after the last `/` or from start) and that extension is not one of `.gif`, `.mp4`, `.webm`, `.ascii`, `.txt` (case-insensitive), the server MUST emit an `Error` diagnostic on the `PATH` token range with message `"Invalid output format. Supported: .gif, .mp4, .webm, .ascii, .txt"` and code `"invalid-extension"`. Paths ending with `/` (directory for PNG frame sequences) or paths without a recognizable extension MUST NOT be flagged. |
+| **Verification** | `Output demo.pdf` → Error. `Output demo.gif` → no error. `Output demo.MP4` → no error (case-insensitive). `Output golden.ascii` → no error. `Output frames/` → no error. |
 
 ### DIA-005 — Duplicate Set for Same Setting
 
@@ -159,6 +165,16 @@ and environment checks (file existence, `$PATH` program lookup).
 | **Statement** | If a new `didSave` arrives while a previous heavyweight check is still running for the same document, the server SHOULD cancel the in-flight check (via `tokio_util::sync::CancellationToken` or `JoinHandle::abort()`) before starting a new one, to avoid publishing stale results. |
 | **Verification** | Rapid save-save with slow heavyweight check: only the latest check's results are published. |
 
+### DIA-013 — Invalid Screenshot Path Extension
+
+| Field | Value |
+| --- | --- |
+| **ID** | DIA-013 |
+| **Priority** | P0 (MUST) |
+| **Owner** | Architect → Builder |
+| **Statement** | If a `SCREENSHOT_COMMAND` path does not end with `.png` (case-insensitive), the server MUST emit an `Error` diagnostic on the `PATH` token range with message `"Invalid screenshot format. Supported: .png"` and code `"invalid-screenshot-extension"`. |
+| **Verification** | `Screenshot demo.png` → no error. `Screenshot demo.PNG` → no error (case-insensitive). `Screenshot demo.jpg` → Error. |
+
 ## 5. Design Options Analysis
 
 ### 5.1 Diagnostic Pipeline Architecture
@@ -214,6 +230,7 @@ async-friendly when called from a spawned task. Per Rust Best Practices:
 | Parse errors (Phase 1) | — | Error | Syntax |
 | Missing Output directive | `missing-output` | Warning | Structural |
 | Invalid Output extension | `invalid-extension` | Error | Value validation |
+| Invalid Screenshot extension | `invalid-screenshot-extension` | Error | Value validation |
 | Duplicate Set | `duplicate-set` | Warning | Structural |
 | Invalid hex color | `invalid-hex-color` | Error | Value validation |
 | Numeric out of range | `value-out-of-range` | Error | Value validation |
@@ -243,6 +260,7 @@ async-friendly when called from a spawned task. Per Rust Best Practices:
 | --- | --- | --- |
 | Missing Output directive | Lightweight (didChange) | Pure AST scan — O(n) children of SOURCE_FILE |
 | Invalid Output extension | Lightweight (didChange) | String suffix check on PATH token |
+| Invalid Screenshot extension | Lightweight (didChange) | String suffix check on PATH token |
 | Duplicate Set | Lightweight (didChange) | Collect SET_COMMAND nodes, group by setting keyword |
 | Invalid hex color | Lightweight (didChange) | Regex match on string token text |
 | Numeric out of range | Lightweight (didChange) | Parse numeric token, compare against bounds |
@@ -317,61 +335,52 @@ The `heavyweight_diagnostics` field caches the latest heavyweight check
 results. The `heavyweight_task` field holds the cancellation token for
 the in-flight heavyweight task (if any).
 
-## 11. Freeze Candidates
+## 11. Resolved Design Decisions
 
-### FC-DIA-01 — Output Directory Existence Check
+All Freeze Candidates from Stage A have been closed with definitive decisions.
 
-**Status:** Open
+### FC-DIA-01 — Output Directory Existence Check (RESOLVED: Do NOT Check)
 
-**Question:** Should the diagnostics engine check whether the parent
-directory of the `Output` path exists? This would catch cases like
-`Output nonexistent_dir/demo.gif` early. However, VHS may create the
-directory at runtime.
+**Decision:** The diagnostics engine MUST NOT check whether the parent
+directory of the `Output` path exists in Phase 2.
 
-**Current recommendation:** Do NOT check directory existence in Phase 2.
-VHS does not document directory auto-creation behavior, and a false
-positive here would be confusing. Revisit if user feedback indicates demand.
+**Rationale:** VHS v0.3.0+ automatically creates output directories
+(verified via GitHub Issue #206). If the LSP reports "directory not found",
+users would be confused because VHS would succeed at runtime. This would
+be a false positive. Revisit if user feedback indicates demand.
 
-**Resolution criteria:** Verify VHS runtime behavior regarding directory
-creation for Output paths.
+### FC-DIA-02 — LoopOffset Percentage Validation (RESOLVED: Do NOT Validate)
 
-### FC-DIA-02 — LoopOffset Percentage Validation
+**Decision:** The diagnostics engine MUST NOT validate `Set LoopOffset`
+value ranges in Phase 2.
 
-**Status:** Open
+**Rationale:** The VHS documentation does not specify valid ranges for
+LoopOffset. It accepts both absolute frame counts (e.g., `5`) and
+percentages (e.g., `50%`). Edge values may have intentional effects.
+In the absence of authoritative constraints from the VHS specification,
+validation would risk false positives.
 
-**Question:** Should `Set LoopOffset` values be validated? The spec allows
-`float` with optional `%`. Should values > 100% or negative values produce
-a warning?
+### FC-DIA-03 — Screenshot Path Extension Validation (RESOLVED: Validate `.png` Only)
 
-**Current recommendation:** Do NOT validate LoopOffset range in Phase 2.
-The VHS documentation does not specify valid ranges, and edge values may
-have intentional effects (e.g., negative offset for rewind).
+**Decision:** The diagnostics engine MUST validate Screenshot path
+extensions. Only `.png` is valid. This is implemented as DIA-013
+(added to §4 during freeze).
 
-**Resolution criteria:** Verify VHS runtime behavior for out-of-range
-LoopOffset values.
+**Rationale:** The VHS README (v0.11.0) explicitly states Screenshot
+"captures the current frame (png format)". A PR (#635) proposing `.txt`
+support has not been merged. The validation follows the same Error-level
+pattern as DIA-004 for Output extensions. If VHS adds text screenshot
+support in a future release, the valid extension set will be expanded.
 
-### FC-DIA-03 — Screenshot Path Extension Validation
+### FC-DIA-04 — Heavyweight Diagnostic Debounce (RESOLVED: Cancellation-and-Restart Only)
 
-**Status:** Open
+**Decision:** Heavyweight diagnostics MUST use the cancellation-and-restart
+approach (DIA-012) without additional debouncing.
 
-**Question:** Should `Screenshot` path extension be validated (expected:
-`.png`)? This parallels DIA-004 for `Output`.
-
-**Current recommendation:** Add validation if the VHS documentation
-confirms `.png` is the only supported format. Otherwise defer.
-
-**Resolution criteria:** Verify VHS Screenshot output format constraints.
-
-### FC-DIA-04 — Heavyweight Diagnostic Debounce
-
-**Status:** Open
-
-**Question:** Should heavyweight diagnostics be debounced on rapid saves,
-or is the cancellation-and-restart approach (DIA-012) sufficient?
-
-**Current recommendation:** Cancellation-and-restart is sufficient. VHS
-files are small and `$PATH` lookups are fast (~5ms each). Debouncing
-adds complexity without meaningful benefit.
-
-**Resolution criteria:** Profile heavyweight check latency during Builder
-implementation. If > 100ms, add debouncing.
+**Rationale:** VHS `.tape` files are typically <200 lines. `$PATH` lookup
+via the `which` crate takes ~5ms, `fs::metadata` takes ~1ms. The total
+heavyweight check latency is well under 100ms. Cancellation-and-restart
+(via `CancellationToken` or `JoinHandle::abort()`) already prevents stale
+results. Debouncing would add complexity disproportionate to its benefit.
+Per Rust Async Patterns: "Use `tokio::spawn` for concurrent tasks; use
+`CancellationToken` for graceful shutdown."

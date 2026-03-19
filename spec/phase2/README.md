@@ -1,6 +1,6 @@
 # Phase 2: Intelligence & Diagnostics
 
-## Status: Stage A (Exploratory Design — 2026-03-19)
+## Status: Stage B (CONTRACT_FROZEN — 2026-03-19)
 
 Phase 2 adds smart features on top of the LSP Foundation: context-aware
 autocomplete, semantic diagnostics, and a safety check engine for `Type`
@@ -11,11 +11,11 @@ are independent of each other.
 
 | File | Work Stream | Status | Description |
 | --- | --- | --- | --- |
-| `SPEC_COMPLETION.md` | WS-1 | Stage A | Context-aware autocomplete for commands, settings, themes, values |
-| `SPEC_DIAGNOSTICS.md` | WS-2 | Stage A | Semantic validation, environment checks, unified diagnostic pipeline |
-| `SPEC_SAFETY.md` | WS-3 | Stage A | Destructive command detection in Type directives |
-| `SPEC_TEST_MATRIX.md` | — | Not started | Phase 2 acceptance test matrix (created during Stage B) |
-| `SPEC_TRACEABILITY.md` | — | Not started | Requirement-to-implementation mapping (maintained by Builder) |
+| `SPEC_COMPLETION.md` | WS-1 | Frozen | Context-aware autocomplete for commands, settings, themes, values |
+| `SPEC_DIAGNOSTICS.md` | WS-2 | Frozen | Semantic validation, environment checks, unified diagnostic pipeline |
+| `SPEC_SAFETY.md` | WS-3 | Frozen | Destructive command detection in Type directives |
+| `SPEC_TEST_MATRIX.md` | — | Frozen | Phase 2 acceptance test matrix |
+| `SPEC_TRACEABILITY.md` | — | Frozen | Requirement-to-implementation mapping (maintained by Builder) |
 
 ## Work Streams
 
@@ -45,44 +45,42 @@ Phase 2 internal:
   WS-1 (Completion) is fully independent of WS-2 and WS-3
 ```
 
-### Key Design Discovery (Stage A)
+## Builder Batch Plan
 
-- **WS-3 → WS-2 integration**: Safety diagnostics are collected as a
-  lightweight check (pure string pattern matching) and merged into the
-  unified diagnostic pipeline defined in SPEC_DIAGNOSTICS.md DIA-011.
-  This means WS-3 has a soft dependency on WS-2's pipeline architecture,
-  though the safety detection logic itself is independent.
-
-- **didSave handler**: Phase 2 extends Phase 1 by adding a `didSave`
-  handler for heavyweight diagnostics (DIA-010). This is a cross-cutting
-  concern that affects the server lifecycle design in WS-2.
-
-- **Server capabilities**: Phase 2 adds `completionProvider` and
-  `textDocumentSync.save` to the Phase 1 capability set (see
-  SPEC_COMPLETION.md §10).
-
-## Suggested Batch Progression
+The three work streams are independent and MAY be implemented in parallel
+or sequentially. The recommended ordering accounts for the WS-3 → WS-2
+soft dependency (safety diagnostics integrate into the diagnostic pipeline).
 
 ```text
 Batch 1: WS-2 — Diagnostic pipeline infrastructure
          (lightweight semantic checks + heavyweight framework + didSave handler)
-         This establishes the pipeline that WS-3 plugs into.
+         Establishes the unified pipeline that WS-3 plugs into.
+         Deliverables: DIA-001 through DIA-013, DocumentState extension,
+         didSave handler, cancellation tokens.
 
 Batch 2: WS-3 — Safety check engine
          (pattern database + detection algorithm + suppression + pipeline integration)
          Leverages the diagnostic pipeline from Batch 1.
+         Deliverables: SAF-001 through SAF-007, regex pattern database,
+         LazyLock<RegexSet>, suppression comment scanning.
 
 Batch 3: WS-1 — Completion provider
-         (context resolution + item registries + snippets)
+         (context resolution + item registries + snippets + theme data file)
          Fully independent; can be parallelized with Batch 1-2 if desired.
+         Deliverables: CMP-001 through CMP-010, data/themes.txt,
+         include_str! + LazyLock theme registry.
+
+Batch 4: Integration test + closeout
+         (cross-WS integration tests, property-based tests, Phase 1 regression)
+         Deliverables: T-INT2-001 through T-INT2-004, all property-based tests.
 ```
 
-**Rationale for reordering (vs. original):** The original ordering
-(Completion → Diagnostics → Safety) was based on perceived user value
-priority. The revised ordering (Diagnostics → Safety → Completion) is
-based on implementation dependency: WS-2 creates the diagnostic pipeline
-infrastructure that WS-3 consumes. WS-1 is independent and can be
-scheduled in parallel.
+**Parallel execution note:** Batch 3 (Completion) has zero dependency on
+Batch 1 or 2 and MAY run in parallel from the start. Batch 2 (Safety) has
+a soft dependency on Batch 1 (Diagnostics) via the unified pipeline
+integration point (DIA-011 / SAF-006). If running in parallel, the Builder
+should implement the safety detection logic first and defer pipeline
+integration to a sync point after Batch 1 completes.
 
 ## Cross-Phase Capability Extension
 
@@ -96,3 +94,19 @@ complete Phase 2 capability set is defined in SPEC_COMPLETION.md §10:
 | `hoverProvider` | Yes | Yes |
 | `documentFormattingProvider` | Yes | Yes |
 | `completionProvider` | No | Yes (`triggerCharacters: [], resolveProvider: false`) |
+
+## Key Resolved Decisions (Stage B Summary)
+
+| FC ID | Decision | Rationale |
+| --- | --- | --- |
+| FC-CMP-01 | Empty trigger characters `[]` | Client word-boundary triggers sufficient; space trigger too noisy |
+| FC-CMP-02 | 4 WindowBar styles | VHS README confirms: Colorful, ColorfulRight, Rings, RingsRight |
+| FC-CMP-03 | External `data/themes.txt` + `include_str!` + `LazyLock` | 318 entries too large for inline array; near-zero overhead |
+| FC-DIA-01 | No Output directory check | VHS v0.3.0+ auto-creates directories |
+| FC-DIA-02 | No LoopOffset range validation | VHS docs do not specify valid ranges |
+| FC-DIA-03 | Validate Screenshot `.png` only (DIA-013) | VHS README confirms png-only |
+| FC-DIA-04 | Cancellation-and-restart only | PATH lookups ~5ms; debounce not needed |
+| FC-SAF-01 | No cross-Type sequence detection | High false-positive rate; Phase 3+ scope |
+| FC-SAF-02 | Use `regex` crate (standard) | Needs `RegexSet`; `regex-lite` lacks it |
+| FC-SAF-03 | No workspace config in Phase 2 | Defer to Phase 3 extension settings |
+| FC-SAF-04 | No Env directive scanning | Niche attack vector; high false-positive risk |
