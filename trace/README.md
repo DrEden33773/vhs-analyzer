@@ -23,7 +23,7 @@ trace/
 ├── phase1/        (Phase 1: LSP Foundation)
 │   ├── status.yaml
 │   └── tracker.md
-├── phase2/        (Phase 2: Intelligence & Diagnostics — to be created)
+├── phase2/        (Phase 2: Intelligence & Diagnostics)
 │   ├── status.yaml
 │   └── tracker.md
 └── phase3/        (Phase 3: VSCode Extension Client — to be created)
@@ -42,6 +42,6 @@ When a new phase starts:
 
 When a phase completes:
 
-1. Update `status` in `trace/<phase>/status.yaml` to `closeout_completed`.
+1. Update `status` in `trace/<phase>/status.yaml` to `completed`.
 2. Update the pointer in root `STATUS.yaml` with `completed_at`.
 3. No file migration needed — data is already in `trace/<phase>/`.

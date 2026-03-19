@@ -53,11 +53,13 @@ Phase 1 spec files:
 - `phase1/SPEC_TEST_MATRIX.md`: minimum acceptance test matrix for Phase 1
 - `phase1/SPEC_TRACEABILITY.md`: requirement IDs mapped to code and tests
 
-## Phase 2: Intelligence & Diagnostics (Not Started)
+## Phase 2: Intelligence & Diagnostics (Completed)
 
-Phase 2 extends the LSP Foundation with smart features. Depends on Phase 1 frozen contracts.
+Phase 2 extended the LSP Foundation with completion, diagnostics, and safety
+analysis on top of the frozen Phase 1 contracts. The specs are frozen and the
+Builder implementation is complete.
 
-Planned spec files:
+Phase 2 spec files:
 
 - `phase2/SPEC_COMPLETION.md`: context-aware autocomplete for `Set` settings, theme names, time units, file extensions
 - `phase2/SPEC_DIAGNOSTICS.md`: semantic validation — syntax errors, invalid `Output` paths, invalid hex colors, missing `Require` dependencies
