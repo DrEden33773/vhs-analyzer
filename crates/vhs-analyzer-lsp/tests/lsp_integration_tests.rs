@@ -230,6 +230,14 @@ fn initialize_response_advertises_hover_formatting_and_save_sync() {
         response["result"]["capabilities"]["textDocumentSync"]["save"]["includeText"],
         false
     );
+    assert_eq!(
+        response["result"]["capabilities"]["completionProvider"]["triggerCharacters"],
+        json!([])
+    );
+    assert_eq!(
+        response["result"]["capabilities"]["completionProvider"]["resolveProvider"],
+        false
+    );
 }
 
 #[test]
@@ -249,7 +257,7 @@ fn initialize_response_includes_server_info() {
     let response = server.initialize();
 
     assert_eq!(response["result"]["serverInfo"]["name"], "vhs-analyzer");
-    assert_eq!(response["result"]["serverInfo"]["version"], "0.1.0");
+    assert_eq!(response["result"]["serverInfo"]["version"], "0.2.0");
 }
 
 #[tokio::test(flavor = "current_thread")]

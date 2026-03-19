@@ -121,7 +121,18 @@ batches:
     test_ids: "T-CMP-*"
     crate: vhs-analyzer-lsp
     depends_on: [batch3]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - Cargo.toml
+      - crates/vhs-analyzer-core/data/themes.txt
+      - crates/vhs-analyzer-lsp/src/completion.rs
+      - crates/vhs-analyzer-lsp/src/server.rs
+      - crates/vhs-analyzer-lsp/tests/completion_tests.rs
+      - crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs
+      - spec/phase2/SPEC_TRACEABILITY.md
+      - trace/phase2/status.yaml
+      - trace/phase2/tracker.md
   batch5:
     name: "Integration + Closeout"
     work_packages: []
@@ -132,7 +143,7 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 194
+  automated_tests: 220
   ci_gate: true
   entries:
     - batch: batch1
@@ -219,6 +230,43 @@ builder_progress:
         - "Added an async heavyweight collector in crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs for Require PATH checks and Source file existence checks resolved against the current file directory or workspace root."
         - "Finalized the unified publication pipeline so didChange preserves cached heavyweight diagnostics, didOpen can schedule an initial heavyweight pass, didSave refreshes the cache asynchronously, and didClose cancels in-flight work before clearing diagnostics."
         - "Added 9 passing acceptance and regression tests in crates/vhs-analyzer-lsp/tests/diagnostics_heavyweight_tests.rs plus an initialize capability assertion in crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass
+    - batch: batch4
+      name: "Completion Provider (WS-1)"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - CMP-001
+        - CMP-002
+        - CMP-003
+        - CMP-004
+        - CMP-005
+        - CMP-006
+        - CMP-007
+        - CMP-008
+        - CMP-009
+        - CMP-010
+      scenarios:
+        implemented:
+          - T-CMP-001 through T-CMP-014
+          - T-CMP-020 through T-CMP-022
+          - T-CMP-030 through T-CMP-034
+          - T-CMP-040 through T-CMP-042
+          - T-CMP-050 through T-CMP-052
+          - T-CMP-060
+          - T-CMP-070 through T-CMP-072
+          - T-CMP-080 through T-CMP-083
+        additional:
+          - Added a regression covering optional `ms` and `s` suffix completions after `Sleep 500`
+          - Extended initialize integration coverage to assert `completionProvider.triggerCharacters = []` and `resolveProvider = false`
+      notes:
+        - "Added crates/vhs-analyzer-lsp/src/completion.rs with AST-backed context resolution for command keywords, setting names, built-in themes, enumerated setting values, output extensions, modifier targets, snippet templates, and time-unit suffixes."
+        - "Embedded the built-in theme registry via crates/vhs-analyzer-core/data/themes.txt and quote-wrapped theme insertText values that contain spaces while preserving unquoted inserts for single-word themes."
+        - "Extended crates/vhs-analyzer-lsp/src/server.rs to advertise completionProvider, handle textDocument/completion requests against the cached syntax tree, and fix line-start UTF-16 offset conversion at trailing newlines."
+        - "Bumped the workspace package version to 0.2.0 and added 26 passing acceptance and property tests in crates/vhs-analyzer-lsp/tests/completion_tests.rs."
       quality_gate:
         cargo_fmt_all_check: pass
         cargo_clippy_workspace_all_targets_all_features_locked: pass

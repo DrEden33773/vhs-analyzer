@@ -28,16 +28,16 @@ module and test references. The Builder MUST update the "Impl Module" and
 
 | Req ID | Description | Priority | Planned Impl Module | Test IDs | Phase 1 Baseline | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| CMP-001 | completionProvider capability | P0 | `crates/vhs-analyzer-lsp/src/server.rs` | T-CMP-001, T-CMP-002 | LSP-002 (InitializeResult) | Not started |
-| CMP-002 | Completion context resolution algorithm | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-083 | PAR-001, PAR-007, HOV-006 | Not started |
-| CMP-003 | Command keyword completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-014 | PAR-001 (SyntaxKind) | Not started |
-| CMP-004 | Setting name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-020–T-CMP-022 | PAR-007 (SetCommand) | Not started |
-| CMP-005 | Theme name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-030–T-CMP-034 | — | Not started |
-| CMP-006 | Setting value completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-040–T-CMP-042 | PAR-007 (SetCommand) | Not started |
-| CMP-007 | Snippet templates | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-050–T-CMP-052 | — | Not started |
-| CMP-008 | Output extension completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-060 | PAR-007 (OutputCommand) | Not started |
-| CMP-009 | Time unit completions | P2 | `crates/vhs-analyzer-lsp/src/completion.rs` | — | — | Not started |
-| CMP-010 | Modifier key target completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-070–T-CMP-072 | PAR-007 (CtrlCommand) | Not started |
+| CMP-001 | completionProvider capability | P0 | `crates/vhs-analyzer-lsp/src/server.rs` | T-CMP-001, T-CMP-002 | LSP-002 (InitializeResult) | Completed |
+| CMP-002 | Completion context resolution algorithm | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-083 | PAR-001, PAR-007, HOV-006 | Completed |
+| CMP-003 | Command keyword completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-014 | PAR-001 (SyntaxKind) | Completed |
+| CMP-004 | Setting name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-020–T-CMP-022 | PAR-007 (SetCommand) | Completed |
+| CMP-005 | Theme name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-030–T-CMP-034 | — | Completed |
+| CMP-006 | Setting value completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-040–T-CMP-042 | PAR-007 (SetCommand) | Completed |
+| CMP-007 | Snippet templates | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-050–T-CMP-052 | — | Completed |
+| CMP-008 | Output extension completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-060 | PAR-007 (OutputCommand) | Completed |
+| CMP-009 | Time unit completions | P2 | `crates/vhs-analyzer-lsp/src/completion.rs` | — | — | Completed |
+| CMP-010 | Modifier key target completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-070–T-CMP-072 | PAR-007 (CtrlCommand) | Completed |
 
 ## 3. WS-2: Diagnostics Traceability
 

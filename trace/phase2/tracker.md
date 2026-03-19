@@ -1,7 +1,7 @@
 # Phase 2 Execution Tracker
 
 Phase: Intelligence & Diagnostics (Completion, Diagnostics, Safety)
-Status: In Progress — Batches 1-3 completed, Batch 4 pending
+Status: In Progress — Batches 1-4 completed, Batch 5 pending
 Started: 2026-03-19
 
 ## 1. Stage Progress
@@ -19,7 +19,7 @@ Started: 2026-03-19
 | 1 | Lightweight Diagnostic Rules | WS-2 | lsp | DIA-001~007, DIA-013 | — | — | completed |
 | 2 | Safety Engine | WS-3 | lsp | SAF-001~007 | B1 | — | completed |
 | 3 | Heavyweight Diagnostics + Pipeline | WS-2 | lsp | DIA-008~012 | B2 | Pipeline complete | completed |
-| 4 | Completion Provider | WS-1 | lsp | CMP-001~010 | B3 | All features complete | not started |
+| 4 | Completion Provider | WS-1 | lsp | CMP-001~010 | B3 | All features complete | completed |
 | 5 | Integration + Closeout | — | both | T-INT2 + property | B4 | Phase 2 complete | not started |
 
 ## 3. Dependency Constraints
@@ -136,3 +136,32 @@ Builder appends one record per completed batch below this line.
 - Notes:
   - Batch 3 keeps the Batch 1 compatibility shim intact by layering heavyweight checks on top of the frozen parse + lightweight + safety pipeline instead of changing the Phase 1 lexer/parser baseline.
   - Cancellation uses both `CancellationToken` state in `DocumentState` and `JoinHandle::abort()` at the server layer so a newer save supersedes older in-flight heavyweight work without publishing stale results.
+
+### Batch 4 — Completion Provider
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `CMP-001`, `CMP-002`, `CMP-003`, `CMP-004`, `CMP-005`, `CMP-006`, `CMP-007`, `CMP-008`, `CMP-009`, `CMP-010`
+- Files:
+  - `Cargo.toml`
+  - `crates/vhs-analyzer-core/data/themes.txt`
+  - `crates/vhs-analyzer-lsp/src/completion.rs`
+  - `crates/vhs-analyzer-lsp/src/server.rs`
+  - `crates/vhs-analyzer-lsp/tests/completion_tests.rs`
+  - `crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`
+  - `spec/phase2/SPEC_TRACEABILITY.md`
+  - `trace/phase2/status.yaml`
+  - `trace/phase2/tracker.md`
+- Deliverables:
+  - Added a new `crates/vhs-analyzer-lsp/src/completion.rs` module that resolves completion context from the cached AST and returns eager completion lists for command keywords, setting names, built-in themes, enumerated setting values, output extensions, modifier targets, snippet templates, and time-unit suffixes.
+  - Added `crates/vhs-analyzer-core/data/themes.txt` as an embedded theme registry and ensured theme names with spaces use quoted `insertText` while single-word themes remain unquoted.
+  - Extended `crates/vhs-analyzer-lsp/src/server.rs` to advertise `completionProvider`, handle `textDocument/completion`, and keep line-start UTF-16 offset mapping correct at trailing newlines.
+  - Bumped the workspace version to `0.2.0` and updated initialization integration coverage in `crates/vhs-analyzer-lsp/tests/lsp_integration_tests.rs`.
+  - Added 26 passing acceptance and property tests in `crates/vhs-analyzer-lsp/tests/completion_tests.rs` covering the Batch 4 `T-CMP-*` scenarios plus an optional time-unit regression.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
+- Notes:
+  - The completion provider reuses the same cached parse snapshot as diagnostics, hover, and formatting, so Batch 1/2/3 publication behavior remains untouched while completion is added on top.
+  - `CMP-009` is optional in the frozen spec; the implementation still provides `ms` and `s` suffix suggestions in `Sleep`, `Set TypingSpeed`, and `@duration` contexts.

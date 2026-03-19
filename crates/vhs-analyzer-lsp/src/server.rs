@@ -1,9 +1,11 @@
 //! Language-server state and `LanguageServer` trait implementation.
 //!
 //! This module owns document synchronization, parse-diagnostic publication,
-//! hover dispatch, and formatting bridges over the cached `vhs-analyzer-core`
-//! syntax trees.
+//! completion/hover dispatch, and formatting bridges over the cached
+//! `vhs-analyzer-core` syntax trees.
 
+#[path = "completion.rs"]
+mod completion;
 #[path = "diagnostics.rs"]
 mod diagnostics;
 #[path = "safety.rs"]
@@ -18,7 +20,8 @@ use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 use tower_lsp_server::jsonrpc::{Error, ErrorCode, Result};
 use tower_lsp_server::ls_types::{
-    Diagnostic, DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+    CompletionOptions, CompletionParams, CompletionResponse, Diagnostic,
+    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
     DidSaveTextDocumentParams, DocumentFormattingParams, Hover, HoverContents, HoverParams,
     HoverProviderCapability, InitializeParams, InitializeResult, InitializedParams, MarkupContent,
     MarkupKind, MessageType, OneOf, Position, Range, SaveOptions, ServerCapabilities, ServerInfo,
@@ -76,6 +79,11 @@ impl VhsLanguageServer {
             )),
             hover_provider: Some(HoverProviderCapability::Simple(true)),
             document_formatting_provider: Some(OneOf::Left(true)),
+            completion_provider: Some(CompletionOptions {
+                trigger_characters: Some(Vec::new()),
+                resolve_provider: Some(false),
+                ..Default::default()
+            }),
             ..Default::default()
         }
     }
@@ -283,7 +291,6 @@ impl VhsLanguageServer {
         let target_character = usize::try_from(position.character).unwrap_or(usize::MAX);
         let mut line = 0_usize;
         let mut character = 0_usize;
-        let mut last_boundary = 0_usize;
 
         // Walk the source by Unicode scalar values so the reverse mapping matches
         // the UTF-16 character counting used by LSP clients.
@@ -291,8 +298,6 @@ impl VhsLanguageServer {
             if line == target_line && character >= target_character {
                 return byte_index;
             }
-
-            last_boundary = byte_index;
 
             match ch {
                 '\r' => {
@@ -311,11 +316,7 @@ impl VhsLanguageServer {
             }
         }
 
-        if line == target_line && character >= target_character {
-            last_boundary
-        } else {
-            source.len()
-        }
+        source.len()
     }
 
     async fn publish_diagnostics(&self, uri: Uri, state: &DocumentState) {
@@ -414,6 +415,20 @@ impl LanguageServer for VhsLanguageServer {
             }),
             range: Some(Self::range_for_offsets(&state.source, info.start, info.end)),
         }))
+    }
+
+    async fn completion(&self, params: CompletionParams) -> Result<Option<CompletionResponse>> {
+        let uri = &params.text_document_position.text_document.uri;
+        let state = self.require_document(uri)?;
+        let syntax = SyntaxNode::new_root(state.green.clone());
+        let offset =
+            Self::offset_for_position(&state.source, params.text_document_position.position);
+
+        Ok(completion::completion_response(
+            &syntax,
+            &state.source,
+            offset,
+        ))
     }
 
     async fn formatting(
