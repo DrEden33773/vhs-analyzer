@@ -20,8 +20,8 @@ stages:
       requirements_p2_may: 3
       freeze_candidates: 19
   architect_stage_b:
-    status: not_started
-    completed_at: null
+    status: completed
+    completed_at: "2026-03-20"
     description: "Freeze all specs — resolve Freeze Candidates, produce MUST/SHOULD/MAY contracts"
     deliverables:
       - spec/phase3/SPEC_CLIENT.md (CONTRACT_FROZEN)
@@ -31,12 +31,12 @@ stages:
       - spec/phase3/SPEC_TEST_MATRIX.md (CONTRACT_FROZEN)
       - spec/phase3/SPEC_TRACEABILITY.md (CONTRACT_FROZEN)
     stats:
-      requirements_total: 0
-      requirements_p0_must: 0
-      requirements_p1_should: 0
-      requirements_p2_may: 0
-      freeze_candidates_resolved: 0
-      test_scenarios_total: 0
+      requirements_total: 43
+      requirements_p0_must: 29
+      requirements_p1_should: 11
+      requirements_p2_may: 3
+      freeze_candidates_resolved: 19
+      test_scenarios_total: 87
   builder:
     status: not_started
     completed_at: null
@@ -57,13 +57,13 @@ requirement_ids:
   packaging: [PKG-001, PKG-002, PKG-003, PKG-004, PKG-005, PKG-006, PKG-007, PKG-008, PKG-009, PKG-010, PKG-011, PKG-012]
 
 test_scenarios:
-  total: 0
+  total: 87
   by_category:
-    client: 0
-    preview: 0
-    codelens: 0
-    packaging: 0
-    integration: 0
+    client: 21
+    preview: 20
+    codelens: 21
+    packaging: 20
+    integration: 5
 
 batches:
   batch1:
@@ -71,14 +71,14 @@ batches:
     work_packages: [WS-1, WS-4]
     requirements: []
     test_ids: "T-CLI-*"
-    crate: editors/vscode
+    crate: editors/code
     status: not_started
   batch2:
     name: "Live Preview Webview (WS-2)"
     work_packages: [WS-2]
     requirements: []
     test_ids: "T-PRV-*"
-    crate: editors/vscode
+    crate: editors/code
     depends_on: [batch1]
     status: not_started
   batch3:
@@ -86,7 +86,7 @@ batches:
     work_packages: [WS-3]
     requirements: []
     test_ids: "T-CLS-*"
-    crate: editors/vscode
+    crate: editors/code
     depends_on: [batch1]
     status: not_started
   batch4:
@@ -94,7 +94,7 @@ batches:
     work_packages: [WS-4]
     requirements: []
     test_ids: "T-PKG-*"
-    crate: editors/vscode
+    crate: editors/code
     depends_on: [batch2, batch3]
     status: not_started
   batch5:
@@ -102,7 +102,7 @@ batches:
     work_packages: []
     requirements: []
     test_ids: "T-INT3-*"
-    crate: editors/vscode
+    crate: editors/code
     depends_on: [batch4]
     status: not_started
 
