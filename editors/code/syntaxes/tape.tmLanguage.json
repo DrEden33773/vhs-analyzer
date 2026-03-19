@@ -84,19 +84,25 @@
           "name": "string.quoted.double.tape",
           "begin": "\"",
           "end": "\"",
-          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.tape" }]
+          "patterns": [
+            { "match": "\\\\.", "name": "constant.character.escape.tape" }
+          ]
         },
         {
           "name": "string.quoted.single.tape",
           "begin": "'",
           "end": "'",
-          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.tape" }]
+          "patterns": [
+            { "match": "\\\\.", "name": "constant.character.escape.tape" }
+          ]
         },
         {
           "name": "string.quoted.backtick.tape",
           "begin": "`",
           "end": "`",
-          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.tape" }]
+          "patterns": [
+            { "match": "\\\\.", "name": "constant.character.escape.tape" }
+          ]
         }
       ]
     },
