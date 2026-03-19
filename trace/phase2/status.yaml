@@ -1,6 +1,7 @@
 phase: phase2_intelligence_diagnostics
-status: in_progress
+status: completed
 started_at: "2026-03-19"
+completed_at: "2026-03-19"
 
 stages:
   architect_stage_a:
@@ -34,7 +35,8 @@ stages:
       freeze_candidates_resolved: 11
       test_scenarios_total: 67
   builder:
-    status: in_progress
+    status: completed
+    completed_at: "2026-03-19"
     description: "Implement from frozen specs — Diagnostics, Safety, Completion (5 batches)"
 
 spec_files:
@@ -140,10 +142,17 @@ batches:
     test_ids: "T-INT2-*"
     crate: both
     depends_on: [batch4]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-lsp/tests/phase2_integration_test.rs
+      - spec/phase2/SPEC_TRACEABILITY.md
+      - trace/phase2/status.yaml
+      - trace/phase2/tracker.md
+      - STATUS.yaml
 
 builder_progress:
-  automated_tests: 220
+  automated_tests: 224
   ci_gate: true
   entries:
     - batch: batch1
@@ -267,6 +276,27 @@ builder_progress:
         - "Embedded the built-in theme registry via crates/vhs-analyzer-core/data/themes.txt and quote-wrapped theme insertText values that contain spaces while preserving unquoted inserts for single-word themes."
         - "Extended crates/vhs-analyzer-lsp/src/server.rs to advertise completionProvider, handle textDocument/completion requests against the cached syntax tree, and fix line-start UTF-16 offset conversion at trailing newlines."
         - "Bumped the workspace package version to 0.2.0 and added 26 passing acceptance and property tests in crates/vhs-analyzer-lsp/tests/completion_tests.rs."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass
+    - batch: batch5
+      name: "Integration + Closeout"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements: []
+      scenarios:
+        implemented:
+          - T-INT2-001 through T-INT2-004
+          - T-CMP-083
+          - T-DIA-093
+          - T-SAF-070
+        additional:
+          - Added stdio end-to-end coverage for combined diagnostics, completion coexistence, server version propagation, and preserved Phase 1 hover and formatting behavior
+      notes:
+        - "Added crates/vhs-analyzer-lsp/tests/phase2_integration_test.rs with public-interface stdio integration coverage for the frozen Batch 5 scenarios."
+        - "Confirmed the existing property-based completion, diagnostics, and safety tests remain green as the Batch 5 closeout gate."
+        - "Updated Phase 2 traceability/tracking artifacts and marked the Phase 2 archive plus root STATUS.yaml pointer as completed."
       quality_gate:
         cargo_fmt_all_check: pass
         cargo_clippy_workspace_all_targets_all_features_locked: pass

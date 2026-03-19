@@ -1,7 +1,7 @@
 # Phase 2 Execution Tracker
 
 Phase: Intelligence & Diagnostics (Completion, Diagnostics, Safety)
-Status: In Progress — Batches 1-4 completed, Batch 5 pending
+Status: Completed — all 5 batches completed
 Started: 2026-03-19
 
 ## 1. Stage Progress
@@ -10,7 +10,7 @@ Started: 2026-03-19
 | --- | --- | --- | --- | --- |
 | Architect Stage A | Claude | Completed | 2026-03-19 | 3 exploratory specs, 30 reqs, 11 FC identified |
 | Architect Stage B | Claude | Completed | 2026-03-19 | 5 frozen specs, 30 reqs, 67 test scenarios |
-| Builder | Builder | In Progress | — | 5 batches planned |
+| Builder | Builder | Completed | 2026-03-19 | 5 batches completed |
 
 ## 2. Builder Batch Plan (5 Batches)
 
@@ -20,7 +20,7 @@ Started: 2026-03-19
 | 2 | Safety Engine | WS-3 | lsp | SAF-001~007 | B1 | — | completed |
 | 3 | Heavyweight Diagnostics + Pipeline | WS-2 | lsp | DIA-008~012 | B2 | Pipeline complete | completed |
 | 4 | Completion Provider | WS-1 | lsp | CMP-001~010 | B3 | All features complete | completed |
-| 5 | Integration + Closeout | — | both | T-INT2 + property | B4 | Phase 2 complete | not started |
+| 5 | Integration + Closeout | — | both | T-INT2 + property | B4 | Phase 2 complete | completed |
 
 ## 3. Dependency Constraints
 
@@ -165,3 +165,27 @@ Builder appends one record per completed batch below this line.
 - Notes:
   - The completion provider reuses the same cached parse snapshot as diagnostics, hover, and formatting, so Batch 1/2/3 publication behavior remains untouched while completion is added on top.
   - `CMP-009` is optional in the frozen spec; the implementation still provides `ms` and `s` suffix suggestions in `Sleep`, `Set TypingSpeed`, and `@duration` contexts.
+
+### Batch 5 — Integration + Closeout
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: Cross-cutting integration coverage for `WS-1`, `WS-2`, and `WS-3`
+- Files:
+  - `crates/vhs-analyzer-lsp/tests/phase2_integration_test.rs`
+  - `spec/phase2/SPEC_TRACEABILITY.md`
+  - `trace/phase2/status.yaml`
+  - `trace/phase2/tracker.md`
+  - `STATUS.yaml`
+- Deliverables:
+  - Added `crates/vhs-analyzer-lsp/tests/phase2_integration_test.rs` with real stdio end-to-end coverage for `T-INT2-001` through `T-INT2-004`.
+  - Verified combined diagnostics, diagnostics/completion coexistence, `serverInfo.version == "0.2.0"`, and preserved Phase 1 hover plus formatting behavior through the public LSP transport.
+  - Confirmed the existing property-based completion, diagnostics, and safety tests remain green as the Batch 5 closeout gate.
+  - Updated Phase 2 traceability and status artifacts, and marked the root `STATUS.yaml` Phase 2 pointer as completed.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
+- Notes:
+  - The first two Batch 5 scenarios were already green when promoted into process-level integration tests, which confirmed the existing unified diagnostics pipeline and completion/cache behavior at the public stdio boundary.
+  - Existing `crates/vhs-analyzer-lsp/tests/integration_test.rs` remains the broader Phase 1 transport regression, while `crates/vhs-analyzer-lsp/tests/phase2_integration_test.rs` now isolates the frozen Phase 2 acceptance scenarios.

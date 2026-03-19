@@ -2,7 +2,7 @@ schema_version: 2
 updated_at: "2026-03-19"
 project:
   name: vhs-analyzer
-  phase: phase2_architect
+  phase: phase2_builder
   status: in_progress
 
 authority_order:
@@ -42,11 +42,11 @@ phases:
     completed_at: "2026-03-19"
     archive: trace/phase1/
   phase2:
-    status: spec_frozen
+    status: completed
     frozen_at: "2026-03-19"
+    completed_at: "2026-03-19"
     archive: trace/phase2/
   phase3:
     status: not_started
 
-next_execution_targets:
-  - phase2_builder
+next_execution_targets: []

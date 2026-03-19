@@ -29,8 +29,8 @@ module and test references. The Builder MUST update the "Impl Module" and
 | Req ID | Description | Priority | Planned Impl Module | Test IDs | Phase 1 Baseline | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | CMP-001 | completionProvider capability | P0 | `crates/vhs-analyzer-lsp/src/server.rs` | T-CMP-001, T-CMP-002 | LSP-002 (InitializeResult) | Completed |
-| CMP-002 | Completion context resolution algorithm | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-083 | PAR-001, PAR-007, HOV-006 | Completed |
-| CMP-003 | Command keyword completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-014 | PAR-001 (SyntaxKind) | Completed |
+| CMP-002 | Completion context resolution algorithm | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-083, T-INT2-002 | PAR-001, PAR-007, HOV-006 | Completed |
+| CMP-003 | Command keyword completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-014, T-INT2-002 | PAR-001 (SyntaxKind) | Completed |
 | CMP-004 | Setting name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-020–T-CMP-022 | PAR-007 (SetCommand) | Completed |
 | CMP-005 | Theme name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-030–T-CMP-034 | — | Completed |
 | CMP-006 | Setting value completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-040–T-CMP-042 | PAR-007 (SetCommand) | Completed |
@@ -49,11 +49,11 @@ module and test references. The Builder MUST update the "Impl Module" and
 | DIA-004 | Invalid Output path extension | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-020–T-DIA-025 | PAR-007 (OutputCommand) | Completed |
 | DIA-005 | Duplicate Set for same setting | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-040–T-DIA-041 | PAR-007 (SetCommand) | Completed |
 | DIA-006 | Invalid hex color in MarginFill | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-050–T-DIA-055 | PAR-007 (SetCommand) | Completed |
-| DIA-007 | Numeric value out of range | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-060–T-DIA-065 | PAR-007 (SetCommand) | Completed |
+| DIA-007 | Numeric value out of range | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-060–T-DIA-065, T-INT2-002 | PAR-007 (SetCommand) | Completed |
 | DIA-008 | Require program not found | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs`; `crates/vhs-analyzer-lsp/src/server.rs` | T-DIA-070–T-DIA-072 | PAR-007 (RequireCommand) | Completed |
 | DIA-009 | Source file not found | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs`; `crates/vhs-analyzer-lsp/src/server.rs` | T-DIA-080–T-DIA-081 | PAR-007 (SourceCommand) | Completed |
 | DIA-010 | Diagnostic timing classification | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-072, T-DIA-090–T-DIA-093 | LSP-003 (didChange) | Completed |
-| DIA-011 | Unified diagnostic pipeline | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-090–T-DIA-092 | LSP-008 (publish_diagnostics) | Completed |
+| DIA-011 | Unified diagnostic pipeline | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-090–T-DIA-092, T-INT2-001, T-INT2-002 | LSP-008 (publish_diagnostics) | Completed |
 | DIA-012 | Heavyweight check cancellation | P1 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-091 | — | Completed |
 | DIA-013 | Invalid Screenshot extension | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-030–T-DIA-032 | PAR-007 (ScreenshotCommand) | Completed |
 
@@ -77,7 +77,16 @@ module and test references. The Builder MUST update the "Impl Module" and
 | No panics on arbitrary AST inputs | Lightweight diagnostic collectors | DIA-010 | T-DIA-093 |
 | No panics on arbitrary string content in Type | Safety detection algorithm | SAF-004 | T-SAF-070 |
 
-## 6. Cross-Phase Dependency Summary
+## 6. Batch 5 Integration Coverage
+
+| Test ID | Scenario | Coverage | Status |
+| --- | --- | --- | --- |
+| T-INT2-001 | Combined diagnostics | DIA-011, SAF-006, LSP-008 | Completed |
+| T-INT2-002 | Completion + diagnostics coexist | CMP-002, CMP-003, DIA-007, DIA-011 | Completed |
+| T-INT2-003 | Server version 0.2.0 | Batch 4 release contract (`serverInfo.version`) | Completed |
+| T-INT2-004 | Phase 1 hover + formatting preserved | HOV-001, HOV-002, FMT-001, LSP-005 | Completed |
+
+## 7. Cross-Phase Dependency Summary
 
 | Phase 2 Requirement | Phase 1 Dependency | Extension Type |
 | --- | --- | --- |
