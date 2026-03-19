@@ -83,7 +83,18 @@ batches:
     test_ids: "T-SAF-*"
     crate: vhs-analyzer-lsp
     depends_on: [batch1]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-19"
+    implementation_files:
+      - crates/vhs-analyzer-lsp/Cargo.toml
+      - crates/vhs-analyzer-lsp/src/server.rs
+      - crates/vhs-analyzer-lsp/src/diagnostics.rs
+      - crates/vhs-analyzer-lsp/src/safety.rs
+      - crates/vhs-analyzer-lsp/src/safety/patterns.rs
+      - crates/vhs-analyzer-lsp/tests/safety_tests.rs
+      - spec/phase2/SPEC_TRACEABILITY.md
+      - trace/phase2/status.yaml
+      - trace/phase2/tracker.md
   batch3:
     name: "Heavyweight Diagnostics + Pipeline (WS-2 remainder)"
     work_packages: [WS-2]
@@ -110,7 +121,7 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 163
+  automated_tests: 185
   ci_gate: true
   entries:
     - batch: batch1
@@ -137,6 +148,39 @@ builder_progress:
         - "Implemented missing Output, invalid Output extension, invalid Screenshot extension, duplicate Set, invalid MarginFill hex, and numeric range validation in crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs."
         - "Added 28 passing acceptance tests in crates/vhs-analyzer-lsp/tests/diagnostics_tests.rs covering T-DIA-001 through T-DIA-065 for the Batch 1 scope."
         - "Added a compatibility shim that suppresses specific Phase 1 parse errors for recoverable Output/Screenshot path variants and signed numeric setting values so the frozen Phase 2 semantic rules can run without mutating the Phase 1 lexer/parser baseline."
+      quality_gate:
+        cargo_fmt_all_check: pass
+        cargo_clippy_workspace_all_targets_all_features_locked: pass
+        cargo_test_workspace_all_targets_locked: pass
+    - batch: batch2
+      name: "Safety Engine (WS-3)"
+      status: completed
+      completed_at: "2026-03-19"
+      requirements:
+        - SAF-001
+        - SAF-002
+        - SAF-003
+        - SAF-004
+        - SAF-005
+        - SAF-006
+        - SAF-007
+      scenarios:
+        implemented:
+          - T-SAF-001 through T-SAF-005
+          - T-SAF-010 through T-SAF-012
+          - T-SAF-020 through T-SAF-022
+          - T-SAF-030 through T-SAF-031
+          - T-SAF-040 through T-SAF-043
+          - T-SAF-050 through T-SAF-052
+          - T-SAF-060 through T-SAF-061
+          - T-SAF-070
+        additional:
+          - Added a didChange regression test to confirm safety diagnostics publish immediately when risky Type content is introduced after open
+      notes:
+        - "Added a synchronous safety engine in crates/vhs-analyzer-lsp/src/safety.rs that extracts Type string arguments, normalizes command text, checks inline suppression comments, and emits LSP diagnostics."
+        - "Added a static regex-backed pattern database in crates/vhs-analyzer-lsp/src/safety/patterns.rs covering destructive filesystem, privilege escalation, remote execution, permission modification, and data exfiltration risks."
+        - "Integrated safety diagnostics into the existing lightweight diagnostic publication flow in crates/vhs-analyzer-lsp/src/diagnostics.rs so didOpen and didChange publish parse, semantic, and safety findings together."
+        - "Added 22 passing tests in crates/vhs-analyzer-lsp/tests/safety_tests.rs covering all Batch 2 acceptance scenarios plus a didChange pipeline regression."
       quality_gate:
         cargo_fmt_all_check: pass
         cargo_clippy_workspace_all_targets_all_features_locked: pass

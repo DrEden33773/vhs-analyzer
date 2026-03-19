@@ -61,13 +61,13 @@ module and test references. The Builder MUST update the "Impl Module" and
 
 | Req ID | Description | Priority | Planned Impl Module | Test IDs | Phase 1 Baseline | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| SAF-001 | Type directive content extraction | P0 | `crates/vhs-analyzer-lsp/src/safety.rs` | T-SAF-061 | PAR-007 (TypeCommand), LEX-007 | Not started |
-| SAF-002 | Dangerous command pattern database | P0 | `crates/vhs-analyzer-lsp/src/safety/patterns.rs` | T-SAF-001–T-SAF-031 | — | Not started |
-| SAF-003 | Risk severity levels | P0 | `crates/vhs-analyzer-lsp/src/safety.rs` | T-SAF-001–T-SAF-043 | — | Not started |
-| SAF-004 | Detection algorithm | P0 | `crates/vhs-analyzer-lsp/src/safety.rs` | T-SAF-060 | PAR-001 (TYPE_COMMAND) | Not started |
-| SAF-005 | Inline suppression mechanism | P1 | `crates/vhs-analyzer-lsp/src/safety.rs` | T-SAF-050–T-SAF-052 | — | Not started |
-| SAF-006 | Integration with diagnostic pipeline | P0 | `crates/vhs-analyzer-lsp/src/diagnostics.rs` | T-INT2-001 | DIA-011 (unified pipeline) | Not started |
-| SAF-007 | No false positives on benign commands | P0 | `crates/vhs-analyzer-lsp/src/safety/patterns.rs` | T-SAF-040–T-SAF-043 | — | Not started |
+| SAF-001 | Type directive content extraction | P0 | `crates/vhs-analyzer-lsp/src/safety.rs` | T-SAF-061 | PAR-007 (TypeCommand), LEX-007 | Completed |
+| SAF-002 | Dangerous command pattern database | P0 | `crates/vhs-analyzer-lsp/src/safety/patterns.rs` | T-SAF-001–T-SAF-031 | — | Completed |
+| SAF-003 | Risk severity levels | P0 | `crates/vhs-analyzer-lsp/src/safety.rs`; `crates/vhs-analyzer-lsp/src/safety/patterns.rs` | T-SAF-001–T-SAF-043 | — | Completed |
+| SAF-004 | Detection algorithm | P0 | `crates/vhs-analyzer-lsp/src/safety.rs`; `crates/vhs-analyzer-lsp/src/safety/patterns.rs` | T-SAF-060 | PAR-001 (TYPE_COMMAND) | Completed |
+| SAF-005 | Inline suppression mechanism | P1 | `crates/vhs-analyzer-lsp/src/safety.rs` | T-SAF-050–T-SAF-052 | — | Completed |
+| SAF-006 | Integration with diagnostic pipeline | P0 | `crates/vhs-analyzer-lsp/src/diagnostics.rs`; `crates/vhs-analyzer-lsp/src/server.rs` | T-INT2-001 | DIA-011 (unified pipeline) | Completed |
+| SAF-007 | No false positives on benign commands | P0 | `crates/vhs-analyzer-lsp/src/safety.rs`; `crates/vhs-analyzer-lsp/src/safety/patterns.rs` | T-SAF-040–T-SAF-043 | — | Completed |
 
 ## 5. Property-Based Testing Requirements
 

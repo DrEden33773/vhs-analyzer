@@ -1,7 +1,7 @@
 # Phase 2 Execution Tracker
 
 Phase: Intelligence & Diagnostics (Completion, Diagnostics, Safety)
-Status: In Progress — Batch 1 completed, Batch 2 pending
+Status: In Progress — Batches 1-2 completed, Batch 3 pending
 Started: 2026-03-19
 
 ## 1. Stage Progress
@@ -17,7 +17,7 @@ Started: 2026-03-19
 | Batch | Name | WS | Crate | Requirements | Depends On | Milestone | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Lightweight Diagnostic Rules | WS-2 | lsp | DIA-001~007, DIA-013 | — | — | completed |
-| 2 | Safety Engine | WS-3 | lsp | SAF-001~007 | B1 | — | not started |
+| 2 | Safety Engine | WS-3 | lsp | SAF-001~007 | B1 | — | completed |
 | 3 | Heavyweight Diagnostics + Pipeline | WS-2 | lsp | DIA-008~012 | B2 | Pipeline complete | not started |
 | 4 | Completion Provider | WS-1 | lsp | CMP-001~010 | B3 | All features complete | not started |
 | 5 | Integration + Closeout | — | both | T-INT2 + property | B4 | Phase 2 complete | not started |
@@ -78,3 +78,32 @@ Builder appends one record per completed batch below this line.
 - Notes:
   - Added a compatibility shim in `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` that suppresses specific Phase 1 parse diagnostics for recoverable `Output` and `Screenshot` path variants plus signed numeric setting values, allowing the frozen Phase 2 semantic contracts to hold without modifying the frozen Phase 1 lexer/parser behavior.
   - `DIA-010` and `DIA-011` are now partially wired for the `didChange` lightweight path and remain in progress until Batch 3 completes the heavyweight and save-time pipeline.
+
+### Batch 2 — Safety Engine
+
+- Date: 2026-03-19
+- Status: Completed
+- Requirements: `SAF-001`, `SAF-002`, `SAF-003`, `SAF-004`, `SAF-005`, `SAF-006`, `SAF-007`
+- Files:
+  - `crates/vhs-analyzer-lsp/Cargo.toml`
+  - `crates/vhs-analyzer-lsp/src/server.rs`
+  - `crates/vhs-analyzer-lsp/src/diagnostics.rs`
+  - `crates/vhs-analyzer-lsp/src/safety.rs`
+  - `crates/vhs-analyzer-lsp/src/safety/patterns.rs`
+  - `crates/vhs-analyzer-lsp/tests/safety_tests.rs`
+  - `spec/phase2/SPEC_TRACEABILITY.md`
+  - `trace/phase2/status.yaml`
+  - `trace/phase2/tracker.md`
+- Deliverables:
+  - Added a synchronous safety engine that extracts `Type` directive text, joins multiple string arguments, normalizes command content, and emits safety diagnostics from AST-only analysis.
+  - Added a static `regex::RegexSet`-backed pattern database covering destructive filesystem actions, privilege escalation, remote execution, permission modification, and data exfiltration signals.
+  - Added inline suppression support for `# vhs-analyzer-ignore: safety` and category-specific suppression such as `# vhs-analyzer-ignore: safety/destructive-fs`.
+  - Integrated safety diagnostics into the existing lightweight publication path so `didOpen` and `didChange` now publish parse, semantic, and safety diagnostics together.
+  - Added 22 passing tests in `crates/vhs-analyzer-lsp/tests/safety_tests.rs` covering all Batch 2 acceptance scenarios plus a `didChange` regression.
+- Quality gate:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
+- Notes:
+  - Pipe-sensitive remote execution patterns and the fork-bomb signature are matched without weakening per-stage detection for later pipeline stages like `echo hello | sudo rm -rf /`.
+  - Batch 3 still owns heavyweight diagnostics, didSave timing, and the final unified cache-aware pipeline described by `DIA-008` through `DIA-012`.

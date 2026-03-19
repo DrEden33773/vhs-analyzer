@@ -6,6 +6,8 @@
 
 #[path = "diagnostics.rs"]
 mod diagnostics;
+#[path = "safety.rs"]
+pub(crate) mod safety;
 
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};

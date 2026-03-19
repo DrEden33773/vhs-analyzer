@@ -9,7 +9,7 @@ mod semantic;
 use tower_lsp_server::ls_types::{Diagnostic, DiagnosticSeverity, Uri};
 use vhs_analyzer_core::syntax::SyntaxNode;
 
-use super::DocumentState;
+use super::{DocumentState, safety};
 
 pub(super) fn diagnostics_for_state(uri: &Uri, state: &DocumentState) -> Vec<Diagnostic> {
     let syntax = SyntaxNode::new_root(state.green.clone());
@@ -29,5 +29,6 @@ pub(super) fn diagnostics_for_state(uri: &Uri, state: &DocumentState) -> Vec<Dia
         .collect::<Vec<_>>();
 
     diagnostics.extend(analysis.diagnostics());
+    diagnostics.extend(safety::collect_safety_diagnostics(&syntax));
     diagnostics
 }
