@@ -52,35 +52,37 @@ or sequentially. The recommended ordering accounts for the WS-3 → WS-2
 soft dependency (safety diagnostics integrate into the diagnostic pipeline).
 
 ```text
-Batch 1: WS-2 — Diagnostic pipeline infrastructure
-         (lightweight semantic checks + heavyweight framework + didSave handler)
-         Establishes the unified pipeline that WS-3 plugs into.
-         Deliverables: DIA-001 through DIA-013, DocumentState extension,
-         didSave handler, cancellation tokens.
+Batch 1: WS-2 (partial) — Lightweight diagnostic rules
+         Pure synchronous AST analysis functions.
+         Deliverables: DIA-001, DIA-002, DIA-003~DIA-007, DIA-013.
+         Lightweight pipeline skeleton: didChange → parse + lightweight + publish.
 
 Batch 2: WS-3 — Safety check engine
-         (pattern database + detection algorithm + suppression + pipeline integration)
-         Leverages the diagnostic pipeline from Batch 1.
-         Deliverables: SAF-001 through SAF-007, regex pattern database,
-         LazyLock<RegexSet>, suppression comment scanning.
+         Pure synchronous regex pattern matching on Type directives.
+         Deliverables: SAF-001~SAF-007, regex pattern database, RegexSet,
+         suppression scanning. Plugs into Batch 1's didChange pipeline.
 
-Batch 3: WS-1 — Completion provider
-         (context resolution + item registries + snippets + theme data file)
-         Fully independent; can be parallelized with Batch 1-2 if desired.
-         Deliverables: CMP-001 through CMP-010, data/themes.txt,
+Batch 3: WS-2 (remainder) — Heavyweight diagnostics + pipeline unification
+         Async didSave handler, heavyweight checks, cancellation, full pipeline.
+         Deliverables: DIA-008~DIA-012, DocumentState extension,
+         didSave handler, CancellationToken, which crate integration.
+
+Batch 4: WS-1 — Completion provider
+         Context resolution, all item registries, snippets, theme data file.
+         Fully independent of Batch 1-3.
+         Deliverables: CMP-001~CMP-010, data/themes.txt,
          include_str! + LazyLock theme registry.
 
-Batch 4: Integration test + closeout
-         (cross-WS integration tests, property-based tests, Phase 1 regression)
-         Deliverables: T-INT2-001 through T-INT2-004, all property-based tests.
+Batch 5: Integration test + closeout
+         Cross-WS integration tests, property-based tests, Phase 1 regression.
+         Deliverables: T-INT2-001~T-INT2-004, property-based tests, tracking.
 ```
 
-**Parallel execution note:** Batch 3 (Completion) has zero dependency on
-Batch 1 or 2 and MAY run in parallel from the start. Batch 2 (Safety) has
-a soft dependency on Batch 1 (Diagnostics) via the unified pipeline
-integration point (DIA-011 / SAF-006). If running in parallel, the Builder
-should implement the safety detection logic first and defer pipeline
-integration to a sync point after Batch 1 completes.
+**Design rationale:** Diagnostics is split at the sync/async boundary.
+Batch 1-2 are purely synchronous (no async, no I/O), keeping cognitive
+load low. Batch 3 introduces all async complexity (tokio::spawn,
+CancellationToken, didSave) in one focused session. Batch 4 (Completion)
+has zero dependency on Batch 1-3 and could theoretically run in parallel.
 
 ## Cross-Phase Capability Extension
 
