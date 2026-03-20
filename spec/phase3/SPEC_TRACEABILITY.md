@@ -75,7 +75,17 @@ baseline requirement (if consuming one).
 | PKG-011 | Vitest configuration | `editors/code/vitest.config.ts` | T-PKG-014 | — |
 | PKG-012 | Rust release profile | `Cargo.toml` (workspace) | T-PKG-009 | — |
 
-## 6. Resolved Design Decisions Traceability
+## 6. Batch 5 Integration Coverage
+
+| Test ID | Scenario | Coverage | Status |
+| --- | --- | --- | --- |
+| T-INT3-001 | Full activation → LSP handshake → hover | CLI-001, CLI-002, CLI-003, CLI-004, CLI-011 | Completed |
+| T-INT3-002 | CodeLens run → Preview shows result | CLS-001, CLS-002, CLS-003, PRV-001, PRV-002, PRV-003, PRV-004, PRV-009 | Completed |
+| T-INT3-003 | No-server mode → CodeLens + Preview work without LSP | CLI-009, CLS-001, CLS-002, PRV-001, PRV-003, PRV-004 | Completed |
+| T-INT3-004 | Platform VSIX install → bundled binary activates | CLI-001, PKG-001, PKG-002, PKG-003 | Deferred (MAY) |
+| T-INT3-005 | Universal VSIX → no-server mode | CLI-009, PKG-009 | Deferred (MAY) |
+
+## 7. Resolved Design Decisions Traceability
 
 | Decision ID | Spec | Affects Requirements | Affects Tests |
 | --- | --- | --- | --- |
@@ -99,7 +109,7 @@ baseline requirement (if consuming one).
 | RD-PKG-05 | SPEC_PACKAGING.md | PKG-006, PKG-008 | T-PKG-016, T-PKG-017 |
 | RD-PKG-06 | SPEC_PACKAGING.md | PKG-008 | T-PKG-018 |
 
-## 7. Cross-Phase Dependency Index
+## 8. Cross-Phase Dependency Index
 
 | Phase 3 Req | Phase 1/2 Baseline | Dependency Type |
 | --- | --- | --- |

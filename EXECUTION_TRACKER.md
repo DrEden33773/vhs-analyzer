@@ -5,9 +5,9 @@ This file is an **index** — phase-specific details live in `trace/<phase>/`.
 
 ## 1. Snapshot
 
-- Date: 2026-03-19
+- Date: 2026-03-20
 - Workspace: `vhs-analyzer`
-- Current Phase: **Phase 3** — not started; Phase 2 is complete
+- Current Phase: **Complete** — Phase 3 finished and all planned phases are closed out
 
 ## 2. Responsibility Boundaries
 
@@ -27,11 +27,11 @@ Legend: `[x]` completed, `[~]` in progress, `[ ]` not started
   - [x] Architect Stage B (spec freeze — 17 FC resolved, 42 reqs, 105 tests)
   - [x] Builder (Lexer → Parser → LSP Core → Hover + Formatting → Integration closeout)
 - [x] Phase 2: Intelligence & Diagnostics → [details](trace/phase2/tracker.md)
-- [ ] Phase 3: VSCode Extension Client
+- [x] Phase 3: VSCode Extension Client → [details](trace/phase3/tracker.md)
 
 Progress score (all phases): see `trace/` archives for current per-phase detail
 
-Current automated tests: `224`
+Current automated tests: `287`
 
 ## 4. Pending Tasks with Planned LLM Ownership
 
@@ -46,7 +46,7 @@ Current automated tests: `224`
 
 - [x] Implement Phase 1 from frozen specs (Lexer, Parser, tower-lsp-server, Hover, integration closeout)
 - [x] Implement Phase 2 from frozen specs (Completion, Diagnostics, Safety)
-- [ ] Implement Phase 3 from frozen specs (VSCode client, Preview, CodeLens, CI/CD)
+- [x] Implement Phase 3 from frozen specs (VSCode client, Preview, CodeLens, CI/CD)
 
 ### 4.3 Shared with Boundary Control
 
@@ -64,4 +64,4 @@ Each directory contains `status.yaml` (machine-readable) and `tracker.md`
 | Pre-Phase 1 | Completed | 2026-03-18 | 2026-03-18 | — |
 | Phase 1 | Completed | 2026-03-18 | 2026-03-19 | [trace/phase1/](trace/phase1/) |
 | Phase 2 | Completed | 2026-03-19 | 2026-03-19 | [trace/phase2/](trace/phase2/) |
-| Phase 3 | Not Started | — | — | — |
+| Phase 3 | Completed | 2026-03-19 | 2026-03-20 | [trace/phase3/](trace/phase3/) |

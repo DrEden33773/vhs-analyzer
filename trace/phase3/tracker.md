@@ -1,8 +1,9 @@
 # Phase 3 Execution Tracker
 
 Phase: VSCode Extension Client (Client, Preview, CodeLens, Packaging)
-Status: In Progress (Architect Stage A complete)
+Status: Completed — all 5 batches completed
 Started: 2026-03-19
+Completed: 2026-03-20
 
 ## 1. Stage Progress
 
@@ -10,7 +11,7 @@ Started: 2026-03-19
 | --- | --- | --- | --- | --- |
 | Architect Stage A | Claude | Completed | 2026-03-19 | 4 exploratory specs + updated README (43 reqs, 19 FCs) |
 | Architect Stage B | Claude | Completed | 2026-03-20 | 6 frozen specs + test matrix + traceability |
-| Builder | Builder | In Progress | — | 5 batches (scaffold + client, preview, codelens, packaging, integration) |
+| Builder | Builder | Completed | 2026-03-20 | 5 batches completed, integration closeout done |
 
 ## 2. Builder Batch Plan (5 Batches)
 
@@ -20,7 +21,7 @@ Started: 2026-03-19
 | 2 | Live Preview Webview | WS-2 | editors/code | PRV-* | B1 | Preview renders GIF | completed |
 | 3 | CodeLens & Commands | WS-3 | editors/code | CLS-* | B1 | Run button works | completed |
 | 4 | Platform Packaging & CI/CD | WS-4 | editors/code + .github | PKG-* | B2, B3 | VSIX builds for all targets | completed |
-| 5 | Integration + Closeout | — | editors/code | T-INT3 | B4 | Phase 3 complete | not started |
+| 5 | Integration + Closeout | — | editors/code | T-INT3 | B4 | Phase 3 complete | completed |
 
 ## 3. Dependency Constraints
 
@@ -144,3 +145,38 @@ Builder appends one record per completed batch below this line.
 - Notes:
   - The final bundled extension size is 379.41 KB, still below the 500 KB packaging target.
   - Local VSIX smoke checks now contain only `package.json`, `language-configuration.json`, `README.md`, `LICENSE`, `CHANGELOG.md`, `syntaxes/tape.tmLanguage.json`, and `dist/extension.js`, with no shipped `media/preview.css`.
+
+### Batch 5 — Completed (2026-03-20)
+
+- Scope: integration coverage for the frozen extension feature set plus final Phase 3 closeout records.
+- Requirements: cross-cutting `T-INT3-*` coverage for activation/LSP, CodeLens/Preview, and no-server fallback.
+- Files:
+  - `editors/code/src/integration.test.ts`
+  - `editors/code/package.json`
+  - `editors/code/README.md`
+  - `editors/code/CHANGELOG.md`
+  - `editors/code/icon.png`
+  - `spec/phase3/SPEC_TRACEABILITY.md`
+  - `trace/phase3/status.yaml`
+  - `trace/phase3/tracker.md`
+  - `STATUS.yaml`
+  - `EXECUTION_TRACKER.md`
+- Deliverables:
+  - Added `editors/code/src/integration.test.ts` with three process-level integration tests covering `T-INT3-001` through `T-INT3-003`: bundled activation + hover, CodeLens-driven Run & Preview, and no-server mode retaining CodeLens + Preview.
+  - Introduced a minimal stdio LSP harness and fake `vhs` command fixture so the tests exercise the real activation flow, bundled binary discovery, `ExecutionManager`, `PreviewManager`, and command wiring without relying on a VS Code host process.
+  - Replaced the placeholder extension README with marketplace-ready installation and feature documentation, expanded the `0.3.0` changelog entry, and added an extension icon wired through `editors/code/package.json`.
+  - Updated Phase 3 traceability and status artifacts, and marked the root indexes as completed while explicitly deferring the optional MAY E2E scenarios `T-INT3-004` and `T-INT3-005`.
+- Quality gate:
+  - `pnpm run lint`
+  - `pnpm run typecheck`
+  - `pnpm run test`
+  - `pnpm run build`
+  - `pnpm exec vsce ls --no-dependencies`
+  - `pnpm exec vsce package --no-dependencies`
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test --workspace --all-targets --locked`
+  - `cargo build --release -p vhs-analyzer-lsp --locked`
+- Notes:
+  - Batch 5 closes Phase 3 with 62 TypeScript tests and 225 Rust tests green locally.
+  - The optional E2E install-path scenarios remain deferred because they are MAY coverage in the frozen matrix and would require a full VS Code host harness beyond the current Vitest-based integration boundary.

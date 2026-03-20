@@ -1,7 +1,7 @@
 phase: phase3_vscode_extension_client
-status: in_progress
+status: completed
 started_at: "2026-03-19"
-completed_at: null
+completed_at: "2026-03-20"
 
 stages:
   architect_stage_a:
@@ -38,8 +38,8 @@ stages:
       freeze_candidates_resolved: 19
       test_scenarios_total: 87
   builder:
-    status: in_progress
-    completed_at: null
+    status: completed
+    completed_at: "2026-03-20"
     description: "Implement from frozen specs — Client, Preview, CodeLens, Packaging (5 batches)"
 
 spec_files:
@@ -154,10 +154,22 @@ batches:
     test_ids: "T-INT3-*"
     crate: editors/code
     depends_on: [batch4]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-20"
+    implementation_files:
+      - editors/code/src/integration.test.ts
+      - editors/code/package.json
+      - editors/code/README.md
+      - editors/code/CHANGELOG.md
+      - editors/code/icon.png
+      - spec/phase3/SPEC_TRACEABILITY.md
+      - trace/phase3/status.yaml
+      - trace/phase3/tracker.md
+      - STATUS.yaml
+      - EXECUTION_TRACKER.md
 
 builder_progress:
-  automated_tests: 59
+  automated_tests: 62
   ci_gate: true
   entries:
     - batch: batch1
@@ -342,6 +354,30 @@ builder_progress:
         - "Added the Batch 4 packaging pipeline: workspace release profile, six-target Rust build matrix, seven VSIX outputs, pre-release detection, dual registry publishing, and GitHub Release asset upload in `.github/workflows/release.yml`."
         - "Moved Preview styling into the bundled extension via a raw CSS import and `esbuild` API build script so `media/preview.css` is no longer required in the VSIX, matching the tightened packaging boundary."
         - "Updated `extension-ci.yml` to install pnpm before `actions/setup-node` cache resolution, kept pinned version verification, and added extension `LICENSE` and `CHANGELOG.md` files so local `vsce ls` and `vsce package --no-dependencies` smoke checks match the expected package contents."
+      quality_gate:
+        lint: passed
+        typecheck: passed
+        test: passed
+        build: passed
+        vsce_ls: passed
+        vsce_package: passed
+        cargo_fmt: passed
+        cargo_clippy: passed
+        cargo_test: passed
+        cargo_release_build: passed
+    - batch: batch5
+      name: "Integration Test + Closeout"
+      status: completed
+      completed_at: "2026-03-20"
+      requirements: []
+      scenarios:
+        - T-INT3-001
+        - T-INT3-002
+        - T-INT3-003
+      notes:
+        - "Added `editors/code/src/integration.test.ts` with process-level integration coverage for bundled activation + hover, CodeLens-driven Run & Preview, and no-server fallback behavior."
+        - "Used a minimal stdio LSP harness plus fake `vhs` command fixtures so the Batch 5 tests exercise the real activation, ExecutionManager, PreviewManager, and CodeLens wiring without a VS Code host process."
+        - "Documented the marketplace-facing extension package, added an extension icon, and updated Phase 3/root status indexes while leaving the optional MAY E2E scenarios (`T-INT3-004`, `T-INT3-005`) deferred."
       quality_gate:
         lint: passed
         typecheck: passed
