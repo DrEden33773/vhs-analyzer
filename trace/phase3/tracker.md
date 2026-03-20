@@ -116,4 +116,4 @@ Builder appends one record per completed batch below this line.
 - Notes:
   - File-level CodeLens placement now skips leading blank and comment lines, matching RD-CLS-01 without requiring the LSP server.
   - Output-level CodeLens actions can preview a specific artifact path while file-level "Run & Preview" continues to default to the first `Output`.
-  - The extension bundle size is now 377.8 KB after Batch 3 wiring, still within the packaging target budget.
+  - The extension bundle size is now 377.9 KB after Batch 3 wiring, still within the packaging target budget.

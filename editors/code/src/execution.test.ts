@@ -81,6 +81,8 @@ describe("ExecutionManager", () => {
     expect(childProcess.kill).toHaveBeenCalledWith("SIGTERM");
     expect(scheduledCallbacks).toHaveLength(1);
     expect(scheduledCallbacks[0]?.delayMs).toBe(3000);
+    expect(manager.getState(tapeUri)).toEqual({ kind: "idle" });
+    expect(__getCommandContext("vhs-analyzer.isRunning")).toBe(false);
 
     scheduledCallbacks[0]?.callback();
     expect(childProcess.kill).toHaveBeenLastCalledWith("SIGKILL");
@@ -92,7 +94,6 @@ describe("ExecutionManager", () => {
       name: "ExecutionFailure",
     });
     expect(manager.getState(tapeUri)).toEqual({ kind: "idle" });
-    expect(__getCommandContext("vhs-analyzer.isRunning")).toBe(false);
     expect(clearScheduled).toHaveBeenCalledWith(timerHandle);
   });
 

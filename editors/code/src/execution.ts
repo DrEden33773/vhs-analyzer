@@ -126,6 +126,8 @@ export class ExecutionManager {
           active.process.kill("SIGKILL");
         }
       }, cancellationGracePeriodMs);
+      this.setState(tapeUri, { kind: "idle" });
+      await this.updateRunningContext();
     }
 
     return true;
@@ -353,7 +355,7 @@ export class ExecutionManager {
   private async updateRunningContext(): Promise<void> {
     await this.dependencies.setContext(
       runningContextKey,
-      this.running.size > 0,
+      [...this.running.values()].some((active) => !active.cancelled),
     );
   }
 
