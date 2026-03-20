@@ -65,8 +65,8 @@ baseline requirement (if consuming one).
 | PKG-001 | Target platform matrix | `.github/workflows/release.yml` | T-PKG-001..T-PKG-007 | — |
 | PKG-002 | Rust binary cross-compilation | `.github/workflows/release.yml` | T-PKG-008, T-PKG-009 | LSP-001 (binary) |
 | PKG-003 | Extension manifest | `editors/code/package.json` | T-PKG-015 | CLI-006, CLI-008, CLS-002 |
-| PKG-004 | esbuild bundle configuration | `editors/code/package.json` (build script) | T-PKG-010, T-PKG-011 | — |
-| PKG-005 | pnpm + vsce compatibility | `editors/code/.vscodeignore`, `editors/code/package.json` | T-PKG-015 | — |
+| PKG-004 | esbuild bundle configuration | `editors/code/package.json`, `editors/code/scripts/build.mjs` | T-PKG-010, T-PKG-011 | — |
+| PKG-005 | pnpm + vsce compatibility | `editors/code/.vscodeignore`, `editors/code/package.json`, `editors/code/scripts/build.mjs`, `editors/code/src/preview.ts`, `.github/workflows/release.yml` | T-PKG-015 | — |
 | PKG-006 | GitHub Actions release workflow | `.github/workflows/release.yml` | T-PKG-016..T-PKG-019 | — |
 | PKG-007 | TypeScript CI pipeline | `.github/workflows/extension-ci.yml` | T-PKG-012, T-PKG-013, T-PKG-014 | — |
 | PKG-008 | Publishing strategy | `.github/workflows/release.yml` | T-PKG-018 | — |

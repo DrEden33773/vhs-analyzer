@@ -132,11 +132,21 @@ batches:
   batch4:
     name: "Platform Packaging & CI/CD (WS-4 completion)"
     work_packages: [WS-4]
-    requirements: []
+    requirements:
+      - PKG-001
+      - PKG-002
+      - PKG-003
+      - PKG-004
+      - PKG-005
+      - PKG-006
+      - PKG-008
+      - PKG-009
+      - PKG-012
     test_ids: "T-PKG-*"
     crate: editors/code
     depends_on: [batch2, batch3]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-20"
   batch5:
     name: "Integration Test + Closeout"
     work_packages: []
@@ -293,3 +303,53 @@ builder_progress:
         cargo_fmt: passed
         cargo_clippy: passed
         cargo_test: passed
+    - batch: batch4
+      name: "Platform Packaging & CI/CD (WS-4 completion)"
+      status: completed
+      completed_at: "2026-03-20"
+      requirements:
+        - PKG-001
+        - PKG-002
+        - PKG-003
+        - PKG-004
+        - PKG-005
+        - PKG-006
+        - PKG-008
+        - PKG-009
+        - PKG-012
+      scenarios:
+        - T-PKG-001
+        - T-PKG-002
+        - T-PKG-003
+        - T-PKG-004
+        - T-PKG-005
+        - T-PKG-006
+        - T-PKG-007
+        - T-PKG-008
+        - T-PKG-009
+        - T-PKG-010
+        - T-PKG-011
+        - T-PKG-012
+        - T-PKG-013
+        - T-PKG-014
+        - T-PKG-015
+        - T-PKG-016
+        - T-PKG-017
+        - T-PKG-018
+        - T-PKG-019
+        - T-PKG-020
+      notes:
+        - "Added the Batch 4 packaging pipeline: workspace release profile, six-target Rust build matrix, seven VSIX outputs, pre-release detection, dual registry publishing, and GitHub Release asset upload in `.github/workflows/release.yml`."
+        - "Moved Preview styling into the bundled extension via a raw CSS import and `esbuild` API build script so `media/preview.css` is no longer required in the VSIX, matching the tightened packaging boundary."
+        - "Updated `extension-ci.yml` to rely on Corepack for the pinned pnpm version and added extension `LICENSE` and `CHANGELOG.md` files so local `vsce ls` and `vsce package --no-dependencies` smoke checks match the expected package contents."
+      quality_gate:
+        lint: passed
+        typecheck: passed
+        test: passed
+        build: passed
+        vsce_ls: passed
+        vsce_package: passed
+        cargo_fmt: passed
+        cargo_clippy: passed
+        cargo_test: passed
+        cargo_release_build: passed

@@ -1,5 +1,7 @@
 src/
+scripts/
 node_modules/
+media/preview.css
 *.ts
 tsconfig.json
 biome.json

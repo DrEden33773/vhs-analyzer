@@ -10,6 +10,7 @@
     "url": "https://github.com/DrEden33773/vhs-analyzer"
   },
   "engines": {
+    "node": ">=18.0.0",
     "vscode": "^1.85.0"
   },
   "categories": [
@@ -150,8 +151,8 @@
     ]
   },
   "scripts": {
-    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
-    "watch": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
+    "build": "node ./scripts/build.mjs",
+    "watch": "node ./scripts/build.mjs --watch",
     "lint": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",

@@ -43,10 +43,7 @@ describe("PreviewManager", () => {
     expect(panel?.options.enableScripts).toBe(true);
     expect(panel?.options.retainContextWhenHidden).toBe(true);
     expect(panel?.options.localResourceRoots).toEqual(
-      expect.arrayContaining([
-        Uri.file("/workspace"),
-        Uri.file("/extension/media"),
-      ]),
+      expect.arrayContaining([Uri.file("/workspace")]),
     );
   });
 
@@ -406,11 +403,13 @@ describe("preview html helpers", () => {
   it("preview_html_contains_csp_state_containers_and_message_handling", () => {
     const html = createPreviewHtml({
       cspSource: "mock-webview-source",
+      inlineStyles: "body { color: red; }",
       nonce: "nonce123",
-      stylesheetUri: "/preview.css",
     });
 
     expect(html).toContain("Content-Security-Policy");
+    expect(html).toContain("<style>body { color: red; }</style>");
+    expect(html).not.toContain('<link rel="stylesheet"');
     expect(html).toContain("acquireVsCodeApi()");
     expect(html).toContain('addEventListener("message"');
     expect(html).toContain('id="prompt"');

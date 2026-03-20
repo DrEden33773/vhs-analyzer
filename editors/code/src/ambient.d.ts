@@ -1,3 +1,8 @@
+declare module "*?raw" {
+  const content: string;
+  export default content;
+}
+
 declare module "which" {
   export interface WhichOptions {
     all?: boolean;

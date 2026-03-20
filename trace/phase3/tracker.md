@@ -19,7 +19,7 @@ Started: 2026-03-19
 | 1 | LSP Client + Project Scaffold | WS-1 + WS-4 | editors/code | CLI-* + PKG scaffold | — | Extension activates | completed |
 | 2 | Live Preview Webview | WS-2 | editors/code | PRV-* | B1 | Preview renders GIF | completed |
 | 3 | CodeLens & Commands | WS-3 | editors/code | CLS-* | B1 | Run button works | completed |
-| 4 | Platform Packaging & CI/CD | WS-4 | editors/code + .github | PKG-* | B2, B3 | VSIX builds for all targets | not started |
+| 4 | Platform Packaging & CI/CD | WS-4 | editors/code + .github | PKG-* | B2, B3 | VSIX builds for all targets | completed |
 | 5 | Integration + Closeout | — | editors/code | T-INT3 | B4 | Phase 3 complete | not started |
 
 ## 3. Dependency Constraints
@@ -117,3 +117,30 @@ Builder appends one record per completed batch below this line.
   - File-level CodeLens placement now skips leading blank and comment lines, matching RD-CLS-01 without requiring the LSP server.
   - Output-level CodeLens actions can preview a specific artifact path while file-level "Run & Preview" continues to default to the first `Output`.
   - The extension bundle size is now 377.9 KB after Batch 3 wiring, still within the packaging target budget.
+
+### Batch 4 — Completed (2026-03-20)
+
+- Scope: WS-4 packaging completion, release automation, and final VSIX asset shaping for the existing extension features.
+- Requirements: PKG-001, PKG-002, PKG-003, PKG-004, PKG-005, PKG-006, PKG-008, PKG-009, PKG-012.
+- Implementation:
+  - Added workspace-level Rust release optimizations in `Cargo.toml` and created `.github/workflows/release.yml` with the lint-and-test → build-rust → package-vsix → publish pipeline, six Rust targets, seven VSIX outputs, pre-release detection, dual publishing, and GitHub Release asset upload.
+  - Replaced the Preview panel's runtime stylesheet file dependency with a bundled raw CSS import backed by `editors/code/scripts/build.mjs`, keeping `media/preview.css` as source while removing it from the shipped VSIX.
+  - Tightened the extension packaging boundary via `editors/code/.vscodeignore`, added `editors/code/LICENSE` and `editors/code/CHANGELOG.md`, and updated `.github/workflows/extension-ci.yml` to use Corepack with the pinned pnpm version.
+- Tests:
+  - TypeScript: `pnpm run test` → 59/59 passing (`server.test.ts`, `config.test.ts`, `dependencies.test.ts`, `extension.test.ts`, `utils.test.ts`, `execution.test.ts`, `preview.test.ts`, `codelens.test.ts`).
+  - Rust regression: `cargo test --workspace --all-targets --locked` → 225/225 passing.
+  - Packaging smoke checks: `pnpm exec vsce ls --no-dependencies`, `pnpm exec vsce package --no-dependencies`, and `cargo build --release -p vhs-analyzer-lsp --locked` → passed.
+- Quality gate:
+  - `pnpm run lint` passed.
+  - `pnpm run typecheck` passed.
+  - `pnpm run test` passed.
+  - `pnpm run build` passed.
+  - `pnpm exec vsce ls --no-dependencies` passed.
+  - `pnpm exec vsce package --no-dependencies` passed.
+  - `cargo fmt --all -- --check` passed.
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` passed.
+  - `cargo test --workspace --all-targets --locked` passed.
+  - `cargo build --release -p vhs-analyzer-lsp --locked` passed.
+- Notes:
+  - The final bundled extension size is 379.41 KB, still below the 500 KB packaging target.
+  - Local VSIX smoke checks now contain only `package.json`, `language-configuration.json`, `README.md`, `LICENSE`, `CHANGELOG.md`, `syntaxes/tape.tmLanguage.json`, and `dist/extension.js`, with no shipped `media/preview.css`.

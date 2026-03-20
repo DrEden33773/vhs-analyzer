@@ -10,6 +10,7 @@ import {
   window,
   workspace,
 } from "vscode";
+import previewStyles from "../media/preview.css?raw";
 
 import { getExtensionConfiguration } from "./config";
 import {
@@ -262,14 +263,8 @@ export class PreviewPanel {
 
     panel.webview.html = createPreviewHtml({
       cspSource: panel.webview.cspSource,
+      inlineStyles: previewStyles,
       nonce: createNonce(),
-      stylesheetUri: panel.webview
-        .asWebviewUri(
-          Uri.file(
-            path.join(dependencies.extensionPath, "media", "preview.css"),
-          ),
-        )
-        .toString(),
     });
 
     return new PreviewPanel(
@@ -515,8 +510,6 @@ export function buildLocalResourceRoots(options: {
   workspaceFolders: readonly Uri[];
 }): Uri[] {
   const roots = new Map<string, Uri>();
-  const mediaDirectory = Uri.file(path.join(options.extensionPath, "media"));
-  roots.set(mediaDirectory.fsPath, mediaDirectory);
 
   for (const workspaceFolder of options.workspaceFolders) {
     roots.set(workspaceFolder.fsPath, workspaceFolder);
@@ -539,10 +532,11 @@ export function buildLocalResourceRoots(options: {
 
 export function createPreviewHtml(options: {
   cspSource: string;
+  inlineStyles: string;
   nonce: string;
-  stylesheetUri: string;
 }): string {
   const escapedMissingVhsMessage = JSON.stringify(missingVhsMessage);
+  const escapedInlineStyles = escapeInlineStyle(options.inlineStyles);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -550,7 +544,7 @@ export function createPreviewHtml(options: {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${options.cspSource}; media-src ${options.cspSource}; style-src ${options.cspSource} 'unsafe-inline'; script-src 'nonce-${options.nonce}';">
-  <link rel="stylesheet" href="${options.stylesheetUri}">
+  <style>${escapedInlineStyles}</style>
   <title>VHS Preview</title>
 </head>
 <body>
@@ -683,6 +677,10 @@ function escapeHtmlAttribute(value: string): string {
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
+}
+
+function escapeInlineStyle(value: string): string {
+  return value.replaceAll("</style", "<\\/style");
 }
 
 function isWithinDirectory(directoryPath: string, filePath: string): boolean {

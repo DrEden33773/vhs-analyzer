@@ -1,0 +1,319 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: editors/code/pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Verify pinned pnpm version
+        working-directory: editors/code
+        run: test "$(pnpm --version)" = "10.32.1"
+
+      - name: Install extension dependencies
+        working-directory: editors/code
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Typecheck extension
+        working-directory: editors/code
+        run: pnpm run typecheck
+
+      - name: Lint extension
+        working-directory: editors/code
+        run: pnpm run lint
+
+      - name: Test extension
+        working-directory: editors/code
+        run: pnpm run test
+
+      - name: Build extension bundle
+        working-directory: editors/code
+        run: pnpm run build
+
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --check
+
+      - name: Lint Rust workspace
+        run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+
+      - name: Test Rust workspace
+        run: cargo test --workspace --all-targets --locked
+
+  build-rust:
+    needs: lint-and-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact_name: vhs-analyzer-x86_64-pc-windows-msvc
+            binary_name: vhs-analyzer.exe
+            os: windows-latest
+            rust_target: x86_64-pc-windows-msvc
+            use_cross: false
+          - artifact_name: vhs-analyzer-aarch64-apple-darwin
+            binary_name: vhs-analyzer
+            os: macos-14
+            rust_target: aarch64-apple-darwin
+            use_cross: false
+          - artifact_name: vhs-analyzer-x86_64-apple-darwin
+            binary_name: vhs-analyzer
+            os: macos-13
+            rust_target: x86_64-apple-darwin
+            use_cross: false
+          - artifact_name: vhs-analyzer-x86_64-unknown-linux-gnu
+            binary_name: vhs-analyzer
+            os: ubuntu-latest
+            rust_target: x86_64-unknown-linux-gnu
+            use_cross: false
+          - artifact_name: vhs-analyzer-aarch64-unknown-linux-gnu
+            binary_name: vhs-analyzer
+            os: ubuntu-latest
+            rust_target: aarch64-unknown-linux-gnu
+            use_cross: true
+          - artifact_name: vhs-analyzer-x86_64-unknown-linux-musl
+            binary_name: vhs-analyzer
+            os: ubuntu-latest
+            rust_target: x86_64-unknown-linux-musl
+            use_cross: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cross
+        if: ${{ matrix.use_cross }}
+        run: cargo install cross --locked
+
+      - name: Build Rust binary with cargo
+        if: ${{ !matrix.use_cross }}
+        run: cargo build --release --locked --target ${{ matrix.rust_target }} -p vhs-analyzer-lsp
+
+      - name: Build Rust binary with cross
+        if: ${{ matrix.use_cross }}
+        run: cross build --release --locked --target ${{ matrix.rust_target }} -p vhs-analyzer-lsp
+
+      - name: Upload Rust binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: target/${{ matrix.rust_target }}/release/${{ matrix.binary_name }}
+
+  package-vsix:
+    needs:
+      - lint-and-test
+      - build-rust
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - binary_artifact: vhs-analyzer-x86_64-pc-windows-msvc
+            binary_name: vhs-analyzer.exe
+            include_binary: true
+            package_suffix: win32-x64
+            vsce_target: win32-x64
+          - binary_artifact: vhs-analyzer-aarch64-apple-darwin
+            binary_name: vhs-analyzer
+            include_binary: true
+            package_suffix: darwin-arm64
+            vsce_target: darwin-arm64
+          - binary_artifact: vhs-analyzer-x86_64-apple-darwin
+            binary_name: vhs-analyzer
+            include_binary: true
+            package_suffix: darwin-x64
+            vsce_target: darwin-x64
+          - binary_artifact: vhs-analyzer-x86_64-unknown-linux-gnu
+            binary_name: vhs-analyzer
+            include_binary: true
+            package_suffix: linux-x64
+            vsce_target: linux-x64
+          - binary_artifact: vhs-analyzer-aarch64-unknown-linux-gnu
+            binary_name: vhs-analyzer
+            include_binary: true
+            package_suffix: linux-arm64
+            vsce_target: linux-arm64
+          - binary_artifact: vhs-analyzer-x86_64-unknown-linux-musl
+            binary_name: vhs-analyzer
+            include_binary: true
+            package_suffix: alpine-x64
+            vsce_target: alpine-x64
+          - binary_artifact: ""
+            binary_name: ""
+            include_binary: false
+            package_suffix: universal
+            vsce_target: ""
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: editors/code/pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Verify pinned pnpm version
+        working-directory: editors/code
+        run: test "$(pnpm --version)" = "10.32.1"
+
+      - name: Install extension dependencies
+        working-directory: editors/code
+        run: pnpm install --frozen-lockfile
+
+      - name: Build extension bundle
+        working-directory: editors/code
+        run: pnpm run build
+
+      - name: Read extension version
+        id: package_meta
+        working-directory: editors/code
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Download Rust binary
+        if: ${{ matrix.include_binary }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.binary_artifact }}
+          path: binary
+
+      - name: Prepare bundled binary
+        if: ${{ matrix.include_binary }}
+        working-directory: editors/code
+        run: |
+          mkdir -p server
+          cp "../binary/${{ matrix.binary_name }}" "server/${{ matrix.binary_name }}"
+          chmod +x "server/${{ matrix.binary_name }}"
+
+      - name: Package VSIX
+        working-directory: editors/code
+        run: |
+          mkdir -p ../release-assets
+          if [ "${{ matrix.include_binary }}" = "true" ]; then
+            pnpm exec vsce package --target "${{ matrix.vsce_target }}" --no-dependencies --out "../release-assets/vhs-analyzer-${{ steps.package_meta.outputs.version }}-${{ matrix.package_suffix }}.vsix"
+          else
+            pnpm exec vsce package --no-dependencies --out "../release-assets/vhs-analyzer-${{ steps.package_meta.outputs.version }}-${{ matrix.package_suffix }}.vsix"
+          fi
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.package_suffix }}
+          path: editors/release-assets/vhs-analyzer-${{ steps.package_meta.outputs.version }}-${{ matrix.package_suffix }}.vsix
+
+  publish:
+    needs: package-vsix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: editors/code/pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Verify pinned pnpm version
+        working-directory: editors/code
+        run: test "$(pnpm --version)" = "10.32.1"
+
+      - name: Install extension dependencies
+        working-directory: editors/code
+        run: pnpm install --frozen-lockfile
+
+      - name: Compute release metadata
+        id: release_meta
+        run: |
+          version=$(node -p "require('./editors/code/package.json').version")
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            release_tag="${GITHUB_REF_NAME}"
+          else
+            release_tag="v${version}"
+          fi
+
+          echo "package_version=${version}" >> "$GITHUB_OUTPUT"
+          echo "release_tag=${release_tag}" >> "$GITHUB_OUTPUT"
+
+          if [[ "${release_tag}" == *-* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download VSIX artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: release-assets
+          pattern: vsix-*
+
+      - name: Publish to VSCode Marketplace and Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          prerelease_flag=()
+          if [ "${{ steps.release_meta.outputs.is_prerelease }}" = "true" ]; then
+            prerelease_flag+=(--pre-release)
+          fi
+
+          for vsix in release-assets/*.vsix; do
+            pnpm --dir editors/code exec vsce publish --pat "${VSCE_PAT}" --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}"
+            npx ovsx -p "${OVSX_PAT}" publish --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}"
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*.vsix
+          name: ${{ steps.release_meta.outputs.release_tag }}
+          prerelease: ${{ steps.release_meta.outputs.is_prerelease }}
+          tag_name: ${{ steps.release_meta.outputs.release_tag }}
+          target_commitish: ${{ github.sha }}
