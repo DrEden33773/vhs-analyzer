@@ -127,16 +127,16 @@ Operational progress for these items will be tracked in `STATUS.yaml` and `EXECU
 
 ### Phase 2: Diagnostics & Autocomplete
 
-1. [ ] Implement semantic validation (syntax errors, invalid paths).
-2. [ ] Implement Safety Check Engine (warn on destructive commands).
-3. [ ] Implement `textDocument/completion` provider.
+1. [x] Implement semantic validation (syntax errors, invalid paths).
+2. [x] Implement Safety Check Engine (warn on destructive commands).
+3. [x] Implement `textDocument/completion` provider.
 
 ### Phase 3: Extension Client
 
-1. [ ] Develop TypeScript client using `vscode-languageclient`.
-2. [ ] Build Live Preview Webview.
-3. [ ] Implement runtime dependency detection (warn if `vhs`, `ttyd`, `ffmpeg` are missing).
-4. [ ] Setup multi-target CI/CD via `vsce`.
+1. [x] Develop TypeScript client using `vscode-languageclient`.
+2. [x] Build Live Preview Webview.
+3. [x] Implement runtime dependency detection (warn if `vhs`, `ttyd`, `ffmpeg` are missing).
+4. [x] Setup multi-target CI/CD via `vsce`.
 
 ---
 

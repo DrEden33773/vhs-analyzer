@@ -40,7 +40,7 @@ Current automated tests: `287`
 - [x] Draft Phase 1 Stage A specs
 - [x] Freeze Phase 1 Stage B specs
 - [x] Design Phase 2 validation matrix and autocomplete heuristics
-- [ ] Define Phase 3 Extension API, Webview messaging protocol, and CI packaging spec
+- [x] Define Phase 3 Extension API, Webview messaging protocol, and CI packaging spec
 
 ### 4.2 Builder-Owned
 

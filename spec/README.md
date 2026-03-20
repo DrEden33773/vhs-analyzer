@@ -67,11 +67,12 @@ Phase 2 spec files:
 - `phase2/SPEC_TEST_MATRIX.md`: Phase 2 acceptance test matrix
 - `phase2/SPEC_TRACEABILITY.md`: Phase 2 requirement-to-implementation mapping
 
-## Phase 3: VSCode Extension Client (Not Started)
+## Phase 3: VSCode Extension Client (Completed)
 
-Phase 3 builds the TypeScript VSCode/Cursor extension and CI/CD pipeline.
+Phase 3 built the TypeScript VSCode/Cursor extension and CI/CD pipeline. The
+specs are frozen and the Builder implementation is complete.
 
-Planned spec files:
+Phase 3 spec files:
 
 - `phase3/SPEC_CLIENT.md`: `vscode-languageclient` integration, LSP binary discovery and launch, configuration schema
 - `phase3/SPEC_PREVIEW.md`: side-by-side Webview for GIF/MP4 preview, file watcher, auto-refresh
