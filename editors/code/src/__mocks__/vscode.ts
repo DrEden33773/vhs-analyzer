@@ -150,10 +150,17 @@ const commandHandlers = new Map<string, (...args: unknown[]) => unknown>();
 const commandContexts = new Map<string, unknown>();
 const configurationEmitter = new EventEmitter<ConfigurationChangeEvent>();
 const colorThemeEmitter = new EventEmitter<{ kind: number }>();
+const textDocumentEmitter = new EventEmitter<{
+  document: { languageId: string; uri: Uri };
+}>();
 const createdFileSystemWatchers: Array<
   ReturnType<typeof createFileSystemWatcher>
 > = [];
 const createdWebviewPanels: Array<ReturnType<typeof createWebviewPanel>> = [];
+const registeredCodeLensProviders: Array<{
+  provider: unknown;
+  selector: unknown;
+}> = [];
 
 function buildConfigurationKey(
   section: string | undefined,
@@ -319,6 +326,7 @@ export const workspace = {
   workspaceFolders: [] as Array<{ uri: Uri }>,
   getConfiguration: vi.fn((section?: string) => createConfiguration(section)),
   onDidChangeConfiguration: configurationEmitter.event,
+  onDidChangeTextDocument: textDocumentEmitter.event,
   createFileSystemWatcher: vi.fn((pattern: string) => {
     const watcher = createFileSystemWatcher(pattern);
     createdFileSystemWatchers.push(watcher);
@@ -330,6 +338,14 @@ export const window = {
   activeColorTheme: {
     kind: ColorThemeKind.Dark,
   } as { kind: number },
+  activeTextEditor: undefined as
+    | {
+        document: {
+          languageId: string;
+          uri: Uri;
+        };
+      }
+    | undefined,
   createWebviewPanel: vi.fn(
     (
       viewType: string,
@@ -362,6 +378,22 @@ export const window = {
 
 export const env = {
   openExternal: vi.fn(async () => true),
+};
+
+export const languages = {
+  registerCodeLensProvider: vi.fn((selector: unknown, provider: unknown) => {
+    const registration = {
+      provider,
+      selector,
+    };
+    registeredCodeLensProviders.push(registration);
+    return new Disposable(() => {
+      const index = registeredCodeLensProviders.indexOf(registration);
+      if (index !== -1) {
+        registeredCodeLensProviders.splice(index, 1);
+      }
+    });
+  }),
 };
 
 export const commands = {
@@ -430,6 +462,22 @@ export function __setWorkspaceFolders(paths: string[]): void {
   }));
 }
 
+export function __setActiveTextEditor(document: {
+  languageId: string;
+  uri: Uri;
+}): void {
+  window.activeTextEditor = {
+    document,
+  };
+}
+
+export function __fireTextDocumentChange(document: {
+  languageId: string;
+  uri: Uri;
+}): void {
+  textDocumentEmitter.fire({ document });
+}
+
 export function __getCommandContext(key: string): unknown {
   return commandContexts.get(key);
 }
@@ -452,6 +500,13 @@ export function __getLastCreatedWebviewPanel():
   return createdWebviewPanels.at(-1);
 }
 
+export function __getRegisteredCodeLensProviders(): Array<{
+  provider: unknown;
+  selector: unknown;
+}> {
+  return [...registeredCodeLensProviders];
+}
+
 export function __setActiveColorTheme(kind: number): void {
   window.activeColorTheme.kind = kind;
   colorThemeEmitter.fire({
@@ -463,6 +518,7 @@ export function __resetMockVscode(): void {
   workspace.workspaceFolders = [];
   configurationEmitter.dispose();
   colorThemeEmitter.dispose();
+  textDocumentEmitter.dispose();
 
   for (const [key, value] of Object.entries({
     "vhs-analyzer.server.path": "",
@@ -478,7 +534,9 @@ export function __resetMockVscode(): void {
   commandContexts.clear();
   createdFileSystemWatchers.length = 0;
   createdWebviewPanels.length = 0;
+  registeredCodeLensProviders.length = 0;
   window.activeColorTheme.kind = ColorThemeKind.Dark;
+  window.activeTextEditor = undefined;
 
   workspace.getConfiguration.mockClear();
   workspace.createFileSystemWatcher.mockClear();
@@ -489,6 +547,7 @@ export function __resetMockVscode(): void {
   window.showErrorMessage.mockClear();
   window.showQuickPick.mockClear();
   env.openExternal.mockClear();
+  languages.registerCodeLensProvider.mockClear();
   commands.registerCommand.mockClear();
   commands.executeCommand.mockClear();
 }

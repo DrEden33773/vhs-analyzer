@@ -28,6 +28,8 @@ export type ExecutionState =
 export interface ExecutionDependencies {
   clearScheduled: (timer: TimerHandle) => void;
   getWorkspaceFolders: () => readonly Uri[];
+  now: () => number;
+  outputChannel?: RunOutputChannelLike;
   readTapeFile: (tapeUri: Uri) => Promise<string>;
   schedule: (callback: () => void, delayMs: number) => TimerHandle;
   setContext: (key: string, value: boolean) => Promise<unknown>;
@@ -62,6 +64,11 @@ export interface SpawnedProcess {
   on(event: "exit", listener: (code: number | null) => void): this;
 }
 
+export interface RunOutputChannelLike {
+  appendLine(value: string): void;
+  show(preserveFocus?: boolean): void;
+}
+
 type TimerHandle = ReturnType<typeof setTimeout>;
 
 interface ActiveExecution {
@@ -92,6 +99,7 @@ export class ExecutionManager {
       clearScheduled: clearTimeout,
       getWorkspaceFolders: () =>
         (workspace.workspaceFolders ?? []).map((folder) => folder.uri),
+      now: Date.now,
       readTapeFile: async (tapeUri) => readFile(tapeUri.fsPath, "utf8"),
       schedule: setTimeout,
       setContext: async (key, value) =>
@@ -146,6 +154,10 @@ export class ExecutionManager {
       workingDirectory,
       tapeSource,
     );
+    const startedAt = this.dependencies.now();
+    this.writeOutputLine(
+      `[${formatTimestamp(startedAt)}] Running: vhs ${path.basename(tapeUri.fsPath)}`,
+    );
     const process = this.dependencies.spawnProcess("vhs", [tapeUri.fsPath], {
       cwd: workingDirectory,
     });
@@ -175,13 +187,14 @@ export class ExecutionManager {
         tapeUri,
       });
       void this.updateRunningContext();
-      this.attachStderrReader(tapeUri, active);
+      this.attachOutputReaders(tapeUri, active);
 
       process.on("error", (error) => {
         void this.finishFailure({
           active,
           error,
           reject,
+          startedAt,
           tapeUri,
         });
       });
@@ -191,6 +204,7 @@ export class ExecutionManager {
             active,
             artifactPath,
             resolve,
+            startedAt,
             tapeUri,
           });
           return;
@@ -200,25 +214,21 @@ export class ExecutionManager {
           active,
           code,
           reject,
+          startedAt,
           tapeUri,
         });
       });
     });
   }
 
-  private attachStderrReader(tapeUri: Uri, active: ActiveExecution): void {
-    if (active.process.stderr === null) {
-      return;
-    }
-
-    const reader = createInterface({
-      crlfDelay: Number.POSITIVE_INFINITY,
-      input: active.process.stderr,
+  private attachOutputReaders(tapeUri: Uri, active: ActiveExecution): void {
+    this.attachLineReader(active.process.stdout, (line) => {
+      this.writeOutputLine(line);
     });
-
-    reader.on("line", (line) => {
+    this.attachLineReader(active.process.stderr, (line) => {
       active.stderrLines.push(line);
       this.progressEmitter.fire({ line, tapeUri });
+      this.writeOutputLine(line);
     });
   }
 
@@ -226,6 +236,7 @@ export class ExecutionManager {
     active: ActiveExecution;
     code: number | null;
     reject: (reason: ExecutionFailure) => void;
+    startedAt: number;
     tapeUri: Uri;
   }): Promise<void> {
     const message =
@@ -236,6 +247,7 @@ export class ExecutionManager {
       this.cleanupActiveExecution(options.tapeUri, options.active);
       this.setState(options.tapeUri, { kind: "idle" });
       await this.updateRunningContext();
+      this.writeCompletionFooter(options.startedAt, options.code);
       options.reject(
         new ExecutionFailure("Execution cancelled.", {
           cancelled: true,
@@ -253,6 +265,8 @@ export class ExecutionManager {
       message,
     });
     await this.updateRunningContext();
+    this.writeCompletionFooter(options.startedAt, options.code);
+    this.dependencies.outputChannel?.show(true);
     options.reject(
       new ExecutionFailure(message, {
         cancelled: false,
@@ -266,6 +280,7 @@ export class ExecutionManager {
     active: ActiveExecution;
     error: Error;
     reject: (reason: ExecutionFailure) => void;
+    startedAt: number;
     tapeUri: Uri;
   }): Promise<void> {
     const message =
@@ -278,6 +293,8 @@ export class ExecutionManager {
       message,
     });
     await this.updateRunningContext();
+    this.writeCompletionFooter(options.startedAt, null);
+    this.dependencies.outputChannel?.show(true);
     options.reject(
       new ExecutionFailure(message, {
         cancelled: false,
@@ -291,6 +308,7 @@ export class ExecutionManager {
     active: ActiveExecution;
     artifactPath: string;
     resolve: (result: ExecutionResult) => void;
+    startedAt: number;
     tapeUri: Uri;
   }): Promise<void> {
     const format = inferOutputFormat(options.artifactPath);
@@ -302,6 +320,7 @@ export class ExecutionManager {
       kind: "complete",
     });
     await this.updateRunningContext();
+    this.writeCompletionFooter(options.startedAt, 0);
     options.resolve({
       artifactPath: options.artifactPath,
       format,
@@ -336,6 +355,38 @@ export class ExecutionManager {
       runningContextKey,
       this.running.size > 0,
     );
+  }
+
+  private attachLineReader(
+    stream: NodeJS.ReadableStream | null,
+    onLine: (line: string) => void,
+  ): void {
+    if (stream === null) {
+      return;
+    }
+
+    const reader = createInterface({
+      crlfDelay: Number.POSITIVE_INFINITY,
+      input: stream,
+    });
+    reader.on("line", onLine);
+  }
+
+  private writeCompletionFooter(
+    startedAt: number,
+    exitCode: number | null,
+  ): void {
+    const elapsedMs = this.dependencies.now() - startedAt;
+    const formattedExitCode = exitCode ?? "unknown";
+    this.writeOutputLine(
+      `[${formatTimestamp(this.dependencies.now())}] Completed in ${(
+        elapsedMs / 1000
+      ).toFixed(1)}s (exit code: ${formattedExitCode})`,
+    );
+  }
+
+  private writeOutputLine(line: string): void {
+    this.dependencies.outputChannel?.appendLine(line);
   }
 }
 
@@ -391,4 +442,8 @@ function isWithinDirectory(directoryPath: string, filePath: string): boolean {
     relativePath === "" ||
     (!relativePath.startsWith("..") && !path.isAbsolute(relativePath))
   );
+}
+
+function formatTimestamp(timestamp: number): string {
+  return new Date(timestamp).toISOString();
 }

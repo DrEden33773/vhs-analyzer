@@ -168,6 +168,64 @@ describe("ExecutionManager", () => {
     });
     expect(spawnProcess).toHaveBeenCalledTimes(2);
   });
+
+  it("execution_writes_timestamped_output_logs_and_reveals_channel_on_error", async () => {
+    const tapeUri = Uri.file("/workspace/demo.tape");
+    const childProcess = new MockChildProcess();
+    const outputChannel = createMockOutputChannel();
+    const manager = new ExecutionManager({
+      getWorkspaceFolders: () => [Uri.file("/workspace")],
+      now: () => Date.parse("2026-03-20T17:00:00Z"),
+      outputChannel,
+      readTapeFile: vi.fn().mockResolvedValue("Output demo.gif"),
+      spawnProcess: vi.fn().mockReturnValue(childProcess),
+    });
+
+    const runPromise = manager.run(tapeUri);
+    await flushMicrotasks();
+    childProcess.stdout.write("stdout line\n");
+    childProcess.stderr.write("stderr line\n");
+    childProcess.exit(1);
+
+    await expect(runPromise).rejects.toMatchObject({
+      cancelled: false,
+      name: "ExecutionFailure",
+    });
+
+    expect(outputChannel.appendLine).toHaveBeenCalledWith(
+      "[2026-03-20T17:00:00.000Z] Running: vhs demo.tape",
+    );
+    expect(outputChannel.appendLine).toHaveBeenCalledWith("stdout line");
+    expect(outputChannel.appendLine).toHaveBeenCalledWith("stderr line");
+    expect(outputChannel.appendLine).toHaveBeenCalledWith(
+      "[2026-03-20T17:00:00.000Z] Completed in 0.0s (exit code: 1)",
+    );
+    expect(outputChannel.show).toHaveBeenCalledTimes(1);
+  });
+
+  it("execution_keeps_the_output_channel_hidden_on_success", async () => {
+    const tapeUri = Uri.file("/workspace/demo.tape");
+    const childProcess = new MockChildProcess();
+    const outputChannel = createMockOutputChannel();
+    const manager = new ExecutionManager({
+      getWorkspaceFolders: () => [Uri.file("/workspace")],
+      now: () => Date.parse("2026-03-20T17:00:00Z"),
+      outputChannel,
+      readTapeFile: vi.fn().mockResolvedValue("Output demo.gif"),
+      spawnProcess: vi.fn().mockReturnValue(childProcess),
+    });
+
+    const runPromise = manager.run(tapeUri);
+    await flushMicrotasks();
+    childProcess.exit(0);
+
+    await expect(runPromise).resolves.toEqual({
+      artifactPath: "/workspace/demo.gif",
+      format: "gif",
+      tapeUri,
+    });
+    expect(outputChannel.show).not.toHaveBeenCalled();
+  });
 });
 
 class MockChildProcess extends EventEmitter {
@@ -180,4 +238,11 @@ class MockChildProcess extends EventEmitter {
     this.stdout.end();
     this.emit("exit", code);
   }
+}
+
+function createMockOutputChannel() {
+  return {
+    appendLine: vi.fn(),
+    show: vi.fn(),
+  };
 }

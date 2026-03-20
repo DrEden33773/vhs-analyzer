@@ -4,12 +4,20 @@ import type { ExtensionContext } from "vscode";
 import {
   type ThemeColor,
   __fireConfigurationChange,
+  __getRegisteredCodeLensProviders,
   __resetMockVscode,
   __setConfigurationValue,
+  commands,
   createMockExtensionContext,
+  languages,
   window,
   workspace,
 } from "./__mocks__/vscode";
+import {
+  previewTapeCommandId,
+  runTapeCommandId,
+  stopRunningCommandId,
+} from "./codelens";
 import {
   ExtensionController,
   type LanguageClientLike,
@@ -63,6 +71,7 @@ describe("buildLanguageClientOptions", () => {
 
 describe("StatusController", () => {
   afterEach(() => {
+    vi.useRealTimers();
     __resetMockVscode();
     vi.restoreAllMocks();
   });
@@ -112,6 +121,32 @@ describe("StatusController", () => {
     window.showQuickPick.mockResolvedValueOnce("Show Trace");
     await status.showActions();
     expect(onShowTrace).toHaveBeenCalledTimes(1);
+  });
+
+  it("status_bar_execution_flashes_restore_the_previous_server_state", async () => {
+    vi.useFakeTimers();
+    const status = new StatusController({
+      onRestartServer: vi.fn(),
+      onShowOutput: vi.fn(),
+      onShowTrace: vi.fn(),
+    });
+    const item = status.statusBarItem;
+
+    status.setServerStatus("running");
+    status.setExecutionStatus("demo.tape");
+    expect(item.text).toBe("$(sync~spin) VHS: Running demo.tape...");
+
+    status.flashExecutionComplete();
+    expect(item.text).toBe("$(check) VHS: Done");
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(item.text).toBe("VHS $(check)");
+
+    status.setExecutionStatus("demo.tape");
+    status.flashExecutionFailed();
+    expect(item.text).toBe("$(error) VHS: Failed");
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(item.text).toBe("VHS $(check)");
+    vi.useRealTimers();
   });
 });
 
@@ -183,6 +218,39 @@ describe("ExtensionController", () => {
     );
     expect(window.createStatusBarItem.mock.results[0]?.value.text).toBe(
       "VHS $(error)",
+    );
+  });
+
+  it("activation_registers_codelens_provider_and_commands_in_no_server_mode", async () => {
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    const controller = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient: vi.fn(),
+      discoverServerBinary: vi.fn().mockResolvedValue(null),
+      isExecutableFile: vi.fn().mockResolvedValue(false),
+      scheduleRestart: vi.fn(),
+    });
+
+    await controller.activate();
+
+    expect(languages.registerCodeLensProvider).toHaveBeenCalledWith(
+      { language: "tape" },
+      expect.anything(),
+    );
+    expect(__getRegisteredCodeLensProviders()).toHaveLength(1);
+    expect(commands.registerCommand).toHaveBeenCalledWith(
+      runTapeCommandId,
+      expect.any(Function),
+    );
+    expect(commands.registerCommand).toHaveBeenCalledWith(
+      previewTapeCommandId,
+      expect.any(Function),
+    );
+    expect(commands.registerCommand).toHaveBeenCalledWith(
+      stopRunningCommandId,
+      expect.any(Function),
     );
   });
 

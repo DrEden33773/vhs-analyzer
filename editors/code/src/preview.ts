@@ -15,6 +15,7 @@ import { getExtensionConfiguration } from "./config";
 import {
   type ExecutionProgressEvent,
   type ExecutionResult,
+  inferOutputFormat,
   resolveArtifactPath,
 } from "./execution";
 import { resolveBinaryOnPath } from "./server";
@@ -187,9 +188,12 @@ export class PreviewManager {
     this.panels.clear();
   }
 
-  async runAndPreview(tapeUri: Uri): Promise<PreviewPanel> {
+  async runAndPreview(
+    tapeUri: Uri,
+    previewArtifactPath?: string,
+  ): Promise<PreviewPanel> {
     const panel = await this.showPreview(tapeUri);
-    await panel.startRender();
+    await panel.startRender(previewArtifactPath);
     return panel;
   }
 
@@ -343,7 +347,7 @@ export class PreviewPanel {
     this.dependencies.panel.reveal(ViewColumn.Beside);
   }
 
-  async startRender(): Promise<void> {
+  async startRender(previewArtifactPath?: string): Promise<void> {
     const vhsPath = await this.dependencies.resolveExecutable("vhs");
     if (vhsPath === null) {
       this.postMessage({
@@ -362,9 +366,15 @@ export class PreviewPanel {
 
     try {
       const result = await this.dependencies.executionManager.run(this.tapeUri);
-      this.lastRenderResult = result;
-      this.configureAutoRefresh(result);
-      this.postRenderComplete(result);
+      const resolvedResult = resolvePreviewResult(
+        this.tapeUri,
+        result,
+        previewArtifactPath,
+      );
+      this.lastRenderResult = resolvedResult;
+      this.ensureLocalResourceRoot(resolvedResult.artifactPath);
+      this.configureAutoRefresh(resolvedResult);
+      this.postRenderComplete(resolvedResult);
     } catch (error) {
       this.postMessage({
         cancelled: isCancelledExecution(error),
@@ -442,6 +452,24 @@ export class PreviewPanel {
   private disposeWatcher(): void {
     this.watcher?.dispose();
     this.watcher = undefined;
+  }
+
+  private ensureLocalResourceRoot(artifactPath: string): void {
+    const currentOptions = this.dependencies.panel.webview.options ?? {};
+    const currentRoots = currentOptions.localResourceRoots ?? [];
+    const artifactDirectory = Uri.file(path.dirname(artifactPath));
+    if (
+      currentRoots.some((root) =>
+        isWithinDirectory(root.fsPath, artifactDirectory.fsPath),
+      )
+    ) {
+      return;
+    }
+
+    this.dependencies.panel.webview.options = {
+      ...currentOptions,
+      localResourceRoots: [...currentRoots, artifactDirectory],
+    };
   }
 
   private postRenderComplete(
@@ -674,4 +702,24 @@ function resolveWorkingDirectory(
   );
 
   return workspaceFolder?.fsPath ?? path.dirname(tapeUri.fsPath);
+}
+
+function resolvePreviewResult(
+  tapeUri: Uri,
+  result: ExecutionResult,
+  previewArtifactPath?: string,
+): ExecutionResult {
+  if (previewArtifactPath === undefined) {
+    return result;
+  }
+
+  const artifactPath = path.resolve(
+    path.dirname(tapeUri.fsPath),
+    previewArtifactPath,
+  );
+  return {
+    artifactPath,
+    format: inferOutputFormat(artifactPath),
+    tapeUri,
+  };
 }

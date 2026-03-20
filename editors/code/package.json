@@ -93,12 +93,61 @@
         }
       }
     },
-    "commands": [],
+    "commands": [
+      {
+        "command": "vhs-analyzer.runTape",
+        "title": "VHS: Run Tape",
+        "icon": "$(play)",
+        "category": "VHS Analyzer"
+      },
+      {
+        "command": "vhs-analyzer.previewTape",
+        "title": "VHS: Run & Preview",
+        "icon": "$(open-preview)",
+        "category": "VHS Analyzer"
+      },
+      {
+        "command": "vhs-analyzer.stopRunning",
+        "title": "VHS: Stop",
+        "icon": "$(debug-stop)",
+        "category": "VHS Analyzer",
+        "enablement": "vhs-analyzer.isRunning"
+      }
+    ],
     "menus": {
-      "editor/context": [],
-      "explorer/context": []
+      "editor/context": [
+        {
+          "command": "vhs-analyzer.runTape",
+          "when": "editorLangId == 'tape'",
+          "group": "vhs@1"
+        },
+        {
+          "command": "vhs-analyzer.previewTape",
+          "when": "editorLangId == 'tape'",
+          "group": "vhs@2"
+        },
+        {
+          "command": "vhs-analyzer.stopRunning",
+          "when": "editorLangId == 'tape' && vhs-analyzer.isRunning",
+          "group": "vhs@3"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "vhs-analyzer.runTape",
+          "when": "resourceExtname == '.tape'",
+          "group": "vhs@1"
+        }
+      ]
     },
-    "keybindings": []
+    "keybindings": [
+      {
+        "command": "vhs-analyzer.runTape",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "editorLangId == 'tape'"
+      }
+    ]
   },
   "scripts": {
     "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",

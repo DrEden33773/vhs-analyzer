@@ -18,7 +18,7 @@ Started: 2026-03-19
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | LSP Client + Project Scaffold | WS-1 + WS-4 | editors/code | CLI-* + PKG scaffold | — | Extension activates | completed |
 | 2 | Live Preview Webview | WS-2 | editors/code | PRV-* | B1 | Preview renders GIF | completed |
-| 3 | CodeLens & Commands | WS-3 | editors/code | CLS-* | B1 | Run button works | not started |
+| 3 | CodeLens & Commands | WS-3 | editors/code | CLS-* | B1 | Run button works | completed |
 | 4 | Platform Packaging & CI/CD | WS-4 | editors/code + .github | PKG-* | B2, B3 | VSIX builds for all targets | not started |
 | 5 | Integration + Closeout | — | editors/code | T-INT3 | B4 | Phase 3 complete | not started |
 
@@ -92,3 +92,28 @@ Builder appends one record per completed batch below this line.
   - Preview panel reuse is keyed by tape file path, matching the one-panel-per-file requirement.
   - Auto-refresh uses a 500ms debounce and cache-busting query strings to avoid flicker while VHS writes output incrementally.
   - The shared execution layer is ready for Batch 3 CodeLens command reuse without reopening Batch 2 design decisions.
+
+### Batch 3 — Completed (2026-03-20)
+
+- Scope: WS-3 CodeLens provider, command registry, execution feedback wiring, and editor manifest contributions.
+- Requirements: CLS-001 through CLS-010.
+- Implementation:
+  - Added `editors/code/src/codelens.ts` with file-level and Output-level CodeLens computation, dynamic run titles, configuration and document refresh triggers, command registration, and execution-to-status-bar binding.
+  - Extended `editors/code/src/execution.ts` with timestamped run output logging and reveal-on-error behavior for a dedicated `VHS Analyzer: Run` output channel.
+  - Extended `editors/code/src/preview.ts` so Output-level CodeLens actions can target a specific artifact path while keeping one preview panel per tape file.
+  - Updated `editors/code/src/extension.ts` to register the CodeLens provider and commands in both server and no-server modes, and updated `editors/code/package.json` with commands, menus, and the tape-only run shortcut.
+- Tests:
+  - TypeScript: `pnpm run test` → 59/59 passing (`server.test.ts`, `config.test.ts`, `dependencies.test.ts`, `extension.test.ts`, `utils.test.ts`, `execution.test.ts`, `preview.test.ts`, `codelens.test.ts`).
+  - Rust regression: `cargo test --workspace --all-targets --locked` → 225/225 passing.
+- Quality gate:
+  - `pnpm run lint` passed.
+  - `pnpm run typecheck` passed.
+  - `pnpm run test` passed.
+  - `pnpm run build` passed.
+  - `cargo fmt --all -- --check` passed.
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` passed.
+  - `cargo test --workspace --all-targets --locked` passed.
+- Notes:
+  - File-level CodeLens placement now skips leading blank and comment lines, matching RD-CLS-01 without requiring the LSP server.
+  - Output-level CodeLens actions can preview a specific artifact path while file-level "Run & Preview" continues to default to the first `Output`.
+  - The extension bundle size is now 377.8 KB after Batch 3 wiring, still within the packaging target budget.

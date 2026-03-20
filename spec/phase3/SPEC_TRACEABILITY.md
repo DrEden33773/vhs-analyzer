@@ -47,16 +47,16 @@ baseline requirement (if consuming one).
 
 | Req ID | Description | Impl Module | Test IDs | Consumes |
 | --- | --- | --- | --- | --- |
-| CLS-001 | CodeLens placement strategy | `src/codelens.ts` | T-CLS-001, T-CLS-002, T-CLS-003, T-CLS-004 | PAR-001 (OUTPUT_COMMAND) |
-| CLS-002 | Command registry | `src/codelens.ts`, `package.json` | T-CLS-005, T-CLS-006, T-CLS-007, T-CLS-008 | — |
-| CLS-003 | Execution state machine | `src/execution.ts` | T-CLS-009, T-CLS-010, T-CLS-011, T-CLS-012 | — |
-| CLS-004 | Status bar progress indicator | `src/status.ts` | T-CLS-013, T-CLS-014 | CLI-011 (status bar) |
-| CLS-005 | CodeLens toggle via configuration | `src/codelens.ts` | T-CLS-015, T-CLS-016 | CLI-006 (codelens.enabled) |
-| CLS-006 | CodeLens provider registration | `src/codelens.ts` | T-CLS-001, T-CLS-017 | — |
-| CLS-007 | Execution output channel | `src/execution.ts` | T-CLS-006 | — |
-| CLS-008 | Keyboard shortcut binding | `package.json` (keybindings) | T-CLS-018, T-CLS-019 | — |
-| CLS-009 | Editor context menu | `package.json` (menus) | T-CLS-018, T-CLS-019 | — |
-| CLS-010 | Explorer context menu | `package.json` (menus) | — | — |
+| CLS-001 | CodeLens placement strategy | `editors/code/src/codelens.ts` | T-CLS-001, T-CLS-002, T-CLS-003, T-CLS-004 (`editors/code/src/codelens.test.ts`) | PAR-001 (OUTPUT_COMMAND) |
+| CLS-002 | Command registry | `editors/code/src/codelens.ts`, `editors/code/src/extension.ts`, `editors/code/package.json` | T-CLS-005 (`editors/code/src/extension.test.ts`), T-CLS-006, T-CLS-007, T-CLS-008 (`editors/code/src/codelens.test.ts`) | — |
+| CLS-003 | Execution state machine | `editors/code/src/execution.ts` | T-CLS-009, T-CLS-010, T-CLS-011, T-CLS-012 (`editors/code/src/execution.test.ts`) | — |
+| CLS-004 | Status bar progress indicator | `editors/code/src/codelens.ts`, `editors/code/src/extension.ts`, `editors/code/src/status.ts` | T-CLS-013, T-CLS-014 (`editors/code/src/codelens.test.ts`, `editors/code/src/extension.test.ts`) | CLI-011 (status bar) |
+| CLS-005 | CodeLens toggle via configuration | `editors/code/src/codelens.ts` | T-CLS-015, T-CLS-016 (`editors/code/src/codelens.test.ts`) | CLI-006 (codelens.enabled) |
+| CLS-006 | CodeLens provider registration | `editors/code/src/codelens.ts`, `editors/code/src/extension.ts` | T-CLS-001, T-CLS-017 (`editors/code/src/codelens.test.ts`, `editors/code/src/extension.test.ts`) | — |
+| CLS-007 | Execution output channel | `editors/code/src/execution.ts`, `editors/code/src/extension.ts` | T-CLS-006 (`editors/code/src/execution.test.ts`) | — |
+| CLS-008 | Keyboard shortcut binding | `editors/code/package.json` (keybindings) | T-CLS-018 (E2E), manifest contribution asserted in `editors/code/src/codelens.test.ts` | — |
+| CLS-009 | Editor context menu | `editors/code/package.json` (menus) | T-CLS-018, T-CLS-019 (E2E), manifest contribution asserted in `editors/code/src/codelens.test.ts` | — |
+| CLS-010 | Explorer context menu | `editors/code/package.json` (menus) | Manifest contribution asserted in `editors/code/src/codelens.test.ts` | — |
 
 ## 5. Packaging Requirements (PKG)
 

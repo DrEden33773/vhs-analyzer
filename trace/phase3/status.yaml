@@ -113,11 +113,22 @@ batches:
   batch3:
     name: "CodeLens & Commands (WS-3)"
     work_packages: [WS-3]
-    requirements: []
+    requirements:
+      - CLS-001
+      - CLS-002
+      - CLS-003
+      - CLS-004
+      - CLS-005
+      - CLS-006
+      - CLS-007
+      - CLS-008
+      - CLS-009
+      - CLS-010
     test_ids: "T-CLS-*"
     crate: editors/code
     depends_on: [batch1]
-    status: not_started
+    status: completed
+    completed_at: "2026-03-20"
   batch4:
     name: "Platform Packaging & CI/CD (WS-4 completion)"
     work_packages: [WS-4]
@@ -136,7 +147,7 @@ batches:
     status: not_started
 
 builder_progress:
-  automated_tests: 42
+  automated_tests: 59
   ci_gate: true
   entries:
     - batch: batch1
@@ -225,6 +236,55 @@ builder_progress:
         - "Added a shared Output utility, ExecutionManager, and PreviewManager/PreviewPanel implementation for the Batch 2 preview pipeline."
         - "Implemented Webview HTML/CSS, typed preview messaging, VHS availability checks, auto-refresh debounce, theme change forwarding, and panel reuse per tape file."
         - "Covered shared execution behavior in unit tests so the same execution engine can be reused by CodeLens in Batch 3."
+      quality_gate:
+        lint: passed
+        typecheck: passed
+        test: passed
+        build: passed
+        cargo_fmt: passed
+        cargo_clippy: passed
+        cargo_test: passed
+    - batch: batch3
+      name: "CodeLens & Commands (WS-3)"
+      status: completed
+      completed_at: "2026-03-20"
+      requirements:
+        - CLS-001
+        - CLS-002
+        - CLS-003
+        - CLS-004
+        - CLS-005
+        - CLS-006
+        - CLS-007
+        - CLS-008
+        - CLS-009
+        - CLS-010
+      scenarios:
+        - T-CLS-001
+        - T-CLS-002
+        - T-CLS-003
+        - T-CLS-004
+        - T-CLS-005
+        - T-CLS-006
+        - T-CLS-007
+        - T-CLS-008
+        - T-CLS-009
+        - T-CLS-010
+        - T-CLS-011
+        - T-CLS-012
+        - T-CLS-013
+        - T-CLS-014
+        - T-CLS-015
+        - T-CLS-016
+        - T-CLS-017
+        - T-CLS-018
+        - T-CLS-019
+        - T-CLS-020
+        - T-CLS-021
+      notes:
+        - "Added `editors/code/src/codelens.ts` with file-level and Output-level CodeLens computation, command registration, configuration/document refresh hooks, and execution-to-status-bar binding."
+        - "Integrated the shared `ExecutionManager` and `PreviewManager` into extension activation so CodeLens and Preview stay available in no-server mode, with a dedicated `VHS Analyzer: Run` output channel."
+        - "Updated `editors/code/package.json` with CodeLens commands, editor and explorer context menu entries, and the default tape-only run shortcut."
       quality_gate:
         lint: passed
         typecheck: passed

@@ -8,6 +8,7 @@ import {
   Uri,
   commands,
   env,
+  languages,
   window,
   workspace,
 } from "vscode";
@@ -18,6 +19,11 @@ import type {
   ServerOptions,
 } from "vscode-languageclient/node";
 import {
+  VhsCodeLensProvider,
+  bindExecutionStateToStatusBar,
+  registerCodeLensCommands,
+} from "./codelens";
+import {
   type ExtensionConfiguration,
   type ServerTraceLevel,
   getExtensionConfiguration,
@@ -27,6 +33,8 @@ import {
   type CheckRuntimeDependenciesOptions,
   checkRuntimeDependencies,
 } from "./dependencies";
+import { ExecutionManager } from "./execution";
+import { PreviewManager } from "./preview";
 import {
   RestartBudget,
   createClientErrorHandler,
@@ -122,11 +130,15 @@ export function createDefaultDependencies(): ExtensionDependencies {
 export class ExtensionController {
   private client: LanguageClientLike | undefined;
   private readonly dependencies: ExtensionDependencies;
+  private readonly executionManager: ExecutionManager;
   private readonly fileWatcher: FileSystemWatcher;
   private readonly outputChannel: OutputChannel;
+  private readonly previewManager: PreviewManager;
   private readonly restartBudget = new RestartBudget();
+  private readonly runOutputChannel: OutputChannel;
   private readonly status: StatusController;
   private readonly traceOutputChannel: OutputChannel;
+  private readonly vhsCodeLensProvider: VhsCodeLensProvider;
 
   constructor(
     private readonly context: ExtensionContext,
@@ -137,6 +149,7 @@ export class ExtensionController {
       ...dependencies,
     };
     this.outputChannel = window.createOutputChannel(extensionName);
+    this.runOutputChannel = window.createOutputChannel(`${extensionName}: Run`);
     this.traceOutputChannel = window.createOutputChannel(
       `${extensionName} Trace`,
     );
@@ -155,14 +168,43 @@ export class ExtensionController {
       },
       statusCommandId,
     );
+    this.executionManager = new ExecutionManager({
+      outputChannel: this.runOutputChannel,
+    });
+    this.previewManager = new PreviewManager({
+      executionManager: this.executionManager,
+      extensionPath: context.extensionPath,
+      workspaceFolders: (workspace.workspaceFolders ?? []).map(
+        (folder) => folder.uri,
+      ),
+    });
+    this.vhsCodeLensProvider = new VhsCodeLensProvider({
+      executionManager: this.executionManager,
+    });
   }
 
   async activate(): Promise<void> {
     this.context.subscriptions.push(
+      this.executionManager,
       this.outputChannel,
+      this.previewManager,
+      this.runOutputChannel,
       this.traceOutputChannel,
       this.fileWatcher,
       this.status,
+      this.vhsCodeLensProvider,
+      bindExecutionStateToStatusBar({
+        executionManager: this.executionManager,
+        status: this.status,
+      }),
+      languages.registerCodeLensProvider(
+        { language: "tape" },
+        this.vhsCodeLensProvider,
+      ),
+      ...registerCodeLensCommands({
+        executionManager: this.executionManager,
+        previewManager: this.previewManager,
+      }),
       commands.registerCommand(statusCommandId, async () => {
         await this.status.showActions();
       }),
