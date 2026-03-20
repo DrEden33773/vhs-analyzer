@@ -125,7 +125,7 @@ Builder appends one record per completed batch below this line.
 - Implementation:
   - Added workspace-level Rust release optimizations in `Cargo.toml` and created `.github/workflows/release.yml` with the lint-and-test → build-rust → package-vsix → publish pipeline, six Rust targets, seven VSIX outputs, pre-release detection, dual publishing, and GitHub Release asset upload.
   - Replaced the Preview panel's runtime stylesheet file dependency with a bundled raw CSS import backed by `editors/code/scripts/build.mjs`, keeping `media/preview.css` as source while removing it from the shipped VSIX.
-  - Tightened the extension packaging boundary via `editors/code/.vscodeignore`, added `editors/code/LICENSE` and `editors/code/CHANGELOG.md`, and updated `.github/workflows/extension-ci.yml` to use Corepack with the pinned pnpm version.
+  - Tightened the extension packaging boundary via `editors/code/.vscodeignore`, added `editors/code/LICENSE` and `editors/code/CHANGELOG.md`, and updated `.github/workflows/extension-ci.yml` to install pnpm before `actions/setup-node` cache resolution while still verifying the pinned pnpm version.
 - Tests:
   - TypeScript: `pnpm run test` → 59/59 passing (`server.test.ts`, `config.test.ts`, `dependencies.test.ts`, `extension.test.ts`, `utils.test.ts`, `execution.test.ts`, `preview.test.ts`, `codelens.test.ts`).
   - Rust regression: `cargo test --workspace --all-targets --locked` → 225/225 passing.

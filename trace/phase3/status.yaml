@@ -341,7 +341,7 @@ builder_progress:
       notes:
         - "Added the Batch 4 packaging pipeline: workspace release profile, six-target Rust build matrix, seven VSIX outputs, pre-release detection, dual registry publishing, and GitHub Release asset upload in `.github/workflows/release.yml`."
         - "Moved Preview styling into the bundled extension via a raw CSS import and `esbuild` API build script so `media/preview.css` is no longer required in the VSIX, matching the tightened packaging boundary."
-        - "Updated `extension-ci.yml` to rely on Corepack for the pinned pnpm version and added extension `LICENSE` and `CHANGELOG.md` files so local `vsce ls` and `vsce package --no-dependencies` smoke checks match the expected package contents."
+        - "Updated `extension-ci.yml` to install pnpm before `actions/setup-node` cache resolution, kept pinned version verification, and added extension `LICENSE` and `CHANGELOG.md` files so local `vsce ls` and `vsce package --no-dependencies` smoke checks match the expected package contents."
       quality_gate:
         lint: passed
         typecheck: passed
