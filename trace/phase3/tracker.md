@@ -151,6 +151,7 @@ Builder appends one record per completed batch below this line.
 - Scope: integration coverage for the frozen extension feature set plus final Phase 3 closeout records.
 - Requirements: cross-cutting `T-INT3-*` coverage for activation/LSP, CodeLens/Preview, and no-server fallback.
 - Files:
+  - `.github/workflows/extension-ci.yml`
   - `editors/code/src/integration.test.ts`
   - `editors/code/package.json`
   - `editors/code/README.md`
@@ -164,6 +165,7 @@ Builder appends one record per completed batch below this line.
 - Deliverables:
   - Added `editors/code/src/integration.test.ts` with three process-level integration tests covering `T-INT3-001` through `T-INT3-003`: bundled activation + hover, CodeLens-driven Run & Preview, and no-server mode retaining CodeLens + Preview.
   - Introduced a minimal stdio LSP harness and fake `vhs` command fixture so the tests exercise the real activation flow, bundled binary discovery, `ExecutionManager`, `PreviewManager`, and command wiring without relying on a VS Code host process.
+  - Updated `.github/workflows/extension-ci.yml` so extension CI builds a debug `vhs-analyzer` binary before `pnpm run test` and passes it through `VHS_ANALYZER_LSP_BINARY`, satisfying the new Batch 5 integration-test precondition in CI.
   - Replaced the placeholder extension README with marketplace-ready installation and feature documentation, expanded the `0.3.0` changelog entry, and added an extension icon wired through `editors/code/package.json`.
   - Updated Phase 3 traceability and status artifacts, and marked the root indexes as completed while explicitly deferring the optional MAY E2E scenarios `T-INT3-004` and `T-INT3-005`.
 - Quality gate:

@@ -677,29 +677,11 @@ async function createFakeCommandEnvironment(): Promise<FakeCommandEnvironment> {
 }
 
 async function prepareBundledBinary(destinationPath: string): Promise<void> {
-  const releaseBinaryPath =
-    process.env.VHS_ANALYZER_LSP_BINARY ??
-    path.resolve(
-      process.cwd(),
-      "..",
-      "..",
-      "target",
-      "release",
-      releaseBinaryName(),
-    );
   const accessMode =
     process.platform === "win32" ? constants.F_OK : constants.X_OK;
+  const sourceBinaryPath = await resolveBuiltLspBinaryPath(accessMode);
 
-  try {
-    await access(releaseBinaryPath, accessMode);
-  } catch (error) {
-    throw new Error(
-      `Expected a built VHS Analyzer LSP binary at ${releaseBinaryPath}. Run \`cargo build --release -p vhs-analyzer-lsp --locked\` or set VHS_ANALYZER_LSP_BINARY.`,
-      { cause: error },
-    );
-  }
-
-  await copyFile(releaseBinaryPath, destinationPath);
+  await copyFile(sourceBinaryPath, destinationPath);
 
   if (process.platform !== "win32") {
     await chmod(destinationPath, 0o755);
@@ -712,6 +694,49 @@ function bundledBinaryName(): string {
 
 function releaseBinaryName(): string {
   return process.platform === "win32" ? "vhs-analyzer.exe" : "vhs-analyzer";
+}
+
+async function resolveBuiltLspBinaryPath(accessMode: number): Promise<string> {
+  const candidatePaths = [
+    process.env.VHS_ANALYZER_LSP_BINARY,
+    path.resolve(
+      process.cwd(),
+      "..",
+      "..",
+      "target",
+      "release",
+      releaseBinaryName(),
+    ),
+    path.resolve(
+      process.cwd(),
+      "..",
+      "..",
+      "target",
+      "debug",
+      releaseBinaryName(),
+    ),
+  ]
+    .flatMap((candidatePath) => {
+      if (candidatePath === undefined || candidatePath.trim() === "") {
+        return [];
+      }
+
+      return [path.resolve(candidatePath)];
+    })
+    .filter((candidatePath, index, paths) => {
+      return paths.indexOf(candidatePath) === index;
+    });
+
+  for (const candidatePath of candidatePaths) {
+    try {
+      await access(candidatePath, accessMode);
+      return candidatePath;
+    } catch {}
+  }
+
+  throw new Error(
+    `Expected a built VHS Analyzer LSP binary. Checked: ${candidatePaths.join(", ")}. Run \`cargo build -p vhs-analyzer-lsp --locked\` (or \`cargo build --release -p vhs-analyzer-lsp --locked\`) or set VHS_ANALYZER_LSP_BINARY.`,
+  );
 }
 
 function createTypedContext(overrides: {
