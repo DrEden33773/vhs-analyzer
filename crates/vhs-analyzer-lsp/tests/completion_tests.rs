@@ -613,6 +613,27 @@ async fn completion_returns_theme_names_inside_empty_single_quoted_theme_string(
 }
 
 #[tokio::test(flavor = "current_thread")]
+async fn completion_returns_theme_names_inside_partial_theme_string() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Set Theme \"D\"";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response(&mut service, &uri, position_for_offset(source, 12)).await,
+    );
+
+    assert!(
+        items.iter().any(|item| item.label == "Dracula"),
+        "expected theme completions inside a partial quoted theme string"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
 async fn completion_replaces_existing_theme_string_contents_without_adding_quotes() {
     let (mut service, _) = LspService::new(VhsLanguageServer::new);
     let _ = initialize_service(&mut service).await;
@@ -1060,6 +1081,31 @@ async fn completion_returns_time_units_after_first_typing_speed_digit() {
 }
 
 #[tokio::test(flavor = "current_thread")]
+async fn completion_returns_time_units_after_subsequent_sleep_digit() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Sleep 10";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response(&mut service, &uri, position_for_offset(source, 8)).await,
+    );
+
+    assert!(
+        items.iter().any(|item| item.label == "ms"),
+        "expected ms time-unit completion after a subsequent Sleep digit"
+    );
+    assert!(
+        items.iter().any(|item| item.label == "s"),
+        "expected s time-unit completion after a subsequent Sleep digit"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
 async fn completion_manual_time_units_append_suffixes_at_numeric_end() {
     let (mut service, _) = LspService::new(VhsLanguageServer::new);
     let _ = initialize_service(&mut service).await;
@@ -1107,6 +1153,166 @@ async fn completion_manual_time_units_append_suffixes_at_numeric_end() {
             tower_lsp_server::ls_types::TextEdit {
                 range: Range::new(Position::new(0, 9), Position::new(0, 9)),
                 new_text: "s".to_owned(),
+            }
+        ))
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_manual_time_units_replace_partial_sleep_suffix() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Sleep 1000m";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response_with_context(
+            &mut service,
+            &uri,
+            Position::new(0, 11),
+            Some(LspCompletionContext {
+                trigger_kind: CompletionTriggerKind::INVOKED,
+                trigger_character: None,
+            }),
+        )
+        .await,
+    );
+    let milliseconds = items
+        .iter()
+        .find(|item| item.label == "ms")
+        .expect("expected ms time-unit completion");
+
+    assert_eq!(milliseconds.filter_text.as_deref(), Some("1000ms"));
+    assert_eq!(
+        milliseconds.text_edit,
+        Some(CompletionTextEdit::Edit(
+            tower_lsp_server::ls_types::TextEdit {
+                range: Range::new(Position::new(0, 10), Position::new(0, 11)),
+                new_text: "ms".to_owned(),
+            }
+        ))
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_manual_time_units_replace_complete_sleep_suffix() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Sleep 1000ms";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response_with_context(
+            &mut service,
+            &uri,
+            Position::new(0, 12),
+            Some(LspCompletionContext {
+                trigger_kind: CompletionTriggerKind::INVOKED,
+                trigger_character: None,
+            }),
+        )
+        .await,
+    );
+    let milliseconds = items
+        .iter()
+        .find(|item| item.label == "ms")
+        .expect("expected ms time-unit completion");
+
+    assert_eq!(milliseconds.filter_text.as_deref(), Some("1000ms"));
+    assert_eq!(
+        milliseconds.text_edit,
+        Some(CompletionTextEdit::Edit(
+            tower_lsp_server::ls_types::TextEdit {
+                range: Range::new(Position::new(0, 10), Position::new(0, 12)),
+                new_text: "ms".to_owned(),
+            }
+        ))
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_manual_time_units_replace_partial_type_duration_suffix() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Type@1000m \"x\"";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response_with_context(
+            &mut service,
+            &uri,
+            Position::new(0, 10),
+            Some(LspCompletionContext {
+                trigger_kind: CompletionTriggerKind::INVOKED,
+                trigger_character: None,
+            }),
+        )
+        .await,
+    );
+    let milliseconds = items
+        .iter()
+        .find(|item| item.label == "ms")
+        .expect("expected ms time-unit completion");
+
+    assert_eq!(milliseconds.filter_text.as_deref(), Some("1000ms"));
+    assert_eq!(
+        milliseconds.text_edit,
+        Some(CompletionTextEdit::Edit(
+            tower_lsp_server::ls_types::TextEdit {
+                range: Range::new(Position::new(0, 9), Position::new(0, 10)),
+                new_text: "ms".to_owned(),
+            }
+        ))
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_manual_time_units_replace_partial_typing_speed_suffix() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Set TypingSpeed 1000m";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response_with_context(
+            &mut service,
+            &uri,
+            Position::new(0, 21),
+            Some(LspCompletionContext {
+                trigger_kind: CompletionTriggerKind::INVOKED,
+                trigger_character: None,
+            }),
+        )
+        .await,
+    );
+    let milliseconds = items
+        .iter()
+        .find(|item| item.label == "ms")
+        .expect("expected ms time-unit completion");
+
+    assert_eq!(milliseconds.filter_text.as_deref(), Some("1000ms"));
+    assert_eq!(
+        milliseconds.text_edit,
+        Some(CompletionTextEdit::Edit(
+            tower_lsp_server::ls_types::TextEdit {
+                range: Range::new(Position::new(0, 20), Position::new(0, 21)),
+                new_text: "ms".to_owned(),
             }
         ))
     );

@@ -2,6 +2,7 @@ phase: phase2_intelligence_diagnostics
 status: completed
 started_at: "2026-03-19"
 completed_at: "2026-03-19"
+updated_at: "2026-03-24"
 
 stages:
   architect_stage_a:
@@ -52,12 +53,40 @@ requirement_ids:
   safety: [SAF-001, SAF-002, SAF-003, SAF-004, SAF-005, SAF-006, SAF-007]
 
 test_scenarios:
-  total: 67
+  total: 75
   by_category:
-    completion: 20
+    completion: 28
     diagnostics: 25
     safety: 18
     integration: 4
+
+post_completion_revisions:
+  - date: "2026-03-24"
+    status: completed
+    approved_by_user: true
+    scope: "Quoted Theme completion refinement plus duration-slot suffix completions"
+    requirements_touched: [CMP-005, CMP-009]
+    test_ids:
+      - T-CMP-034C
+      - T-CMP-034D
+      - T-CMP-034E
+      - T-CMP-093
+      - T-CMP-094
+      - T-CMP-095
+      - T-CMP-096
+      - T-CMP-097
+    implementation_files:
+      - crates/vhs-analyzer-lsp/src/completion.rs
+      - crates/vhs-analyzer-lsp/tests/completion_tests.rs
+      - spec/phase2/SPEC_COMPLETION.md
+      - spec/phase2/SPEC_TEST_MATRIX.md
+      - spec/phase2/SPEC_TRACEABILITY.md
+      - trace/phase2/status.yaml
+      - trace/phase2/tracker.md
+    quality_gate:
+      cargo_fmt_all_check: pass
+      cargo_clippy_workspace_all_targets_all_features_locked: pass
+      cargo_test_workspace_all_targets_locked: pass
 
 batches:
   batch1:

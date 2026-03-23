@@ -5,7 +5,7 @@
 **Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** phase1/SPEC_LSP_CORE.md (LSP binary, stdio transport, server capabilities), phase2/SPEC_COMPLETION.md (completionProvider), phase2/SPEC_DIAGNOSTICS.md (diagnostics pipeline)
-**Last Updated:** 2026-03-20
+**Last Updated:** 2026-03-24
 **Frozen By:** Architect (Claude) — Stage B
 
 ---
@@ -166,8 +166,8 @@ WS-3 (CodeLens) depend on a functioning LSP client.
 | **ID** | CLI-012 |
 | **Priority** | P1 (SHOULD) |
 | **Owner** | Architect → Builder |
-| **Statement** | The extension SHOULD trigger `editor.action.triggerSuggest` with `{ auto: true }` in narrowly scoped edit contexts where the LSP already has meaningful completions but VSCode may not auto-open the widget. The targeted contexts are: (1) immediately after typing the trailing space in `Set Theme`, (2) immediately after VSCode auto-closes an empty quoted string in `Set Theme ""` / `Set Theme ''` with the cursor between the quotes, and (3) immediately after typing the first numeric digit in a time-unit context such as `Sleep 1`, `Type@1`, or `Set TypingSpeed 1`. This assist MUST NOT broaden the LSP `triggerCharacters` list, and MUST avoid triggering in unrelated strings or comments. |
-| **Verification** | Type the trailing space in `Set Theme` → suggestion widget opens automatically. Type `Set Theme ""` and leave the cursor between quotes → suggestion widget opens automatically. Type the first digit in `Sleep 1` / `Type@1` / `Set TypingSpeed 1` → suggestion widget opens automatically. |
+| **Statement** | The extension SHOULD trigger `editor.action.triggerSuggest` in explicit mode (without `{ auto: true }`) in narrowly scoped edit contexts where the LSP already has meaningful completions but VSCode quick suggestions, string heuristics, or word-boundary rules are unreliable. The targeted contexts are: (1) immediately after typing the trailing space in `Set Theme`, (2) immediately after VSCode auto-closes an empty quoted string in `Set Theme ""` / `Set Theme ''` with the cursor between the quotes, (3) while typing inside a quoted Theme value such as `Set Theme "D"` or `Set Theme "Catppuccin "`, and (4) while typing inside a duration slot for `Sleep`, `Type@...`, or `Set TypingSpeed`, including the first digit, subsequent digits, and partial unit suffix characters such as `m` and `s`. This assist MUST NOT broaden the LSP `triggerCharacters` list, and MUST avoid triggering in unrelated strings or comments. |
+| **Verification** | Type the trailing space in `Set Theme` → suggestion widget opens. Type `Set Theme ""` and leave the cursor between quotes → suggestion widget opens. Type `Set Theme "D"` and continue typing inside the quoted value → suggestion widget re-opens with Theme completions. Type `Sleep 1`, `Sleep 10`, `Sleep 1000m`, `Type@1000m`, and `Set TypingSpeed 1000m` while editing the duration slot → suggestion widget opens or re-opens with time-unit completions. |
 
 ## 5. Design Options Analysis
 

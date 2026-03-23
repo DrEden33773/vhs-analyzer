@@ -182,3 +182,35 @@ Builder appends one record per completed batch below this line.
 - Notes:
   - Batch 5 closes Phase 3 with 62 TypeScript tests and 225 Rust tests green locally.
   - The optional E2E install-path scenarios remain deferred because they are MAY coverage in the frozen matrix and would require a full VS Code host harness beyond the current Vitest-based integration boundary.
+
+### Post-completion Revision — 2026-03-24
+
+- Status: Completed
+- Approval: User-approved frozen-spec revision for targeted suggest behavior
+- Scope: Upgrade `CLI-012` from first-digit / empty-quote assists to explicit suggest reopening for quoted Theme edits and duration-slot edits, including subsequent digits and partial `m` / `s` suffixes.
+- Files:
+  - `editors/code/src/extension.ts`
+  - `editors/code/src/extension.test.ts`
+  - `editors/code/src/__mocks__/vscode.ts`
+  - `editors/code/language-configuration.json`
+  - `spec/phase3/SPEC_CLIENT.md`
+  - `spec/phase3/SPEC_TEST_MATRIX.md`
+  - `spec/phase3/SPEC_TRACEABILITY.md`
+  - `trace/phase3/status.yaml`
+  - `trace/phase3/tracker.md`
+- Planned verification:
+  - `pnpm run typecheck`
+  - `pnpm run lint`
+  - `pnpm run test`
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+- Deliverables:
+  - Upgraded `CLI-012` from narrow auto-mode assists to explicit targeted suggest reopening for quoted Theme edits and duration-slot edits.
+  - Added extension-side regression coverage for typing inside quoted Theme values, subsequent duration digits, and partial `m` / `s` suffix characters, bringing `editors/code/src/extension.test.ts` to 16 passing tests and the full extension suite to 71 passing tests.
+  - Updated the tape language `wordPattern` so manual suggestion filtering treats duration literals such as `1000m` / `1000ms` as a coherent word boundary for completion matching.
+- Quality gate:
+  - `pnpm run typecheck` passed.
+  - `pnpm run lint` passed.
+  - `pnpm run test` passed.
+  - `cargo fmt --all -- --check` passed.
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` passed.

@@ -64,6 +64,9 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-034 | Dark+ quoted | `Set Theme` + space → completion | `Dark+` has `insertText: "\"Dark+\""` (wrapped in quotes) |
 | T-CMP-034A | catppuccin-frappe quoted | `Set Theme` + space → completion | `catppuccin-frappe` has `insertText: "\"catppuccin-frappe\""` (wrapped in quotes) |
 | T-CMP-034B | Theme names inside empty quoted string | `Set Theme ""` → completion with cursor between quotes | Theme names returned with the same value-completion behavior as the bare value position |
+| T-CMP-034C | Theme names inside empty single-quoted string | `Set Theme ''` → completion with cursor between quotes | Theme names returned with the same value-completion behavior as the bare value position |
+| T-CMP-034D | Theme names inside partial quoted string | `Set Theme "D"` → completion with cursor after `D` | Theme names returned and filtered as Theme completions, not generic word suggestions |
+| T-CMP-034E | Quoted Theme acceptance preserves quotes | Accept `Catppuccin Mocha` inside `Set Theme ""` | Completion uses `textEdit` so only the quoted contents are replaced; surrounding quotes stay intact |
 | T-CMP-035 | No themes for other settings | `Set FontSize` + space → completion | No theme name items returned |
 
 ### 2.5 Setting Value Completions
@@ -113,6 +116,11 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-090 | Time units after first Sleep digit | `Sleep 1` → completion after `1` | Returns `ms`, `s` |
 | T-CMP-091 | Time units after first Type duration digit | `Type@1 "x"` → completion after `1` | Returns `ms`, `s` |
 | T-CMP-092 | Time units after first TypingSpeed digit | `Set TypingSpeed 1` → completion after `1` | Returns `ms`, `s` |
+| T-CMP-093 | Time units after subsequent Sleep digits | `Sleep 10` → completion after `0` | Returns `ms`, `s` |
+| T-CMP-094 | Time units after partial Sleep suffix | `Sleep 1000m` → completion after `m` | Returns `ms`, `s`; accepting `ms` replaces only the suffix fragment |
+| T-CMP-095 | Time units after complete Sleep suffix | `Sleep 1000ms` → completion after trailing `s` | Returns `ms`, `s`; completion still targets only the suffix range |
+| T-CMP-096 | Time units after partial Type duration suffix | `Type@1000m "x"` → completion after `m` | Returns `ms`, `s` |
+| T-CMP-097 | Time units after partial TypingSpeed suffix | `Set TypingSpeed 1000m` → completion after `m` | Returns `ms`, `s` |
 
 ## 3. WS-2: Diagnostics Test Scenarios
 

@@ -5,7 +5,7 @@
 **Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect
 **Depends On:** phase1/SPEC_PARSER.md (AST), phase1/SPEC_LSP_CORE.md (server capabilities)
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-24
 **Frozen By:** Architect (Claude) — Stage B
 
 ---
@@ -94,8 +94,8 @@ what category of completion to offer, then returns an appropriate list of
 | **ID** | CMP-005 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | When the cursor is inside a `SET_COMMAND` whose setting is `Theme` and positioned after the `THEME_KW` token, the completion handler MUST return theme names from the built-in theme registry (§8). Each item MUST have `kind: CompletionItemKind::EnumMember`, `detail: "VHS built-in theme"`, and `insertText` that wraps the theme name in double quotes whenever the value cannot be inserted as a single bare VHS token (for example names containing spaces, `+`, or `-`, such as `"Catppuccin Mocha"`, `"Dark+"`, or `"catppuccin-frappe"`). Bare-safe identifiers such as `Nord` MAY be inserted without quotes. |
-| **Verification** | Type `Set Theme` followed by a space and request completion; verify the list includes `Dracula`, `Catppuccin Mocha`, `Nord`, and at least 300 entries total. Place the cursor inside `Set Theme ""` and request completion; verify theme names are still returned. |
+| **Statement** | When the cursor is inside a `SET_COMMAND` whose setting is `Theme` and positioned after the `THEME_KW` token, the completion handler MUST return theme names from the built-in theme registry (§8). This requirement covers the bare value position (`Set Theme `), empty quoted strings (`Set Theme ""`, `Set Theme ''`), and partially typed quoted values such as `Set Theme "D"`. Each item MUST have `kind: CompletionItemKind::EnumMember` and `detail: "VHS built-in theme"`. In a bare value position, items MUST use `insertText` that wraps the theme name in double quotes whenever the value cannot be inserted as a single bare VHS token (for example names containing spaces, `+`, or `-`, such as `"Catppuccin Mocha"`, `"Dark+"`, or `"catppuccin-frappe"`). Bare-safe identifiers such as `Nord` MAY be inserted without quotes. When the cursor is already inside a quoted theme string, items MUST use `textEdit` to replace only the string contents and preserve the surrounding quote characters. |
+| **Verification** | Type `Set Theme` followed by a space and request completion; verify the list includes `Dracula`, `Catppuccin Mocha`, `Nord`, and at least 300 entries total. Place the cursor inside `Set Theme ""`, `Set Theme ''`, and `Set Theme "D"` and request completion; verify theme names are still returned. Accept `Catppuccin Mocha` inside `Set Theme ""`; verify the string contents become `Catppuccin Mocha` while the surrounding quotes remain unchanged. |
 
 ### CMP-006 — Setting Value Completions
 
@@ -134,8 +134,8 @@ what category of completion to offer, then returns an appropriate list of
 | **ID** | CMP-009 |
 | **Priority** | P2 (MAY) |
 | **Owner** | Architect → Builder |
-| **Statement** | When the cursor follows a numeric literal in a time-accepting context (e.g., `Sleep`, `TypingSpeed`, duration override `@`), the completion handler MAY return time unit suffixes: `ms` (milliseconds), `s` (seconds). |
-| **Verification** | Type `Sleep 1`, `Type@1`, and `Set TypingSpeed 1`, then request completion; verify `ms` and `s` suffixes are offered in all three contexts. |
+| **Statement** | When the cursor is inside a time-accepting duration slot (e.g., `Sleep`, `TypingSpeed`, duration override `@`) and positioned after a numeric literal or a partially typed unit suffix, the completion handler MAY return time unit suffixes: `ms` (milliseconds), `s` (seconds). This includes `Sleep 1`, `Sleep 10`, `Sleep 1000m`, `Sleep 1000ms`, `Type@1`, `Type@1000m`, and `Set TypingSpeed 1000m`. The handler MAY use source-line fallback heuristics when partially typed suffix text temporarily breaks the canonical AST token shape. Returned time-unit items SHOULD provide `filterText` and `textEdit` so that accepting a completion replaces only the current suffix fragment and preserves the already typed numeric prefix. |
+| **Verification** | Type `Sleep 1`, `Sleep 10`, `Sleep 1000m`, `Sleep 1000ms`, `Type@1`, `Type@1000m`, and `Set TypingSpeed 1000m`, then request completion; verify `ms` and `s` are offered in the supported duration-slot states and apply as suffix replacements instead of duplicating the numeric prefix. |
 
 ### CMP-010 — Modifier Key Target Completions
 
@@ -210,20 +210,21 @@ The context resolution algorithm maps cursor position to completion category:
 | --- | --- | --- | --- |
 | Line start / empty line / inside ERROR at line start / partially typed command prefix at line start | None or SOURCE_FILE | Command keywords | CMP-003 |
 | After `Set` keyword, before setting name | SET_COMMAND | Setting names | CMP-004 |
-| After `Set Theme`, in value position | SET_COMMAND (Theme) | Theme names | CMP-005 |
+| After `Set Theme`, in bare value position | SET_COMMAND (Theme) | Theme names | CMP-005 |
+| Inside quoted `Set Theme` string (empty or partial) | SET_COMMAND (Theme) | Theme names with quote-preserving replacement | CMP-005 |
 | After `Set CursorBlink`, in value position | SET_COMMAND (CursorBlink) | Boolean values | CMP-006 |
 | After `Set WindowBar`, in value position | SET_COMMAND (WindowBar) | Window bar styles | CMP-006 |
 | After `Set Shell`, in value position | SET_COMMAND (Shell) | Shell names | CMP-006 |
 | After `Output`, in path position | OUTPUT_COMMAND | File extensions | CMP-008 |
 | After `Ctrl+` / `Alt+` / `Shift+` | CTRL/ALT/SHIFT_COMMAND | Key targets | CMP-010 |
-| After numeric in time context | SLEEP_COMMAND, DURATION | Time units | CMP-009 |
+| After numeric or partial unit suffix in time context | SLEEP_COMMAND, DURATION, or source-line duration-slot fallback | Time units | CMP-009 |
 | Inside `Type` string argument | TYPE_COMMAND | None (free text) | No completions |
 | Inside comment | COMMENT token | None | No completions |
 
 ## 7. Completion Context Resolution Algorithm (Pseudocode)
 
 ```rust
-fn resolve_completion_context(root: &SyntaxNode, offset: TextSize) -> CompletionContext:
+fn resolve_completion_context(root: &SyntaxNode, source: &str, offset: TextSize) -> CompletionContext:
     token = find_token_at_offset(root, offset)
     if token is None:
         return CommandKeywords
@@ -243,7 +244,7 @@ fn resolve_completion_context(root: &SyntaxNode, offset: TextSize) -> Completion
             if setting_kw is None or offset <= setting_kw.text_range().start():
                 return SettingNames
             match setting_kw.kind():
-                THEME_KW    -> return ThemeNames
+                THEME_KW    -> return ThemeNames  // bare, empty quoted, and partial quoted values
                 CURSORBLINK_KW -> return BooleanValues
                 WINDOWBAR_KW -> return WindowBarStyles
                 SHELL_KW    -> return ShellNames
@@ -264,6 +265,8 @@ fn resolve_completion_context(root: &SyntaxNode, offset: TextSize) -> Completion
             return NoCompletion  // free text
 
         _:
+            if source_line_duration_slot_matches(source, offset):
+                return TimeUnits
             return NoCompletion
 ```
 
@@ -289,12 +292,15 @@ Tomorrow Night, Ubuntu, Zenburn
 ```
 
 **Implementation note:** Theme names containing spaces (e.g.,
-`"Catppuccin Mocha"`) MUST be wrapped in double quotes when inserted.
-Theme names without spaces (e.g., `Dracula`) SHOULD be inserted without
-quotes. The Builder MUST maintain a `data/themes.txt` file (one theme
-name per line, `#`-prefixed lines are comments) derived from the
-upstream VHS THEMES.md. The file is embedded at compile time via
-`include_str!("../data/themes.txt")` and parsed once via
+`"Catppuccin Mocha"`) MUST be wrapped in double quotes when inserted in
+bare value position. Theme names without spaces (e.g., `Dracula`) SHOULD
+be inserted without quotes in bare position. When completion is requested
+inside an already quoted Theme string, the Builder MUST use `textEdit` to
+replace only the quoted contents so accepting a completion never creates
+double or mixed quote layers. The Builder MUST maintain a
+`data/themes.txt` file (one theme name per line, `#`-prefixed lines are
+comments) derived from the upstream VHS THEMES.md. The file is embedded at
+compile time via `include_str!("../data/themes.txt")` and parsed once via
 `std::sync::LazyLock<Vec<&'static str>>` on first access.
 
 ## 9. Snippet Template Registry

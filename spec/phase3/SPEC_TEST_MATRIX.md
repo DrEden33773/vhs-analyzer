@@ -42,9 +42,11 @@
 | T-CLI-019 | Graceful shutdown | Call `deactivate()` | `client.stop()` sends `shutdown` then `exit` per LSP-005 | Unit |
 | T-CLI-020 | Status bar indicator states | Various server states | Green (running), yellow (starting), red (failed/no-server), spinner (VHS executing) | Unit |
 | T-CLI-021 | `which` package resolves executables cross-platform | Call dependency check on various platforms | Correct binary paths returned; PATHEXT handled on Windows | Unit |
-| T-CLI-022 | Auto-suggest after `Set Theme` trailing space | Type the trailing space in `Set Theme` | Extension executes `editor.action.triggerSuggest` with `{ auto: true }` | Unit |
-| T-CLI-023 | Auto-suggest inside empty Theme quotes | Type `"` or `'` to produce `Set Theme ""` / `Set Theme ''` with cursor between quotes | Extension executes `editor.action.triggerSuggest` with `{ auto: true }` | Unit |
-| T-CLI-024 | Auto-suggest after first time digit | Type the first digit in `Sleep 1`, `Type@1`, or `Set TypingSpeed 1` | Extension executes `editor.action.triggerSuggest` with `{ auto: true }` | Unit |
+| T-CLI-022 | Targeted suggest after `Set Theme` trailing space | Type the trailing space in `Set Theme` | Extension executes `editor.action.triggerSuggest` in explicit mode | Unit |
+| T-CLI-023 | Targeted suggest inside empty Theme quotes | Type `"` or `'` to produce `Set Theme ""` / `Set Theme ''` with cursor between quotes | Extension executes `editor.action.triggerSuggest` in explicit mode | Unit |
+| T-CLI-023A | Targeted suggest while typing inside quoted Theme value | Type `D` in `Set Theme "D"` and type a space in `Set Theme "Catppuccin "` | Extension executes `editor.action.triggerSuggest` in explicit mode for both edits | Unit |
+| T-CLI-024 | Targeted suggest after first and subsequent time digits | Type the first digit in `Sleep 1`, then continue to `Sleep 10`, and repeat for `Type@10` / `Set TypingSpeed 10` | Extension executes `editor.action.triggerSuggest` in explicit mode for the duration-slot digit edits | Unit |
+| T-CLI-024A | Targeted suggest after partial time suffix characters | Type `m` or `s` in `Sleep 1000m`, `Type@1000m`, or `Set TypingSpeed 1000m` | Extension executes `editor.action.triggerSuggest` in explicit mode for the duration-slot suffix edits | Unit |
 
 ## 3. Preview Tests (T-PRV)
 

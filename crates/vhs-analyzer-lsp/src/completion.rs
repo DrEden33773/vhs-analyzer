@@ -24,6 +24,12 @@ struct SnippetSpec {
     insert_text: &'static str,
 }
 
+struct DurationSlotContext {
+    numeric_prefix: String,
+    replace_end: usize,
+    replace_start: usize,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum CompletionContext {
     CommandKeywords,
@@ -497,7 +503,7 @@ fn resolve_context(syntax: &SyntaxNode, source: &str, offset: usize) -> Option<C
         return Some(CompletionContext::KeyTargets);
     }
 
-    if is_time_unit_position(syntax, offset) {
+    if is_time_unit_position(source, offset) {
         return Some(CompletionContext::TimeUnits);
     }
 
@@ -519,7 +525,7 @@ fn items_for_context(
         CompletionContext::ShellNames => string_like_items_from_specs(SHELL_NAMES),
         CompletionContext::OutputExtensions => items_from_specs(OUTPUT_EXTENSIONS),
         CompletionContext::KeyTargets => key_target_items(),
-        CompletionContext::TimeUnits => time_unit_items(syntax, source, offset),
+        CompletionContext::TimeUnits => time_unit_items(source, offset),
     }
 }
 
@@ -590,12 +596,10 @@ fn string_like_items_from_specs(specs: &[CompletionSpec]) -> Vec<CompletionItem>
         .collect()
 }
 
-fn time_unit_items(syntax: &SyntaxNode, source: &str, offset: usize) -> Vec<CompletionItem> {
-    let Some((numeric_prefix, insert_offset)) = time_unit_edit_context(syntax, offset) else {
+fn time_unit_items(source: &str, offset: usize) -> Vec<CompletionItem> {
+    let Some(context) = duration_slot_context(source, offset) else {
         return items_from_specs(TIME_UNITS);
     };
-    let insert_range =
-        super::VhsLanguageServer::range_for_offsets(source, insert_offset, insert_offset);
 
     TIME_UNITS
         .iter()
@@ -603,10 +607,14 @@ fn time_unit_items(syntax: &SyntaxNode, source: &str, offset: usize) -> Vec<Comp
             label: item.label.to_owned(),
             kind: Some(item.kind),
             detail: Some(item.detail.to_owned()),
-            filter_text: Some(format!("{numeric_prefix}{}", item.label)),
+            filter_text: Some(format!("{}{}", context.numeric_prefix, item.label)),
             insert_text: Some(item.label.to_owned()),
             text_edit: Some(CompletionTextEdit::Edit(TextEdit {
-                range: insert_range,
+                range: super::VhsLanguageServer::range_for_offsets(
+                    source,
+                    context.replace_start,
+                    context.replace_end,
+                ),
                 new_text: item.label.to_owned(),
             })),
             ..Default::default()
@@ -796,47 +804,112 @@ fn is_modifier_target_position(syntax: &SyntaxNode, offset: usize) -> bool {
         })
 }
 
-fn is_time_unit_position(syntax: &SyntaxNode, offset: usize) -> bool {
-    let Some(token) = significant_token_at_or_before_offset(syntax, offset) else {
-        return false;
-    };
-    if !matches!(token.kind(), SyntaxKind::INTEGER | SyntaxKind::FLOAT) {
-        return false;
-    }
-    if usize::try_from(u32::from(token.text_range().end()))
-        .ok()
-        .is_none_or(|end| offset < end)
-    {
-        return false;
-    }
-
-    if token
-        .parent()
-        .and_then(|node| enclosing_command(&node))
-        .is_some_and(|command| command.kind() == SyntaxKind::SLEEP_COMMAND)
-    {
-        return true;
-    }
-
-    if previous_significant_token(&token).is_some_and(|previous| previous.kind() == SyntaxKind::AT)
-    {
-        return true;
-    }
-
-    set_command_for_offset(syntax, offset)
-        .and_then(|set_command| set_command.setting())
-        .and_then(|setting| setting.name_token())
-        .is_some_and(|name_token| name_token.kind() == SyntaxKind::TYPINGSPEED_KW)
+fn is_time_unit_position(source: &str, offset: usize) -> bool {
+    duration_slot_context(source, offset).is_some()
 }
 
-fn time_unit_edit_context(syntax: &SyntaxNode, offset: usize) -> Option<(String, usize)> {
-    let token = significant_token_at_or_before_offset(syntax, offset)?;
-    if !matches!(token.kind(), SyntaxKind::INTEGER | SyntaxKind::FLOAT) {
+fn duration_slot_context(source: &str, offset: usize) -> Option<DurationSlotContext> {
+    let safe_offset = offset.min(source.len());
+    let line_start = source[..safe_offset]
+        .rfind(['\n', '\r'])
+        .map_or(0, |index| index + 1);
+    let line_end = source[safe_offset..]
+        .find(['\n', '\r'])
+        .map_or(source.len(), |relative| safe_offset + relative);
+    let line_prefix = source.get(line_start..safe_offset)?;
+    let line_suffix = source.get(safe_offset..line_end)?;
+
+    if line_suffix
+        .chars()
+        .next()
+        .is_some_and(|character| character.is_ascii_alphanumeric() || character == '_')
+    {
         return None;
     }
 
-    let insert_offset = usize::try_from(u32::from(token.text_range().end())).ok()?;
-    Some((token.text().to_owned(), insert_offset))
+    let trimmed_prefix = line_prefix.trim_start_matches(char::is_whitespace);
+
+    if let Some(fragment) = trimmed_prefix
+        .strip_prefix("Sleep")
+        .and_then(strip_required_inline_whitespace)
+    {
+        return parse_duration_slot_fragment(fragment, safe_offset);
+    }
+
+    if let Some(fragment) = trimmed_prefix
+        .strip_prefix("Set")
+        .and_then(strip_required_inline_whitespace)
+        .and_then(|rest| rest.strip_prefix("TypingSpeed"))
+        .and_then(strip_required_inline_whitespace)
+    {
+        return parse_duration_slot_fragment(fragment, safe_offset);
+    }
+
+    let after_type = trimmed_prefix.strip_prefix("Type")?;
+    let after_type = after_type.trim_start_matches([' ', '\t']);
+    let after_at = after_type.strip_prefix('@')?;
+    let fragment = after_at.trim_start_matches([' ', '\t']);
+
+    parse_duration_slot_fragment(fragment, safe_offset)
+}
+
+fn strip_required_inline_whitespace(text: &str) -> Option<&str> {
+    let trimmed = text.trim_start_matches([' ', '\t']);
+    (trimmed.len() != text.len()).then_some(trimmed)
+}
+
+fn parse_duration_slot_fragment(fragment: &str, offset: usize) -> Option<DurationSlotContext> {
+    let numeric_len = parse_numeric_prefix_len(fragment)?;
+    let suffix = fragment.get(numeric_len..)?;
+    if !matches!(suffix, "" | "m" | "ms" | "s") {
+        return None;
+    }
+
+    Some(DurationSlotContext {
+        numeric_prefix: fragment.get(..numeric_len)?.to_owned(),
+        replace_start: offset.saturating_sub(suffix.len()),
+        replace_end: offset,
+    })
+}
+
+fn parse_numeric_prefix_len(fragment: &str) -> Option<usize> {
+    let bytes = fragment.as_bytes();
+    if bytes.is_empty() {
+        return None;
+    }
+
+    let mut index = 0_usize;
+
+    if bytes.first() == Some(&b'.') {
+        index += 1;
+        let fractional_digits = consume_ascii_digits(bytes, index);
+        if fractional_digits == 0 {
+            return None;
+        }
+        return Some(index + fractional_digits);
+    }
+
+    let integer_digits = consume_ascii_digits(bytes, index);
+    if integer_digits == 0 {
+        return None;
+    }
+    index += integer_digits;
+
+    if bytes.get(index) == Some(&b'.') {
+        let fractional_digits = consume_ascii_digits(bytes, index + 1);
+        if fractional_digits > 0 {
+            return Some(index + 1 + fractional_digits);
+        }
+    }
+
+    Some(index)
+}
+
+fn consume_ascii_digits(bytes: &[u8], start: usize) -> usize {
+    bytes[start..]
+        .iter()
+        .take_while(|byte| byte.is_ascii_digit())
+        .count()
 }
 
 fn output_command_for_offset(syntax: &SyntaxNode, offset: usize) -> Option<OutputCommand> {

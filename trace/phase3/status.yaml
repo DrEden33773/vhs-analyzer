@@ -2,6 +2,7 @@ phase: phase3_vscode_extension_client
 status: completed
 started_at: "2026-03-19"
 completed_at: "2026-03-20"
+updated_at: "2026-03-24"
 
 stages:
   architect_stage_a:
@@ -51,19 +52,48 @@ spec_files:
   - spec/phase3/SPEC_TRACEABILITY.md
 
 requirement_ids:
-  client: [CLI-001, CLI-002, CLI-003, CLI-004, CLI-005, CLI-006, CLI-007, CLI-008, CLI-009, CLI-010, CLI-011]
+  client: [CLI-001, CLI-002, CLI-003, CLI-004, CLI-005, CLI-006, CLI-007, CLI-008, CLI-009, CLI-010, CLI-011, CLI-012]
   preview: [PRV-001, PRV-002, PRV-003, PRV-004, PRV-005, PRV-006, PRV-007, PRV-008, PRV-009, PRV-010]
   codelens: [CLS-001, CLS-002, CLS-003, CLS-004, CLS-005, CLS-006, CLS-007, CLS-008, CLS-009, CLS-010]
   packaging: [PKG-001, PKG-002, PKG-003, PKG-004, PKG-005, PKG-006, PKG-007, PKG-008, PKG-009, PKG-010, PKG-011, PKG-012]
 
 test_scenarios:
-  total: 87
+  total: 89
   by_category:
-    client: 21
+    client: 23
     preview: 20
     codelens: 21
     packaging: 20
     integration: 5
+
+post_completion_revisions:
+  - date: "2026-03-24"
+    status: completed
+    approved_by_user: true
+    scope: "Explicit targeted suggest for quoted Theme values and duration-slot edits"
+    requirements_touched: [CLI-012]
+    test_ids:
+      - T-CLI-022
+      - T-CLI-023
+      - T-CLI-023A
+      - T-CLI-024
+      - T-CLI-024A
+    implementation_files:
+      - editors/code/src/extension.ts
+      - editors/code/src/extension.test.ts
+      - editors/code/src/__mocks__/vscode.ts
+      - editors/code/language-configuration.json
+      - spec/phase3/SPEC_CLIENT.md
+      - spec/phase3/SPEC_TEST_MATRIX.md
+      - spec/phase3/SPEC_TRACEABILITY.md
+      - trace/phase3/status.yaml
+      - trace/phase3/tracker.md
+    quality_gate:
+      pnpm_lint: pass
+      pnpm_typecheck: pass
+      pnpm_test: pass
+      cargo_fmt_all_check: pass
+      cargo_clippy_workspace_all_targets_all_features_locked: pass
 
 batches:
   batch1:

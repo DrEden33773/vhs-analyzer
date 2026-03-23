@@ -189,3 +189,31 @@ Builder appends one record per completed batch below this line.
 - Notes:
   - The first two Batch 5 scenarios were already green when promoted into process-level integration tests, which confirmed the existing unified diagnostics pipeline and completion/cache behavior at the public stdio boundary.
   - Existing `crates/vhs-analyzer-lsp/tests/integration_test.rs` remains the broader Phase 1 transport regression, while `crates/vhs-analyzer-lsp/tests/phase2_integration_test.rs` now isolates the frozen Phase 2 acceptance scenarios.
+
+### Post-completion Revision — 2026-03-24
+
+- Status: Completed
+- Approval: User-approved frozen-spec revision for completion behavior
+- Scope: Expand `CMP-005` and `CMP-009` so quoted Theme strings preserve surrounding quotes on acceptance, and time-unit completions stay available in duration-slot suffix states such as `1000m` / `1000ms`.
+- Files:
+  - `crates/vhs-analyzer-lsp/src/completion.rs`
+  - `crates/vhs-analyzer-lsp/tests/completion_tests.rs`
+  - `spec/phase2/SPEC_COMPLETION.md`
+  - `spec/phase2/SPEC_TEST_MATRIX.md`
+  - `spec/phase2/SPEC_TRACEABILITY.md`
+  - `trace/phase2/status.yaml`
+  - `trace/phase2/tracker.md`
+- Planned verification:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test -p vhs-analyzer-lsp --test completion_tests`
+  - `cargo test --workspace --all-targets --locked`
+- Deliverables:
+  - Expanded the Phase 2 completion contract so Theme completions now cover empty and partial quoted strings and preserve surrounding quotes via `textEdit`.
+  - Expanded duration-slot completions to remain available after subsequent digits and partial suffix states such as `1000m` and `1000ms`, using suffix-range replacement semantics instead of duplicating numeric prefixes.
+  - Added 6 new Rust completion regression tests for quoted Theme prefix states and duration-slot suffix states, bringing `crates/vhs-analyzer-lsp/tests/completion_tests.rs` to 42 passing tests.
+- Quality gate:
+  - `cargo fmt --all -- --check` passed.
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` passed.
+  - `cargo test -p vhs-analyzer-lsp --test completion_tests` passed.
+  - `cargo test --workspace --all-targets --locked` passed.

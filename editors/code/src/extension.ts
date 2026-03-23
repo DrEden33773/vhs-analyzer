@@ -145,28 +145,61 @@ export function shouldTriggerTargetedSuggest(
     return true;
   }
 
-  const lastCharacter = context.linePrefix.at(-1);
   if (
-    (context.insertedText === '"' ||
-      context.insertedText === "'" ||
-      context.insertedText === '""' ||
-      context.insertedText === "''") &&
-    (lastCharacter === '"' || lastCharacter === "'") &&
-    context.lineSuffix.startsWith(lastCharacter) &&
-    /^\s*Set\s+Theme\s+["']$/u.test(context.linePrefix)
+    isThemeQuotedValueContext(context.linePrefix, context.lineSuffix) &&
+    isThemeValueEdit(context.insertedText)
   ) {
     return true;
   }
 
-  if (!/^\d$/u.test(context.insertedText)) {
+  return (
+    isDurationSlotContext(context.linePrefix, context.lineSuffix) &&
+    isDurationValueEdit(context.insertedText)
+  );
+}
+
+function isThemeQuotedValueContext(
+  linePrefix: string,
+  lineSuffix: string,
+): boolean {
+  const match = /^\s*Set\s+Theme\s+(["'])([^"'`]*)$/u.exec(linePrefix);
+  if (match === null) {
+    return false;
+  }
+
+  const quote = match[1];
+  return quote !== undefined && lineSuffix.startsWith(quote);
+}
+
+function isThemeValueEdit(insertedText: string): boolean {
+  return (
+    insertedText === '"' ||
+    insertedText === "'" ||
+    insertedText === '""' ||
+    insertedText === "''" ||
+    /^[A-Za-z0-9 +_-]$/u.test(insertedText)
+  );
+}
+
+function isDurationSlotContext(
+  linePrefix: string,
+  lineSuffix: string,
+): boolean {
+  if (/^[A-Za-z0-9_]$/u.test(lineSuffix.charAt(0))) {
     return false;
   }
 
   return (
-    /^\s*Sleep\s+\d$/u.test(context.linePrefix) ||
-    /^\s*Type@\d$/u.test(context.linePrefix) ||
-    /^\s*Set\s+TypingSpeed\s+\d$/u.test(context.linePrefix)
+    /^\s*Sleep\s+(?:\d+(?:\.\d+)?|\.\d+)(?:ms|m|s)?$/u.test(linePrefix) ||
+    /^\s*Type\s*@\s*(?:\d+(?:\.\d+)?|\.\d+)(?:ms|m|s)?$/u.test(linePrefix) ||
+    /^\s*Set\s+TypingSpeed\s+(?:\d+(?:\.\d+)?|\.\d+)(?:ms|m|s)?$/u.test(
+      linePrefix,
+    )
   );
+}
+
+function isDurationValueEdit(insertedText: string): boolean {
+  return /^[0-9ms]$/u.test(insertedText);
 }
 
 function advancePosition(position: Position, text: string): Position {
@@ -376,9 +409,7 @@ export class ExtensionController {
       return;
     }
 
-    await commands.executeCommand("editor.action.triggerSuggest", {
-      auto: true,
-    });
+    await commands.executeCommand("editor.action.triggerSuggest");
   }
 
   async deactivate(): Promise<void> {
