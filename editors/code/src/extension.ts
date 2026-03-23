@@ -5,6 +5,8 @@ import {
   type ExtensionContext,
   type FileSystemWatcher,
   type OutputChannel,
+  type Position,
+  type TextDocumentChangeEvent,
   Uri,
   commands,
   env,
@@ -75,6 +77,12 @@ export interface ExtensionDependencies {
   scheduleRestart: (callback: () => void, delayMs: number) => void;
 }
 
+interface SuggestTriggerContext {
+  insertedText: string;
+  linePrefix: string;
+  lineSuffix: string;
+}
+
 export function buildLanguageClientOptions(options: {
   errorHandler: ErrorHandler;
   fileWatcher: FileSystemWatcher;
@@ -124,6 +132,56 @@ export function createDefaultDependencies(): ExtensionDependencies {
     scheduleRestart(callback, delayMs) {
       setTimeout(callback, delayMs);
     },
+  };
+}
+
+export function shouldTriggerTargetedSuggest(
+  context: SuggestTriggerContext,
+): boolean {
+  if (
+    context.insertedText === " " &&
+    /^\s*Set Theme $/u.test(context.linePrefix)
+  ) {
+    return true;
+  }
+
+  const lastCharacter = context.linePrefix.at(-1);
+  if (
+    (context.insertedText === '"' ||
+      context.insertedText === "'" ||
+      context.insertedText === '""' ||
+      context.insertedText === "''") &&
+    (lastCharacter === '"' || lastCharacter === "'") &&
+    context.lineSuffix.startsWith(lastCharacter) &&
+    /^\s*Set Theme\s+["']$/u.test(context.linePrefix)
+  ) {
+    return true;
+  }
+
+  if (!/^\d$/u.test(context.insertedText)) {
+    return false;
+  }
+
+  return (
+    /^\s*Sleep \d$/u.test(context.linePrefix) ||
+    /^\s*Type@\d$/u.test(context.linePrefix) ||
+    /^\s*Set TypingSpeed \d$/u.test(context.linePrefix)
+  );
+}
+
+function lineContextAtPosition(
+  documentText: string,
+  position: Position,
+): { linePrefix: string; lineSuffix: string } | null {
+  const lines = documentText.split(/\r?\n/u);
+  const line = lines[position.line];
+  if (line === undefined) {
+    return null;
+  }
+
+  return {
+    linePrefix: line.slice(0, position.character),
+    lineSuffix: line.slice(position.character),
   };
 }
 
@@ -219,12 +277,57 @@ export class ExtensionController {
           }
         },
       }),
+      workspace.onDidChangeTextDocument((event) => {
+        void this.maybeTriggerTargetedSuggest(event);
+      }),
     );
 
     await this.startLanguageClient(false);
 
     void this.dependencies.checkRuntimeDependencies({
       resolveExecutable: resolveBinaryOnPath,
+    });
+  }
+
+  private async maybeTriggerTargetedSuggest(
+    event: TextDocumentChangeEvent,
+  ): Promise<void> {
+    const activeEditor = window.activeTextEditor;
+    const selection = activeEditor?.selection;
+    if (
+      activeEditor === undefined ||
+      selection === undefined ||
+      activeEditor.document.languageId !== "tape" ||
+      activeEditor.document.uri.toString() !== event.document.uri.toString()
+    ) {
+      return;
+    }
+
+    const latestChange = event.contentChanges.at(-1);
+    if (latestChange === undefined || latestChange.text === "") {
+      return;
+    }
+
+    const lineContext = lineContextAtPosition(
+      activeEditor.document.getText(),
+      selection.active,
+    );
+    if (lineContext === null) {
+      return;
+    }
+
+    if (
+      !shouldTriggerTargetedSuggest({
+        insertedText: latestChange.text,
+        linePrefix: lineContext.linePrefix,
+        lineSuffix: lineContext.lineSuffix,
+      })
+    ) {
+      return;
+    }
+
+    await commands.executeCommand("editor.action.triggerSuggest", {
+      auto: true,
     });
   }
 

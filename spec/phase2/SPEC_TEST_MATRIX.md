@@ -63,6 +63,7 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-033 | Nord unquoted | `Set Theme` + space → completion | `Nord` has `insertText: "Nord"` (no quotes, no spaces) |
 | T-CMP-034 | Dark+ quoted | `Set Theme` + space → completion | `Dark+` has `insertText: "\"Dark+\""` (wrapped in quotes) |
 | T-CMP-034A | catppuccin-frappe quoted | `Set Theme` + space → completion | `catppuccin-frappe` has `insertText: "\"catppuccin-frappe\""` (wrapped in quotes) |
+| T-CMP-034B | Theme names inside empty quoted string | `Set Theme ""` → completion with cursor between quotes | Theme names returned with the same value-completion behavior as the bare value position |
 | T-CMP-035 | No themes for other settings | `Set FontSize` + space → completion | No theme name items returned |
 
 ### 2.5 Setting Value Completions
@@ -72,6 +73,7 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-040 | CursorBlink boolean values | `Set CursorBlink` + space → completion | Returns `true`, `false` with `kind: Value` |
 | T-CMP-041 | WindowBar style values | `Set WindowBar` + space → completion | Returns `Colorful`, `ColorfulRight`, `Rings`, `RingsRight` with `kind: EnumMember` |
 | T-CMP-042 | Shell common values | `Set Shell` + space → completion | Returns `bash`, `zsh`, `fish`, `sh`, `powershell`, `pwsh` with `kind: Value` |
+| T-CMP-042A | Shell values inside empty quoted string | `Set Shell ""` → completion with cursor between quotes | Returns `bash`, `zsh`, `fish`, `sh`, `powershell`, `pwsh` |
 
 ### 2.6 Snippet Templates
 
@@ -103,6 +105,14 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-081 | No completion in comment | `# this is a comment` → completion inside | Returns `Ok(None)` — no completions |
 | T-CMP-082 | Empty file | Completion at (0,0) of completely empty file | Returns command keyword completions |
 | T-CMP-083 | No panic on arbitrary position | Property: completion at random offset in arbitrary `.tape` content | Never panics; returns `Ok(Some(...))` or `Ok(None)` |
+
+### 2.10 Time Unit Completions
+
+| ID | Description | Input | Expected Output |
+| --- | --- | --- | --- |
+| T-CMP-090 | Time units after first Sleep digit | `Sleep 1` → completion after `1` | Returns `ms`, `s` |
+| T-CMP-091 | Time units after first Type duration digit | `Type@1 "x"` → completion after `1` | Returns `ms`, `s` |
+| T-CMP-092 | Time units after first TypingSpeed digit | `Set TypingSpeed 1` → completion after `1` | Returns `ms`, `s` |
 
 ## 3. WS-2: Diagnostics Test Scenarios
 

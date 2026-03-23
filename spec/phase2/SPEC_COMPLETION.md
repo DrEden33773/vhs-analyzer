@@ -95,7 +95,7 @@ what category of completion to offer, then returns an appropriate list of
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
 | **Statement** | When the cursor is inside a `SET_COMMAND` whose setting is `Theme` and positioned after the `THEME_KW` token, the completion handler MUST return theme names from the built-in theme registry (§8). Each item MUST have `kind: CompletionItemKind::EnumMember`, `detail: "VHS built-in theme"`, and `insertText` that wraps the theme name in double quotes whenever the value cannot be inserted as a single bare VHS token (for example names containing spaces, `+`, or `-`, such as `"Catppuccin Mocha"`, `"Dark+"`, or `"catppuccin-frappe"`). Bare-safe identifiers such as `Nord` MAY be inserted without quotes. |
-| **Verification** | Type `Set Theme` followed by a space and request completion; verify the list includes `Dracula`, `Catppuccin Mocha`, `Nord`, and at least 300 entries total. |
+| **Verification** | Type `Set Theme` followed by a space and request completion; verify the list includes `Dracula`, `Catppuccin Mocha`, `Nord`, and at least 300 entries total. Place the cursor inside `Set Theme ""` and request completion; verify theme names are still returned. |
 
 ### CMP-006 — Setting Value Completions
 
@@ -105,7 +105,7 @@ what category of completion to offer, then returns an appropriate list of
 | **Priority** | P1 (SHOULD) |
 | **Owner** | Architect → Builder |
 | **Statement** | For settings with enumerable value sets, the completion handler SHOULD return typed value completions when the cursor is in the value position of a `SET_COMMAND`. Specifically: (1) `CursorBlink` → `true`, `false` with `kind: Value`. (2) `WindowBar` → `"Colorful"`, `"ColorfulRight"`, `"Rings"`, `"RingsRight"` with `kind: EnumMember`. (3) `Shell` → common shells (`"bash"`, `"zsh"`, `"fish"`, `"sh"`, `"powershell"`, `"pwsh"`) with `kind: Value`. |
-| **Verification** | Type `Set CursorBlink` then space → returns `true`/`false`. Type `Set WindowBar` then space → returns the four window bar styles. |
+| **Verification** | Type `Set CursorBlink` then space → returns `true`/`false`. Type `Set WindowBar` then space → returns the four window bar styles. Place the cursor inside `Set Shell ""` and request completion; verify shell values are returned. |
 
 ### CMP-007 — Snippet Templates
 
@@ -135,7 +135,7 @@ what category of completion to offer, then returns an appropriate list of
 | **Priority** | P2 (MAY) |
 | **Owner** | Architect → Builder |
 | **Statement** | When the cursor follows a numeric literal in a time-accepting context (e.g., `Sleep`, `TypingSpeed`, duration override `@`), the completion handler MAY return time unit suffixes: `ms` (milliseconds), `s` (seconds). |
-| **Verification** | Type `Sleep 500` and request completion; verify `ms` and `s` suffixes are offered. |
+| **Verification** | Type `Sleep 1`, `Type@1`, and `Set TypingSpeed 1`, then request completion; verify `ms` and `s` suffixes are offered in all three contexts. |
 
 ### CMP-010 — Modifier Key Target Completions
 

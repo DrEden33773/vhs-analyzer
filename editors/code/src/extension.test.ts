@@ -2,10 +2,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ExtensionContext } from "vscode";
 
 import {
+  Position,
   type ThemeColor,
+  Uri,
   __fireConfigurationChange,
+  __fireTextDocumentChange,
   __getRegisteredCodeLensProviders,
   __resetMockVscode,
+  __setActiveTextEditor,
   __setConfigurationValue,
   commands,
   createMockExtensionContext,
@@ -370,6 +374,153 @@ describe("ExtensionController", () => {
 
     expect(client.setTrace).toHaveBeenCalledWith("messages");
     expect(client.start).not.toHaveBeenCalled();
+  });
+
+  it("targeted_suggest_triggers_after_set_theme_space", async () => {
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    const client = createMockClient();
+    const uri = Uri.file("/workspace/demo.tape");
+    const controller = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient: vi.fn().mockResolvedValue(client),
+      discoverServerBinary: vi
+        .fn()
+        .mockResolvedValue("/extension/server/vhs-analyzer"),
+      isExecutableFile: vi.fn().mockResolvedValue(true),
+      scheduleRestart: vi.fn(),
+    });
+
+    await controller.activate();
+    commands.executeCommand.mockClear();
+    __setActiveTextEditor({
+      getText: () => "Set Theme ",
+      languageId: "tape",
+      selection: new Position(0, 10),
+      uri,
+    });
+
+    __fireTextDocumentChange({
+      contentChanges: [{ text: " " }],
+      languageId: "tape",
+      uri,
+    });
+
+    expect(commands.executeCommand).toHaveBeenCalledWith(
+      "editor.action.triggerSuggest",
+      { auto: true },
+    );
+  });
+
+  it("targeted_suggest_triggers_inside_empty_theme_quotes", async () => {
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    const client = createMockClient();
+    const uri = Uri.file("/workspace/demo.tape");
+    const controller = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient: vi.fn().mockResolvedValue(client),
+      discoverServerBinary: vi
+        .fn()
+        .mockResolvedValue("/extension/server/vhs-analyzer"),
+      isExecutableFile: vi.fn().mockResolvedValue(true),
+      scheduleRestart: vi.fn(),
+    });
+
+    await controller.activate();
+    commands.executeCommand.mockClear();
+    __setActiveTextEditor({
+      getText: () => 'Set Theme ""',
+      languageId: "tape",
+      selection: new Position(0, 11),
+      uri,
+    });
+
+    __fireTextDocumentChange({
+      contentChanges: [{ text: '"' }],
+      languageId: "tape",
+      uri,
+    });
+
+    expect(commands.executeCommand).toHaveBeenCalledWith(
+      "editor.action.triggerSuggest",
+      { auto: true },
+    );
+  });
+
+  it("targeted_suggest_triggers_after_first_time_digit_in_supported_contexts", async () => {
+    const context = createTypedContext({
+      extensionPath: "/extension",
+    });
+    const client = createMockClient();
+    const uri = Uri.file("/workspace/demo.tape");
+    const controller = new ExtensionController(context, {
+      checkRuntimeDependencies: vi.fn().mockResolvedValue(undefined),
+      createLanguageClient: vi.fn().mockResolvedValue(client),
+      discoverServerBinary: vi
+        .fn()
+        .mockResolvedValue("/extension/server/vhs-analyzer"),
+      isExecutableFile: vi.fn().mockResolvedValue(true),
+      scheduleRestart: vi.fn(),
+    });
+
+    await controller.activate();
+    commands.executeCommand.mockClear();
+
+    __setActiveTextEditor({
+      getText: () => "Sleep 1",
+      languageId: "tape",
+      selection: new Position(0, 7),
+      uri,
+    });
+    __fireTextDocumentChange({
+      contentChanges: [{ text: "1" }],
+      languageId: "tape",
+      uri,
+    });
+
+    __setActiveTextEditor({
+      getText: () => 'Type@1 "x"',
+      languageId: "tape",
+      selection: new Position(0, 6),
+      uri,
+    });
+    __fireTextDocumentChange({
+      contentChanges: [{ text: "1" }],
+      languageId: "tape",
+      uri,
+    });
+
+    __setActiveTextEditor({
+      getText: () => "Set TypingSpeed 1",
+      languageId: "tape",
+      selection: new Position(0, 17),
+      uri,
+    });
+    __fireTextDocumentChange({
+      contentChanges: [{ text: "1" }],
+      languageId: "tape",
+      uri,
+    });
+
+    expect(commands.executeCommand).toHaveBeenCalledTimes(3);
+    expect(commands.executeCommand).toHaveBeenNthCalledWith(
+      1,
+      "editor.action.triggerSuggest",
+      { auto: true },
+    );
+    expect(commands.executeCommand).toHaveBeenNthCalledWith(
+      2,
+      "editor.action.triggerSuggest",
+      { auto: true },
+    );
+    expect(commands.executeCommand).toHaveBeenNthCalledWith(
+      3,
+      "editor.action.triggerSuggest",
+      { auto: true },
+    );
   });
 });
 

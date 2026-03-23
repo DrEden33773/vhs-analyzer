@@ -152,6 +152,9 @@ const configurationEmitter = new EventEmitter<ConfigurationChangeEvent>();
 const colorThemeEmitter = new EventEmitter<{ kind: number }>();
 const textDocumentEmitter = new EventEmitter<{
   document: { languageId: string; uri: Uri };
+  contentChanges: Array<{
+    text: string;
+  }>;
 }>();
 const createdFileSystemWatchers: Array<
   ReturnType<typeof createFileSystemWatcher>
@@ -341,8 +344,12 @@ export const window = {
   activeTextEditor: undefined as
     | {
         document: {
+          getText?: () => string;
           languageId: string;
           uri: Uri;
+        };
+        selection?: {
+          active: Position;
         };
       }
     | undefined,
@@ -463,19 +470,37 @@ export function __setWorkspaceFolders(paths: string[]): void {
 }
 
 export function __setActiveTextEditor(document: {
+  getText?: () => string;
   languageId: string;
   uri: Uri;
+  selection?: Position;
 }): void {
   window.activeTextEditor = {
-    document,
+    document: {
+      ...document,
+      getText: document.getText ?? (() => ""),
+    },
+    ...(document.selection === undefined
+      ? {}
+      : {
+          selection: {
+            active: document.selection,
+          },
+        }),
   };
 }
 
 export function __fireTextDocumentChange(document: {
+  contentChanges?: Array<{
+    text: string;
+  }>;
   languageId: string;
   uri: Uri;
 }): void {
-  textDocumentEmitter.fire({ document });
+  textDocumentEmitter.fire({
+    contentChanges: document.contentChanges ?? [],
+    document,
+  });
 }
 
 export function __getCommandContext(key: string): unknown {

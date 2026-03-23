@@ -561,6 +561,27 @@ async fn completion_returns_no_theme_items_for_other_settings() {
 }
 
 #[tokio::test(flavor = "current_thread")]
+async fn completion_returns_theme_names_inside_empty_theme_string() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Set Theme \"\"";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response(&mut service, &uri, position_for_offset(source, 11)).await,
+    );
+
+    assert!(
+        items.iter().any(|item| item.label == "Dracula"),
+        "expected theme completions inside an empty quoted theme string"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
 async fn completion_returns_boolean_values_after_set_cursor_blink() {
     let (mut service, _) = LspService::new(VhsLanguageServer::new);
     let _ = initialize_service(&mut service).await;
@@ -637,6 +658,29 @@ async fn completion_returns_shell_values_after_set_shell() {
                 .iter()
                 .map(|item| (item.label.clone(), item.kind))
                 .collect::<Vec<_>>()
+        );
+    }
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_returns_shell_values_inside_empty_shell_string() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Set Shell \"\"";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response(&mut service, &uri, position_for_offset(source, 11)).await,
+    );
+
+    for value in ["bash", "zsh", "fish", "sh", "powershell", "pwsh"] {
+        assert!(
+            items.iter().any(|item| item.label == value),
+            "expected shell completion value {value:?} inside an empty quoted string"
         );
     }
 }
@@ -893,6 +937,56 @@ async fn completion_returns_time_units_after_sleep_number() {
     assert!(
         items.iter().any(|item| item.label == "s"),
         "expected s time-unit completion"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_returns_time_units_after_first_type_duration_digit() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Type@1 \"x\"";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response(&mut service, &uri, position_for_offset(source, 6)).await,
+    );
+
+    assert!(
+        items.iter().any(|item| item.label == "ms"),
+        "expected ms time-unit completion after the first Type duration digit"
+    );
+    assert!(
+        items.iter().any(|item| item.label == "s"),
+        "expected s time-unit completion after the first Type duration digit"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_returns_time_units_after_first_typing_speed_digit() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Set TypingSpeed 1";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response(&mut service, &uri, position_for_offset(source, 17)).await,
+    );
+
+    assert!(
+        items.iter().any(|item| item.label == "ms"),
+        "expected ms time-unit completion after the first TypingSpeed digit"
+    );
+    assert!(
+        items.iter().any(|item| item.label == "s"),
+        "expected s time-unit completion after the first TypingSpeed digit"
     );
 }
 

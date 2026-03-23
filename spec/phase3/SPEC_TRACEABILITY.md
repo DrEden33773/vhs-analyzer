@@ -27,6 +27,7 @@ baseline requirement (if consuming one).
 | CLI-009 | No-server fallback mode | `editors/code/src/extension.ts`, `editors/code/src/server.ts` | T-CLI-005, T-CLI-014, T-CLI-015, T-CLI-016 (`editors/code/src/extension.test.ts`) | — |
 | CLI-010 | Configuration change handling | `editors/code/src/config.ts` | T-CLI-008, T-CLI-009, T-CLI-010 (`editors/code/src/config.test.ts`) | — |
 | CLI-011 | Status bar indicator | `editors/code/src/status.ts`, `editors/code/src/extension.ts` | T-CLI-020 (`editors/code/src/extension.test.ts`) | — |
+| CLI-012 | Targeted suggest triggering | `editors/code/src/extension.ts` | T-CLI-022, T-CLI-023, T-CLI-024 (`editors/code/src/extension.test.ts`) | CMP-005, CMP-006, CMP-009 |
 
 ## 3. Preview Requirements (PRV)
 

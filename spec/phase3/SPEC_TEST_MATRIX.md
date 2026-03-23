@@ -42,6 +42,9 @@
 | T-CLI-019 | Graceful shutdown | Call `deactivate()` | `client.stop()` sends `shutdown` then `exit` per LSP-005 | Unit |
 | T-CLI-020 | Status bar indicator states | Various server states | Green (running), yellow (starting), red (failed/no-server), spinner (VHS executing) | Unit |
 | T-CLI-021 | `which` package resolves executables cross-platform | Call dependency check on various platforms | Correct binary paths returned; PATHEXT handled on Windows | Unit |
+| T-CLI-022 | Auto-suggest after `Set Theme` trailing space | Type the trailing space in `Set Theme` | Extension executes `editor.action.triggerSuggest` with `{ auto: true }` | Unit |
+| T-CLI-023 | Auto-suggest inside empty Theme quotes | Type `"` or `'` to produce `Set Theme ""` / `Set Theme ''` with cursor between quotes | Extension executes `editor.action.triggerSuggest` with `{ auto: true }` | Unit |
+| T-CLI-024 | Auto-suggest after first time digit | Type the first digit in `Sleep 1`, `Type@1`, or `Set TypingSpeed 1` | Extension executes `editor.action.triggerSuggest` with `{ auto: true }` | Unit |
 
 ## 3. Preview Tests (T-PRV)
 

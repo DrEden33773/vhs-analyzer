@@ -159,6 +159,16 @@ WS-3 (CodeLens) depend on a functioning LSP client.
 | **Statement** | The extension SHOULD display a status bar item showing the current server status: (1) "VHS $(check)" (green) when server is running, (2) "VHS $(warning)" (yellow) during startup/restart, (3) "VHS $(error)" (red) when server failed/no-server mode, (4) "VHS $(sync~spin)" during VHS CLI execution. Clicking the status bar item SHOULD show a quick pick with actions: "Restart Server", "Show Output", "Show Trace". |
 | **Verification** | Server running → green indicator. Kill server → yellow then green (auto-restart). No binary → red indicator. Click indicator → quick pick appears. |
 
+### CLI-012 — Targeted Suggest Triggering
+
+| Field | Value |
+| --- | --- |
+| **ID** | CLI-012 |
+| **Priority** | P1 (SHOULD) |
+| **Owner** | Architect → Builder |
+| **Statement** | The extension SHOULD trigger `editor.action.triggerSuggest` with `{ auto: true }` in narrowly scoped edit contexts where the LSP already has meaningful completions but VSCode may not auto-open the widget. The targeted contexts are: (1) immediately after typing the trailing space in `Set Theme`, (2) immediately after VSCode auto-closes an empty quoted string in `Set Theme ""` / `Set Theme ''` with the cursor between the quotes, and (3) immediately after typing the first numeric digit in a time-unit context such as `Sleep 1`, `Type@1`, or `Set TypingSpeed 1`. This assist MUST NOT broaden the LSP `triggerCharacters` list, and MUST avoid triggering in unrelated strings or comments. |
+| **Verification** | Type the trailing space in `Set Theme` → suggestion widget opens automatically. Type `Set Theme ""` and leave the cursor between quotes → suggestion widget opens automatically. Type the first digit in `Sleep 1` / `Type@1` / `Set TypingSpeed 1` → suggestion widget opens automatically. |
+
 ## 5. Design Options Analysis
 
 ### 5.1 Binary Discovery Strategy
