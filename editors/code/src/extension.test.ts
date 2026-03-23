@@ -183,7 +183,10 @@ describe("ExtensionController", () => {
       command: "/extension/server/vhs-analyzer",
       args: ["--log=debug"],
       options: {
-        env: process.env,
+        env: {
+          ...process.env,
+          NO_COLOR: "1",
+        },
       },
       transport: ClientTransportKind.stdio,
     });
