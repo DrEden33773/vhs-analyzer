@@ -83,7 +83,7 @@ module and test references. The Builder MUST update the "Impl Module" and
 | --- | --- | --- | --- |
 | T-INT2-001 | Combined diagnostics | DIA-011, SAF-006, LSP-008 | Completed |
 | T-INT2-002 | Completion + diagnostics coexist | CMP-002, CMP-003, DIA-007, DIA-011 | Completed |
-| T-INT2-003 | Server version 0.2.0 | Batch 4 release contract (`serverInfo.version`) | Completed |
+| T-INT2-003 | Server version 0.1.0 | Batch 4 release contract (`serverInfo.version`) | Completed |
 | T-INT2-004 | Phase 1 hover + formatting preserved | HOV-001, HOV-002, FMT-001, LSP-005 | Completed |
 
 ## 7. Cross-Phase Dependency Summary

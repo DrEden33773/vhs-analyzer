@@ -113,8 +113,8 @@
 | T-PKG-013 | CI typecheck pipeline | Run `pnpm run typecheck` (`tsc --noEmit`) | Zero errors | CI |
 | T-PKG-014 | CI test pipeline | Run `pnpm run test` (`vitest run`) | All tests pass | CI |
 | T-PKG-015 | `.vscodeignore` excludes dev files | Inspect VSIX contents | No `src/`, `node_modules/`, `*.ts`, `tsconfig.json`, `biome.json` in VSIX | CI |
-| T-PKG-016 | Pre-release tag detection | Push tag `v0.3.0-beta.1` | CI publishes with `--pre-release` flag | CI |
-| T-PKG-017 | Stable tag detection | Push tag `v0.3.0` | CI publishes as stable release | CI |
+| T-PKG-016 | Pre-release tag detection | Push tag `v0.1.0-beta.1` | CI publishes with `--pre-release` flag | CI |
+| T-PKG-017 | Stable tag detection | Push tag `v0.1.0` | CI publishes as stable release | CI |
 | T-PKG-018 | Dual publishing — Marketplace + Open VSX | Release workflow completes | VSIX published to both registries via `vsce publish` and `npx ovsx publish` | CI |
 | T-PKG-019 | GitHub Release assets | Release workflow completes | All 7 VSIX files attached as release assets | CI |
 | T-PKG-020 | pnpm version consistency | CI environment | `pnpm --version` outputs `10.32.1` (matches `packageManager` field) | CI |

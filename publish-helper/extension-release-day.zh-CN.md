@@ -15,9 +15,10 @@
 
 - [ ] 确认本次发布是 `stable` 还是 `beta` / `pre-release`
 - [ ] 明确版本叙事
+  - 首次 public release 基线是否统一为 `0.1.0`
   - 扩展版本
   - Rust workspace / crate 版本
-  - 对外如何解释两套版本号
+  - 如需解释，说明 private 开发阶段曾使用内部里程碑版本号，已在首次公开发布前完成归一化
 - [ ] 检查 `editors/code/package.json`
   - `publisher`
   - `repository`

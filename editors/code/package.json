@@ -2,7 +2,7 @@
   "name": "vhs-analyzer",
   "displayName": "VHS Analyzer",
   "description": "Language server, live preview, and CodeLens for VHS .tape files",
-  "version": "0.3.0",
+  "version": "0.1.0",
   "publisher": "DrEden33773",
   "license": "MIT",
   "icon": "icon.png",

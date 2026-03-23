@@ -109,7 +109,7 @@ distributable VSIX files for each target platform.
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
 | **Statement** | The release workflow (`.github/workflows/release.yml`) MUST: (1) Trigger on version tag push (`v*`) or manual `workflow_dispatch`. (2) Run jobs in sequence: `lint-and-test` → `build-rust` → `package-vsix` → `publish`. (3) `lint-and-test` job: `pnpm install`, `biome check`, `vitest run`, `tsc --noEmit`. (4) `build-rust` job: matrix build for 6 targets (PKG-002), upload binaries as artifacts. (5) `package-vsix` job: download binary artifacts, place in `server/`, run `vsce package --target {platform} --no-dependencies` for each target + universal. (6) `publish` job: publish all VSIX files to VSCode Marketplace and Open VSX. |
-| **Verification** | Push `v0.3.0` tag → workflow runs all jobs → 7 VSIX files published. Manual dispatch → same result. |
+| **Verification** | Push `v0.1.0` tag → workflow runs all jobs → 7 VSIX files published. Manual dispatch → same result. |
 
 ### PKG-007 — TypeScript CI Pipeline
 
@@ -338,8 +338,8 @@ jobs:
   "name": "vhs-analyzer",
   "displayName": "VHS Analyzer",
   "description": "Language server, live preview, and CodeLens for VHS .tape files",
-  "version": "0.3.0",
-  "publisher": "dreden33773",
+  "version": "0.1.0",
+  "publisher": "DrEden33773",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -487,22 +487,24 @@ automatically.
 field ensures local development and CI use identical pnpm versions. pnpm v10
 requires Node >=18, matching our locked Node.js target.
 
-### RD-PKG-04 — Extension Version Scheme
+### RD-PKG-04 — First Public Release Version Baseline
 
-**Decision:** The extension MUST use independent semver, starting at `0.3.0`
-for the Phase 3 launch. The Rust crate version remains independent (currently
-`0.2.x`).
+**Decision:** For the first public release, the extension and Rust workspace
+MUST both use version `0.1.0`. After the first public release, the two version
+lines MAY diverge if their release cadences meaningfully separate.
 
-**Rationale:** Extension and Rust crate have different release cadences.
-Extension-only changes (UI, Preview improvements) should not force a Rust
-crate version bump. `0.3.0` signals the third major milestone (Phase 1 =
-0.1.x, Phase 2 = 0.2.x, Phase 3 = 0.3.x) progressing toward `1.0.0`.
+**Rationale:** Private development used internal milestone versions (`0.2.0`
+for the Rust workspace and `0.3.0` for the extension) to track phase progress.
+Because no external releases were published from those internal milestones, the
+project can normalize both version lines to `0.1.0` before the first public
+release and start from a clean external semver baseline. Later divergence
+remains possible if extension-only or Rust-only releases become common.
 
 ### RD-PKG-05 — Pre-release Strategy
 
-**Decision:** Tags matching `v*-*` (e.g., `v0.3.0-beta.1`) MUST be published
+**Decision:** Tags matching `v*-*` (e.g., `v0.1.0-beta.1`) MUST be published
 as pre-release on both GitHub Releases and VSCode Marketplace (`vsce publish
---pre-release`). Tags without hyphens (e.g., `v0.3.0`) MUST be published as
+--pre-release`). Tags without hyphens (e.g., `v0.1.0`) MUST be published as
 stable.
 
 **Rationale:** Pre-release allows beta testing with the Charmbracelet

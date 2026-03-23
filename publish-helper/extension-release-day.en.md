@@ -19,9 +19,10 @@ metadata, and real-install regressions.
 
 - [ ] Confirm whether this release is `stable` or `beta` / `pre-release`
 - [ ] Confirm the version story
+  - whether the first public release baseline is unified at `0.1.0`
   - extension version
   - Rust workspace / crate version
-  - how you will explain the two version lines publicly
+  - if needed, explain that private development used internal milestone versions and they were normalized before the first public release
 - [ ] Review `editors/code/package.json`
   - `publisher`
   - `repository`

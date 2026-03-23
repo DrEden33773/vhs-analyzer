@@ -261,5 +261,5 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | --- | --- | --- | --- |
 | T-INT2-001 | Combined diagnostics | File with parse error + missing Output + `Type "rm -rf /"` | All three diagnostic types appear: syntax Error, `missing-output` Warning, `safety/destructive-fs` Critical |
 | T-INT2-002 | Completion + diagnostics coexist | File with `Set FontSize 0` → request completion at new line | Completion returns keywords; `value-out-of-range` diagnostic present |
-| T-INT2-003 | Server version 0.2.0 | Send `initialize` | `serverInfo.version` is `"0.2.0"` |
+| T-INT2-003 | Server version 0.1.0 | Send `initialize` | `serverInfo.version` is `"0.1.0"` |
 | T-INT2-004 | All Phase 1 features preserved | Hover and formatting still work after Phase 2 additions | Hover returns documentation; formatting produces correct output |

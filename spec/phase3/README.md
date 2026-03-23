@@ -144,7 +144,7 @@ Respecting the dependency graph (WS-1 before WS-2/WS-3, WS-4 independent):
 - Integration tests: full activation → LSP handshake → hover; CodeLens run →
   Preview result; no-server mode CodeLens + Preview.
 - E2E tests (MAY): `@vscode/test-electron` for context menus, settings UI.
-- CHANGELOG.md for v0.3.0.
+- CHANGELOG.md for v0.1.0.
 - Extension icon and README for marketplace.
 - Verify all T-INT3 scenarios pass.
 - Close out Phase 3 in `trace/phase3/` and root `STATUS.yaml`.

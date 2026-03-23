@@ -310,7 +310,7 @@ fn initialize_reports_phase2_server_version() {
     );
     assert_eq!(
         initialize_response["result"]["serverInfo"]["version"],
-        "0.2.0"
+        "0.1.0"
     );
 }
 

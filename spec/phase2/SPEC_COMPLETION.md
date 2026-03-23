@@ -336,7 +336,7 @@ Phase 2 extends the Phase 1 `InitializeResult` capabilities:
   },
   "serverInfo": {
     "name": "vhs-analyzer",
-    "version": "0.2.0"
+    "version": "0.1.0"
   }
 }
 ```
@@ -346,7 +346,7 @@ Changes from Phase 1:
 - Added `completionProvider` with empty trigger characters.
 - Added `textDocumentSync.save` to support `didSave` notifications
   (consumed by SPEC_DIAGNOSTICS.md heavyweight checks).
-- Version bumped to `0.2.0`.
+- Public release baseline normalized to `0.1.0`.
 
 ## 11. Resolved Design Decisions
 
