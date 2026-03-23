@@ -68,7 +68,7 @@ Respecting the dependency graph (WS-1 before WS-2/WS-3, WS-4 independent):
 
 **Goal:** Establish the extension foundation and project infrastructure.
 
-- Extension project scaffold: `editors/vscode/` with `package.json`,
+- Extension project scaffold: `editors/code/` with `package.json`,
   `tsconfig.json`, `biome.json`, `vitest.config.ts`, `esbuild` build script,
   `pnpm` workspace setup, `.vscodeignore`.
 - `packageManager: "pnpm@10.32.1"` in `package.json`.
@@ -165,7 +165,7 @@ Respecting the dependency graph (WS-1 before WS-2/WS-3, WS-4 independent):
 ## Code Location
 
 ```text
-editors/vscode/
+editors/code/
 ├── package.json            (manifest, contributes, scripts, packageManager)
 ├── tsconfig.json           (strict mode, noEmit)
 ├── biome.json              (lint + format config)

@@ -14,7 +14,7 @@ Phase 2 Intelligence & Diagnostics.
 
 [Your Identity]
 - Role: Architect. You own architecture decisions, NOT implementation code.
-- You MUST NOT write TypeScript code in editors/vscode/src/, Rust code in
+- You MUST NOT write TypeScript code in editors/code/src/, Rust code in
   crates/, modify Cargo.toml, modify package.json, or run build commands.
 - Your deliverables are spec files and design documents ONLY.
 
@@ -46,7 +46,7 @@ Phase 2 Intelligence & Diagnostics.
   * SPEC_PACKAGING.md packages the Rust LSP binary into platform-specific VSIX.
 
 [Technology Stack Constraints]
-Phase 3 introduces a TypeScript codebase in editors/vscode/. The following
+Phase 3 introduces a TypeScript codebase in editors/code/. The following
 toolchain is locked and MUST NOT be changed by the Architect or Builder:
 
   Package manager:    pnpm (strict dependency isolation, --no-dependencies
@@ -247,7 +247,7 @@ Domain 4 — Platform Packaging & CI/CD (SPEC_PACKAGING.md):
      - Phase 3 CI extends with: pnpm install, biome check, vitest run,
        tsc --noEmit, esbuild bundle, vsce package.
      - Unified CI: single workflow or separate extension workflow triggered
-       by editors/vscode/** path filter.
+       by editors/code/** path filter.
 
 For each domain:
 - Propose 2-3 viable design options with trade-off analysis.

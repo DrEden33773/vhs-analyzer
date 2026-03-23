@@ -34,9 +34,9 @@ status-consistency gaps.
   - `ROADMAP.md`
   - `EXECUTION_TRACKER.md`
   - `spec/README.md`
-- [ ] Clarify the historical `editors/vscode` references
-  - If frozen specs stay unchanged, state in the root `README.md` that
-    historical `editors/vscode` references must be read as `editors/code`
+- [ ] Normalize extension-path references to `editors/code`
+  - Update public-facing docs and frozen specs for path consistency
+  - Treat this as a documentation correction, not a behavior-contract change
 - [ ] Decide whether the following directories should remain public as-is
   - `prompt/`
   - `trace/`
@@ -51,7 +51,7 @@ status-consistency gaps.
 - [ ] Confirm `STATUS.yaml` matches `trace/phase3/status.yaml`
 - [ ] Confirm outward-facing docs no longer describe Phase 2 or Phase 3 as
   unfinished
-- [ ] Confirm public entrypoints point to `editors/code/`, not `editors/vscode/`
+- [ ] Confirm all public entrypoints and docs point to `editors/code/`
 
 ## P1: Add Soon After Going Public
 
@@ -76,7 +76,7 @@ status-consistency gaps.
 2. `CONTRIBUTING.md`
 3. `SECURITY.md`
 4. Top-level status document sync
-5. Historical directory-name clarification
+5. Extension path normalization
 6. Decide the public strategy for `prompt/`, `trace/`, and `errors/`
 
 ## Real Risks You Should Not Ignore
@@ -89,7 +89,8 @@ status-consistency gaps.
 - No `SECURITY.md`:
   there is no clear path for responsible disclosure after the repo goes public.
 - Mixed historical path names:
-  new contributors will look for `editors/vscode` and get lost immediately.
+  new contributors will look for the extension code in the wrong directory and
+  get lost immediately.
 
 ## Reference Files
 

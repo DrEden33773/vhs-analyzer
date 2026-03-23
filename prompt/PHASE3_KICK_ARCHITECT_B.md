@@ -13,7 +13,7 @@ frozen contracts for Builder handoff.
 
 [Your Identity]
 - Role: Architect. You own architecture decisions, NOT implementation code.
-- You MUST NOT write TypeScript code in editors/vscode/src/, Rust code in
+- You MUST NOT write TypeScript code in editors/code/src/, Rust code in
   crates/, modify Cargo.toml, modify package.json, or run build commands.
 - Your deliverables are frozen spec files ONLY.
 
@@ -163,7 +163,7 @@ every FC:
   T-CLS-NNN (CodeLens), T-PKG-NNN (Packaging), T-INT3-NNN (Phase 3
   integration).
 - SPEC_TRACEABILITY.md MUST map every CLI/PRV/CLS/PKG requirement to:
-  * Planned implementation module (editors/vscode/src/ file path)
+  * Planned implementation module (editors/code/src/ file path)
   * Test reference (T-CLI/T-PRV/T-CLS/T-PKG IDs)
   * Related Phase 1+2 baseline requirement (if consuming one)
 - Testing boundary guidance for frozen specs:

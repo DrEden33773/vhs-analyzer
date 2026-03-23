@@ -113,7 +113,7 @@ Operational progress for these items will be tracked in `STATUS.yaml` and `EXECU
 
 ### Pre-Phase 1: Project Initialization
 
-1. [x] **Initialize Repo:** Create `vhs-analyzer` monorepo (`crates/vhs-analyzer-core`, `crates/vhs-analyzer-lsp`, `editors/vscode`). **(Completed)**
+1. [x] **Initialize Repo:** Create `vhs-analyzer` monorepo (`crates/vhs-analyzer-core`, `crates/vhs-analyzer-lsp`, `editors/code`). **(Completed)**
 2. [x] **Workflow Setup:** Port `prompt/`, `spec/`, `trace/`, and coordination files from `eden-skills`. **(Completed)**
 
 ### Phase 1: LSP Foundation

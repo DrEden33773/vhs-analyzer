@@ -118,8 +118,8 @@ distributable VSIX files for each target platform.
 | **ID** | PKG-007 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | A CI workflow (`.github/workflows/ci.yml` extension or separate `extension-ci.yml`) MUST run on every push and PR affecting `editors/vscode/**`. Steps: (1) `pnpm install --frozen-lockfile`, (2) `pnpm run typecheck` (`tsc --noEmit`), (3) `pnpm run lint` (`biome check .`), (4) `pnpm run test` (`vitest run`), (5) `pnpm run build` (esbuild production bundle). The workflow MUST use the same Node.js version as the extension's `engines.node` constraint (≥18). |
-| **Verification** | PR modifying `editors/vscode/src/extension.ts` → CI runs TypeScript checks. PR modifying only `crates/` → TypeScript CI does not run (path filter). |
+| **Statement** | A CI workflow (`.github/workflows/ci.yml` extension or separate `extension-ci.yml`) MUST run on every push and PR affecting `editors/code/**`. Steps: (1) `pnpm install --frozen-lockfile`, (2) `pnpm run typecheck` (`tsc --noEmit`), (3) `pnpm run lint` (`biome check .`), (4) `pnpm run test` (`vitest run`), (5) `pnpm run build` (esbuild production bundle). The workflow MUST use the same Node.js version as the extension's `engines.node` constraint (≥18). |
+| **Verification** | PR modifying `editors/code/src/extension.ts` → CI runs TypeScript checks. PR modifying only `crates/` → TypeScript CI does not run (path filter). |
 
 ### PKG-008 — Publishing Strategy
 
@@ -148,7 +148,7 @@ distributable VSIX files for each target platform.
 | **ID** | PKG-010 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | The `editors/vscode/biome.json` MUST configure Biome as the sole linter and formatter for the TypeScript codebase. Configuration MUST enable: (1) `formatter.indentStyle: "space"`, `formatter.indentWidth: 2`, (2) `linter.enabled: true` with recommended rules, (3) `organizeImports.enabled: true`. Files excluded: `dist/`, `node_modules/`, `*.json` (VSCode JSON uses its own schema validation). |
+| **Statement** | The `editors/code/biome.json` MUST configure Biome as the sole linter and formatter for the TypeScript codebase. Configuration MUST enable: (1) `formatter.indentStyle: "space"`, `formatter.indentWidth: 2`, (2) `linter.enabled: true` with recommended rules, (3) `organizeImports.enabled: true`. Files excluded: `dist/`, `node_modules/`, `*.json` (VSCode JSON uses its own schema validation). |
 | **Verification** | `biome check .` passes with zero errors. `biome format --write .` produces no changes on CI (already formatted). |
 
 ### PKG-011 — Vitest Configuration
@@ -158,7 +158,7 @@ distributable VSIX files for each target platform.
 | **ID** | PKG-011 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | The `editors/vscode/vitest.config.ts` MUST configure Vitest for the extension test suite: (1) `test.include: ["src/**/*.test.ts"]`, (2) `test.environment: "node"`, (3) `test.globals: false` (explicit imports), (4) `test.coverage.provider: "v8"`, (5) `test.coverage.include: ["src/**/*.ts"]`, (6) `test.coverage.exclude: ["src/**/*.test.ts", "src/**/*.d.ts"]`. External modules (`vscode`) MUST be mocked via `vi.mock("vscode", ...)`. |
+| **Statement** | The `editors/code/vitest.config.ts` MUST configure Vitest for the extension test suite: (1) `test.include: ["src/**/*.test.ts"]`, (2) `test.environment: "node"`, (3) `test.globals: false` (explicit imports), (4) `test.coverage.provider: "v8"`, (5) `test.coverage.include: ["src/**/*.ts"]`, (6) `test.coverage.exclude: ["src/**/*.test.ts", "src/**/*.d.ts"]`. External modules (`vscode`) MUST be mocked via `vi.mock("vscode", ...)`. |
 | **Verification** | `vitest run` executes all tests. `vitest run --coverage` produces coverage report. Tests pass in CI. |
 
 ### PKG-012 — Rust Release Profile
@@ -259,7 +259,7 @@ jobs:
       - checkout
       - setup-node (20.x)
       - setup-pnpm
-      - pnpm install --frozen-lockfile (in editors/vscode/)
+      - pnpm install --frozen-lockfile (in editors/code/)
       - pnpm run typecheck
       - pnpm run lint
       - pnpm run test
@@ -301,13 +301,13 @@ jobs:
     steps:
       - checkout
       - setup-node, setup-pnpm
-      - pnpm install --frozen-lockfile (in editors/vscode/)
+      - pnpm install --frozen-lockfile (in editors/code/)
       - pnpm run build (esbuild production bundle)
       - download rust binary artifact for ${{ matrix.rust-target }}
-      - mkdir -p editors/vscode/server/
-      - cp artifact/${{ matrix.binary }} editors/vscode/server/
-      - chmod +x editors/vscode/server/${{ matrix.binary }}
-      - cd editors/vscode && vsce package --target ${{ matrix.vsce-target }} --no-dependencies
+      - mkdir -p editors/code/server/
+      - cp artifact/${{ matrix.binary }} editors/code/server/
+      - chmod +x editors/code/server/${{ matrix.binary }}
+      - cd editors/code && vsce package --target ${{ matrix.vsce-target }} --no-dependencies
       - upload VSIX artifact
 
   package-universal:
@@ -317,7 +317,7 @@ jobs:
       - checkout
       - setup-node, setup-pnpm
       - pnpm install, pnpm run build
-      - cd editors/vscode && vsce package --no-dependencies
+      - cd editors/code && vsce package --no-dependencies
       - upload VSIX artifact
 
   publish:
@@ -440,8 +440,8 @@ Phase 3 extends this with TypeScript checks. Two approaches:
 
 | Approach | Description | Pros | Cons |
 | --- | --- | --- | --- |
-| **A: Extend existing ci.yml** | Add a `typescript` job to the existing workflow, filtered by `editors/vscode/**` path | Single CI config; unified status checks | Larger workflow; Rust jobs run on TS-only changes (unless path-filtered) |
-| **B: Separate extension-ci.yml** | New workflow triggered by `editors/vscode/**` path changes | Clean separation; independent caching | Two CI workflows; PR requires both to pass |
+| **A: Extend existing ci.yml** | Add a `typescript` job to the existing workflow, filtered by `editors/code/**` path | Single CI config; unified status checks | Larger workflow; Rust jobs run on TS-only changes (unless path-filtered) |
+| **B: Separate extension-ci.yml** | New workflow triggered by `editors/code/**` path changes | Clean separation; independent caching | Two CI workflows; PR requires both to pass |
 
 **Recommended: Option B (Separate extension-ci.yml).** Path-filtered workflows
 ensure TypeScript CI only runs when extension code changes, and Rust CI only

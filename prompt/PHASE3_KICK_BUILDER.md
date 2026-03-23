@@ -29,7 +29,6 @@ You are executing Phase 3 implementation: VSCode Extension Client.
 - Phase 3 builds a NEW TypeScript project from scratch under `editors/code/`
   (matching the rust-analyzer convention at
   https://github.com/rust-lang/rust-analyzer/tree/master/editors/code).
-  Spec references to `editors/vscode/` should be read as `editors/code/`.
 - Phase 3 has FOUR work streams with a dependency structure:
     * WS-1 Client (SPEC_CLIENT.md) — LSP client bootstrap, binary discovery,
       configuration schema, TextMate grammar, status bar, no-server mode
@@ -343,7 +342,7 @@ Batch 5 — Integration Test + Closeout:
 
 [Project Layout]
 Phase 3 creates a new TypeScript project. Directory: editors/code/ (following
-the rust-analyzer convention, NOT editors/vscode/ as some spec paths suggest).
+the rust-analyzer convention).
 
   editors/code/
     package.json              — manifest, contributes, scripts, packageManager
@@ -621,8 +620,7 @@ Test naming: use descriptive names that read like specifications:
 - Do NOT stop at analysis — you MUST directly write code and tests.
 - Technology stack is LOCKED: pnpm, esbuild, Biome, Vitest. Do NOT substitute
   npm, webpack, ESLint, Prettier, Jest, or any alternatives.
-- Directory path: the extension lives in `editors/code/`, NOT `editors/vscode/`.
-  Treat spec references to `editors/vscode/` as `editors/code/`.
+- Directory path: the extension lives in `editors/code/`.
 
 [Session Resumption Protocol]
 This kick file may be accompanied by a handoff prompt from a previous session.

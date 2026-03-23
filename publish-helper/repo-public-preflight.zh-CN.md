@@ -29,8 +29,9 @@
   - `ROADMAP.md`
   - `EXECUTION_TRACKER.md`
   - `spec/README.md`
-- [ ] 明确处理 `editors/vscode` 历史引用
-  - 如果不改冻结规范，就在根 `README.md` 明说历史文档中的 `editors/vscode` 一律读作 `editors/code`
+- [ ] 将扩展目录引用统一规范为 `editors/code`
+  - 对公开文档和冻结规范做路径一致性修订
+  - 这属于文档修正，不改变行为契约
 - [ ] 决定是否完整公开以下目录
   - `prompt/`
   - `trace/`
@@ -43,7 +44,7 @@
 - [ ] 确认根目录 `LICENSE` 明确可见
 - [ ] 确认 `STATUS.yaml` 与 `trace/phase3/status.yaml` 一致
 - [ ] 确认对外文档不再把 Phase 2/3 写成未完成
-- [ ] 确认所有用户入口都指向 `editors/code/`，不是 `editors/vscode/`
+- [ ] 确认所有公开入口与文档都已指向 `editors/code/`
 
 ## P1：建议在公开后尽快补上
 
@@ -68,7 +69,7 @@
 2. `CONTRIBUTING.md`
 3. `SECURITY.md`
 4. 顶层状态文档对齐
-5. 历史目录名澄清
+5. 扩展目录路径规范化
 6. 决定 `prompt/` / `trace/` / `errors/` 的公开策略
 
 ## 公开前不建议忽略的真实风险
@@ -80,7 +81,7 @@
 - 缺少 `SECURITY.md`：
   首次公开后如果有人发现问题，没有明确的安全联系入口。
 - 历史路径名混用：
-  新贡献者会按照 `editors/vscode` 去找代码，直接迷路。
+  新贡献者会到错误的扩展目录里找代码，直接迷路。
 
 ## 参考文件
 

@@ -271,7 +271,7 @@ Current workspace:
       lsp_integration_tests.rs — T-LSP-* scenarios
       hover_tests.rs     — T-HOV-* scenarios
       integration_test.rs — T-INT-001 e2e test
-  editors/vscode/        — (reserved for Phase 3)
+  editors/code/          — (reserved for Phase 3)
 
 [Dependency Changes]
 Phase 1 builds on the scaffolded workspace. New dependencies per batch:
