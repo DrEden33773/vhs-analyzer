@@ -32,7 +32,7 @@ module and test references. The Builder MUST update the "Impl Module" and
 | CMP-002 | Completion context resolution algorithm | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-083, T-INT2-002 | PAR-001, PAR-007, HOV-006 | Completed |
 | CMP-003 | Command keyword completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-015, T-INT2-002 | PAR-001 (SyntaxKind) | Completed |
 | CMP-004 | Setting name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-020–T-CMP-022 | PAR-007 (SetCommand) | Completed |
-| CMP-005 | Theme name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-030–T-CMP-035 | — | Completed |
+| CMP-005 | Theme name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-030–T-CMP-035 + T-CMP-034A | — | Completed |
 | CMP-006 | Setting value completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-040–T-CMP-042 | PAR-007 (SetCommand) | Completed |
 | CMP-007 | Snippet templates | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-050–T-CMP-052 | — | Completed |
 | CMP-008 | Output extension completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-060 | PAR-007 (OutputCommand) | Completed |

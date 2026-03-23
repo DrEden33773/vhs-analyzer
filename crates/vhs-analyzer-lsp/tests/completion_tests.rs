@@ -518,6 +518,29 @@ async fn completion_quotes_theme_names_with_unsafe_bare_characters() {
 }
 
 #[tokio::test(flavor = "current_thread")]
+async fn completion_quotes_theme_names_with_hyphenated_identifiers() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+
+    open_document(&mut service, &uri, "Set Theme ").await;
+
+    let items =
+        completion_items(&completion_response(&mut service, &uri, Position::new(0, 10)).await);
+    let catppuccin_frappe = items
+        .iter()
+        .find(|item| item.label == "catppuccin-frappe")
+        .expect("expected catppuccin-frappe theme completion");
+
+    assert_eq!(
+        catppuccin_frappe.insert_text.as_deref(),
+        Some("\"catppuccin-frappe\"")
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
 async fn completion_returns_no_theme_items_for_other_settings() {
     let (mut service, _) = LspService::new(VhsLanguageServer::new);
     let _ = initialize_service(&mut service).await;

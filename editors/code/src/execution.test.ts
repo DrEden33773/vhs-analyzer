@@ -97,7 +97,7 @@ describe("ExecutionManager", () => {
     expect(clearScheduled).toHaveBeenCalledWith(timerHandle);
   });
 
-  it("execution_uses_workspace_cwd_and_defaults_to_out_gif_without_output_directive", async () => {
+  it("execution_uses_tape_directory_cwd_and_defaults_to_out_gif_without_output_directive", async () => {
     const tapeUri = Uri.file("/workspace/nested/demo.tape");
     const childProcess = new MockChildProcess();
     const spawnProcess = vi.fn().mockReturnValue(childProcess);
@@ -111,10 +111,10 @@ describe("ExecutionManager", () => {
     await flushMicrotasks();
 
     expect(spawnProcess).toHaveBeenCalledWith("vhs", [tapeUri.fsPath], {
-      cwd: "/workspace",
+      cwd: "/workspace/nested",
     });
     expect(manager.getState(tapeUri)).toEqual({
-      artifactPath: "/workspace/out.gif",
+      artifactPath: "/workspace/nested/out.gif",
       kind: "running",
       tapeUri,
     });
@@ -122,13 +122,13 @@ describe("ExecutionManager", () => {
     childProcess.exit(0);
 
     await expect(runPromise).resolves.toEqual({
-      artifactPath: "/workspace/out.gif",
+      artifactPath: "/workspace/nested/out.gif",
       format: "gif",
       tapeUri,
     });
   });
 
-  it("execution_resolves_relative_output_paths_against_the_working_directory", async () => {
+  it("execution_resolves_relative_output_paths_against_the_tape_directory", async () => {
     const tapeUri = Uri.file("/workspace/nested/demo.tape");
     const childProcess = new MockChildProcess();
     const spawnProcess = vi.fn().mockReturnValue(childProcess);
@@ -142,10 +142,10 @@ describe("ExecutionManager", () => {
     await flushMicrotasks();
 
     expect(spawnProcess).toHaveBeenCalledWith("vhs", [tapeUri.fsPath], {
-      cwd: "/workspace",
+      cwd: "/workspace/nested",
     });
     expect(manager.getState(tapeUri)).toEqual({
-      artifactPath: "/workspace/demo.gif",
+      artifactPath: "/workspace/nested/demo.gif",
       kind: "running",
       tapeUri,
     });
@@ -153,7 +153,7 @@ describe("ExecutionManager", () => {
     childProcess.exit(0);
 
     await expect(runPromise).resolves.toEqual({
-      artifactPath: "/workspace/demo.gif",
+      artifactPath: "/workspace/nested/demo.gif",
       format: "gif",
       tapeUri,
     });
@@ -257,6 +257,17 @@ describe("ExecutionManager", () => {
       tapeUri,
     });
     expect(outputChannel.show).not.toHaveBeenCalled();
+  });
+
+  it("execution_can_reveal_the_output_channel_without_stealing_focus", () => {
+    const outputChannel = createMockOutputChannel();
+    const manager = new ExecutionManager({
+      outputChannel,
+    });
+
+    manager.revealOutput(true);
+
+    expect(outputChannel.show).toHaveBeenCalledWith(true);
   });
 });
 

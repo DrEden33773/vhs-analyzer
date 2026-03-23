@@ -142,6 +142,10 @@ export class ExecutionManager {
     return this.states.get(tapeUri.fsPath) ?? { kind: "idle" };
   }
 
+  revealOutput(preserveFocus = true): void {
+    this.dependencies.outputChannel?.show(preserveFocus);
+  }
+
   async run(tapeUri: Uri): Promise<ExecutionResult> {
     const existing = this.running.get(tapeUri.fsPath);
     if (existing !== undefined) {
@@ -340,11 +344,7 @@ export class ExecutionManager {
   }
 
   private resolveWorkingDirectory(tapeUri: Uri): string {
-    const workspaceFolder = this.dependencies
-      .getWorkspaceFolders()
-      .find((folder) => isWithinDirectory(folder.fsPath, tapeUri.fsPath));
-
-    return workspaceFolder?.fsPath ?? path.dirname(tapeUri.fsPath);
+    return path.dirname(tapeUri.fsPath);
   }
 
   private setState(tapeUri: Uri, state: ExecutionState): void {
@@ -425,7 +425,7 @@ export function inferOutputFormat(artifactPath: string): OutputFormat {
 }
 
 export function resolveArtifactPath(
-  tapeUri: Uri,
+  _tapeUri: Uri,
   workingDirectory: string,
   tapeSource: string,
 ): string {
@@ -436,14 +436,6 @@ export function resolveArtifactPath(
   }
 
   return path.resolve(workingDirectory, outputPath);
-}
-
-function isWithinDirectory(directoryPath: string, filePath: string): boolean {
-  const relativePath = path.relative(directoryPath, filePath);
-  return (
-    relativePath === "" ||
-    (!relativePath.startsWith("..") && !path.isAbsolute(relativePath))
-  );
 }
 
 function formatTimestamp(timestamp: number): string {

@@ -31,6 +31,7 @@ export interface PreviewExecutionManagerLike {
   cancel(tapeUri: Uri): Promise<boolean>;
   getState(tapeUri: Uri): unknown;
   onDidWriteProgress: Event<ExecutionProgressEvent>;
+  revealOutput?(preserveFocus?: boolean): void;
   run(tapeUri: Uri): Promise<ExecutionResult>;
 }
 
@@ -356,6 +357,7 @@ export class PreviewPanel {
     }
 
     void vhsPath;
+    this.dependencies.executionManager.revealOutput?.(true);
     this.postMessage({
       tapeFile: path.basename(this.tapeUri.fsPath),
       type: "renderStart",
@@ -696,13 +698,9 @@ function isWithinDirectory(directoryPath: string, filePath: string): boolean {
 
 function resolveWorkingDirectory(
   tapeUri: Uri,
-  workspaceFolders: readonly Uri[],
+  _workspaceFolders: readonly Uri[],
 ): string {
-  const workspaceFolder = workspaceFolders.find((folder) =>
-    isWithinDirectory(folder.fsPath, tapeUri.fsPath),
-  );
-
-  return workspaceFolder?.fsPath ?? path.dirname(tapeUri.fsPath);
+  return path.dirname(tapeUri.fsPath);
 }
 
 function resolvePreviewResult(

@@ -115,8 +115,8 @@ MUST work in no-server mode (SPEC_CLIENT.md CLI-009).
 | **ID** | CLS-007 |
 | **Priority** | P1 (SHOULD) |
 | **Owner** | Architect → Builder |
-| **Statement** | VHS CLI stdout and stderr SHOULD be forwarded to a dedicated "VHS Analyzer: Run" output channel. Each execution SHOULD be prefixed with a header: `[{timestamp}] Running: vhs {filename}`. On completion, a footer: `[{timestamp}] Completed in {duration}s (exit code: {code})`. The output channel SHOULD be revealed on error but NOT on success (to avoid focus stealing). |
-| **Verification** | Run tape → output appears in "VHS Analyzer: Run" channel. Error → channel auto-reveals. Success → channel does not auto-reveal. |
+| **Statement** | VHS CLI stdout and stderr SHOULD be forwarded to a dedicated "VHS Analyzer: Run" output channel. Each execution SHOULD be prefixed with a header: `[{timestamp}] Running: vhs {filename}`. On completion, a footer: `[{timestamp}] Completed in {duration}s (exit code: {code})`. The output channel SHOULD be revealed on error. For `Run & Preview`, the extension MAY also reveal the output channel at execution start with `preserveFocus: true` so progress is visible without stealing editor focus. |
+| **Verification** | Run tape → output appears in "VHS Analyzer: Run" channel. Error → channel auto-reveals. `Run & Preview` → channel may be shown with preserved focus while the preview runs. |
 
 ### CLS-008 — Keyboard Shortcut Binding
 

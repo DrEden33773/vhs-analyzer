@@ -53,7 +53,7 @@
 | T-PRV-004 | Output path — unquoted | File contains `Output demo.gif` | Regex extracts `demo.gif` | Unit |
 | T-PRV-005 | Output path — quoted | File contains `Output "path with spaces.gif"` | Regex extracts `path with spaces.gif` (quotes stripped) | Unit |
 | T-PRV-006 | Output path — no Output directive | File has no `Output` line | Default to `out.gif` in working directory | Unit |
-| T-PRV-006A | Output path — nested tape with relative Output | Tape is in a nested directory, `Output demo.gif`, cwd is workspace root | Preview targets the artifact relative to execution cwd, not tape directory | Unit |
+| T-PRV-006A | Output path — nested tape with relative Output | Tape is in a nested directory, `Output demo.gif` | Preview targets the artifact relative to the tape directory | Unit |
 | T-PRV-007 | Auto-refresh on output file change | `autoRefresh` enabled; output file changes externally | `renderComplete` with cache-busting URI sent to Webview | Unit |
 | T-PRV-008 | Auto-refresh disabled | Set `preview.autoRefresh` to `false` | File watcher not active; no auto-refresh on external change | Unit |
 | T-PRV-009 | Cancellation via Webview button | Click "Cancel" in Webview during VHS execution | SIGTERM sent to VHS process; `renderError` with `cancelled: true` | Unit |

@@ -94,7 +94,7 @@ what category of completion to offer, then returns an appropriate list of
 | **ID** | CMP-005 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | When the cursor is inside a `SET_COMMAND` whose setting is `Theme` and positioned after the `THEME_KW` token, the completion handler MUST return theme names from the built-in theme registry (§8). Each item MUST have `kind: CompletionItemKind::EnumMember`, `detail: "VHS built-in theme"`, and `insertText` that wraps the theme name in double quotes whenever the value cannot be inserted as a single bare VHS token (for example names containing spaces or `+`, such as `"Catppuccin Mocha"` or `"Dark+"`). Bare-safe identifiers such as `Nord` MAY be inserted without quotes. |
+| **Statement** | When the cursor is inside a `SET_COMMAND` whose setting is `Theme` and positioned after the `THEME_KW` token, the completion handler MUST return theme names from the built-in theme registry (§8). Each item MUST have `kind: CompletionItemKind::EnumMember`, `detail: "VHS built-in theme"`, and `insertText` that wraps the theme name in double quotes whenever the value cannot be inserted as a single bare VHS token (for example names containing spaces, `+`, or `-`, such as `"Catppuccin Mocha"`, `"Dark+"`, or `"catppuccin-frappe"`). Bare-safe identifiers such as `Nord` MAY be inserted without quotes. |
 | **Verification** | Type `Set Theme` followed by a space and request completion; verify the list includes `Dracula`, `Catppuccin Mocha`, `Nord`, and at least 300 entries total. |
 
 ### CMP-006 — Setting Value Completions

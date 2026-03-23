@@ -62,6 +62,7 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-032 | Catppuccin Mocha quoted | `Set Theme` + space → completion | `Catppuccin Mocha` has `insertText: "\"Catppuccin Mocha\""` (wrapped in quotes) |
 | T-CMP-033 | Nord unquoted | `Set Theme` + space → completion | `Nord` has `insertText: "Nord"` (no quotes, no spaces) |
 | T-CMP-034 | Dark+ quoted | `Set Theme` + space → completion | `Dark+` has `insertText: "\"Dark+\""` (wrapped in quotes) |
+| T-CMP-034A | catppuccin-frappe quoted | `Set Theme` + space → completion | `catppuccin-frappe` has `insertText: "\"catppuccin-frappe\""` (wrapped in quotes) |
 | T-CMP-035 | No themes for other settings | `Set FontSize` + space → completion | No theme name items returned |
 
 ### 2.5 Setting Value Completions

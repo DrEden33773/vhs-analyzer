@@ -398,14 +398,15 @@ describe("PreviewManager", () => {
     expect(watcher?.pattern).toBe("/workspace/videos/second demo.webm");
   });
 
-  it("preview_run_targets_specific_output_artifacts_relative_to_the_execution_cwd", async () => {
+  it("preview_run_targets_specific_output_artifacts_relative_to_the_tape_directory", async () => {
     const tapeUri = Uri.file("/workspace/nested/demo.tape");
     const executionManager = createMockExecutionManager({
       run: vi.fn().mockResolvedValue({
-        artifactPath: "/workspace/demo.gif",
+        artifactPath: "/workspace/nested/demo.gif",
         format: "gif",
         tapeUri,
       }),
+      revealOutput: vi.fn(),
     });
     const manager = new PreviewManager({
       executionManager,
@@ -431,11 +432,38 @@ describe("PreviewManager", () => {
     const panel = __getLastCreatedWebviewPanel();
     const watcher = __getCreatedFileSystemWatchers()[0];
     expect(panel?.webview.postedMessages.at(-1)).toEqual({
-      artifactUri: "/workspace/videos/second demo.webm",
+      artifactUri: "/workspace/nested/videos/second demo.webm",
       format: "webm",
       type: "renderComplete",
     });
-    expect(watcher?.pattern).toBe("/workspace/videos/second demo.webm");
+    expect(watcher?.pattern).toBe("/workspace/nested/videos/second demo.webm");
+  });
+
+  it("preview_run_reveals_the_run_output_channel_with_preserved_focus", async () => {
+    const tapeUri = Uri.file("/workspace/demo.tape");
+    const executionManager = createMockExecutionManager({
+      revealOutput: vi.fn(),
+      run: vi.fn().mockResolvedValue({
+        artifactPath: "/workspace/demo.gif",
+        format: "gif",
+        tapeUri,
+      }),
+    });
+    const manager = new PreviewManager({
+      executionManager,
+      extensionPath: "/extension",
+      readTapeFile: vi.fn().mockResolvedValue('Output "demo.gif"'),
+      resolveExecutable: vi.fn().mockResolvedValue("/usr/bin/vhs"),
+      workspaceFolders: [Uri.file("/workspace")],
+    });
+
+    await (
+      manager as {
+        runAndPreview(tapeUri: Uri): Promise<unknown>;
+      }
+    ).runAndPreview(tapeUri);
+
+    expect(executionManager.revealOutput).toHaveBeenCalledWith(true);
   });
 });
 
@@ -477,6 +505,7 @@ function createMockExecutionManager(
   overrides: Partial<{
     cancel: ReturnType<typeof vi.fn>;
     getState: ReturnType<typeof vi.fn>;
+    revealOutput: ReturnType<typeof vi.fn>;
     run: ReturnType<typeof vi.fn>;
   }> = {},
 ) {
@@ -489,6 +518,7 @@ function createMockExecutionManager(
     cancel: overrides.cancel ?? vi.fn().mockResolvedValue(false),
     getState: overrides.getState ?? vi.fn(() => ({ kind: "idle" as const })),
     onDidWriteProgress: progressEmitter.event,
+    revealOutput: overrides.revealOutput ?? vi.fn(),
     run: overrides.run ?? vi.fn(),
     __fireProgress: (event: { line: string; tapeUri: Uri }) => {
       progressEmitter.fire(event);

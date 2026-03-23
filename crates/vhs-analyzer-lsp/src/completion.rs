@@ -635,7 +635,7 @@ fn is_safe_bare_value(value: &str) -> bool {
 
     first.is_ascii_alphabetic()
         && characters.all(|character| {
-            character.is_ascii_alphanumeric() || matches!(character, '_' | '.' | '/' | '-' | '%')
+            character.is_ascii_alphanumeric() || matches!(character, '_' | '.' | '/' | '%')
         })
 }
 

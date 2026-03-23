@@ -74,7 +74,7 @@ Webview with loading states, error display, and auto-refresh on file changes.
 | **ID** | PRV-003 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | The extension MUST invoke VHS via `child_process.spawn("vhs", [tapeFilePath])`. The working directory MUST be the workspace folder containing the `.tape` file, or the file's parent directory if no workspace is open. The VHS process stdout and stderr MUST be captured: stderr lines SHOULD be forwarded to the Webview as `renderProgress` messages. On process exit code 0, the extension MUST send `renderComplete` with the output artifact URI. On non-zero exit, the extension MUST send `renderError` with the captured stderr. |
+| **Statement** | The extension MUST invoke VHS via `child_process.spawn("vhs", [tapeFilePath])`. The working directory MUST be the `.tape` file's parent directory so relative outputs stay local to the tape file. The VHS process stdout and stderr MUST be captured: stderr lines SHOULD be forwarded to the Webview as `renderProgress` messages. On process exit code 0, the extension MUST send `renderComplete` with the output artifact URI. On non-zero exit, the extension MUST send `renderError` with the captured stderr. |
 | **Verification** | Valid tape file → VHS runs, GIF appears in preview. Invalid tape file → error message shown in Webview. |
 
 ### PRV-004 — Output Artifact Discovery
@@ -84,8 +84,8 @@ Webview with loading states, error display, and auto-refresh on file changes.
 | **ID** | PRV-004 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | The extension MUST determine the output artifact path by: (1) Parsing the `.tape` file text to find the first `Output` directive and extracting its path argument. (2) Resolving relative output paths against the same working directory used for the VHS child process, matching current VHS CLI behavior. (3) If no `Output` directive is found, using the VHS default: `out.gif` in the working directory. The extension MUST support all VHS output formats: `.gif`, `.mp4`, `.webm`. |
-| **Verification** | File with `Output demo.gif` → preview shows the artifact produced relative to the execution working directory. File without `Output` → preview shows `out.gif`. |
+| **Statement** | The extension MUST determine the output artifact path by: (1) Parsing the `.tape` file text to find the first `Output` directive and extracting its path argument. (2) Resolving relative output paths against the `.tape` file's parent directory, matching the extension's execution working directory. (3) If no `Output` directive is found, using the VHS default: `out.gif` in the `.tape` file's parent directory. The extension MUST support all VHS output formats: `.gif`, `.mp4`, `.webm`. |
+| **Verification** | File with `Output demo.gif` → preview shows the artifact produced relative to the `.tape` file's directory. File without `Output` → preview shows `out.gif` in the same directory. |
 
 ### PRV-005 — Auto-Refresh on Output File Change
 
