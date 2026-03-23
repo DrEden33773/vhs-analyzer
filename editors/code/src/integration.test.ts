@@ -652,7 +652,7 @@ async function createFakeCommandEnvironment(): Promise<FakeCommandEnvironment> {
       "const tapePath = process.argv[2];",
       'const source = fs.readFileSync(tapePath, "utf8");',
       'const outputMatch = source.match(/^Output\\s+(?:"([^"]+)"|(\\S+))/mu);',
-      'const outputPath = path.resolve(path.dirname(tapePath), outputMatch?.[1] ?? outputMatch?.[2] ?? "out.gif");',
+      'const outputPath = path.resolve(process.cwd(), outputMatch?.[1] ?? outputMatch?.[2] ?? "out.gif");',
       "fs.mkdirSync(path.dirname(outputPath), { recursive: true });",
       'fs.writeFileSync(outputPath, "GIF89a");',
       'console.error("Rendering frame 1");',

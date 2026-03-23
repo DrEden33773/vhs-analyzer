@@ -397,6 +397,46 @@ describe("PreviewManager", () => {
     });
     expect(watcher?.pattern).toBe("/workspace/videos/second demo.webm");
   });
+
+  it("preview_run_targets_specific_output_artifacts_relative_to_the_execution_cwd", async () => {
+    const tapeUri = Uri.file("/workspace/nested/demo.tape");
+    const executionManager = createMockExecutionManager({
+      run: vi.fn().mockResolvedValue({
+        artifactPath: "/workspace/demo.gif",
+        format: "gif",
+        tapeUri,
+      }),
+    });
+    const manager = new PreviewManager({
+      executionManager,
+      extensionPath: "/extension",
+      readTapeFile: vi
+        .fn()
+        .mockResolvedValue(
+          'Output first.gif\nOutput "videos/second demo.webm"',
+        ),
+      resolveExecutable: vi.fn().mockResolvedValue("/usr/bin/vhs"),
+      workspaceFolders: [Uri.file("/workspace")],
+    });
+
+    await (
+      manager as {
+        runAndPreview(
+          tapeUri: Uri,
+          previewArtifactPath?: string,
+        ): Promise<unknown>;
+      }
+    ).runAndPreview(tapeUri, "videos/second demo.webm");
+
+    const panel = __getLastCreatedWebviewPanel();
+    const watcher = __getCreatedFileSystemWatchers()[0];
+    expect(panel?.webview.postedMessages.at(-1)).toEqual({
+      artifactUri: "/workspace/videos/second demo.webm",
+      format: "webm",
+      type: "renderComplete",
+    });
+    expect(watcher?.pattern).toBe("/workspace/videos/second demo.webm");
+  });
 });
 
 describe("preview html helpers", () => {

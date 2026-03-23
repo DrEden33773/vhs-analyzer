@@ -280,6 +280,7 @@ export class PreviewPanel {
         resolveExecutable: dependencies.resolveExecutable,
         schedule: dependencies.schedule,
         tapeUri: dependencies.tapeUri,
+        workspaceFolders: dependencies.workspaceFolders,
       },
       dependencies.tapeUri,
     );
@@ -298,6 +299,7 @@ export class PreviewPanel {
       resolveExecutable: PreviewPanelDependencies["resolveExecutable"];
       schedule: PreviewPanelDependencies["schedule"];
       tapeUri: Uri;
+      workspaceFolders: readonly Uri[];
     },
     private readonly tapeUri: Uri,
   ) {
@@ -365,6 +367,7 @@ export class PreviewPanel {
         this.tapeUri,
         result,
         previewArtifactPath,
+        this.dependencies.workspaceFolders,
       );
       this.lastRenderResult = resolvedResult;
       this.ensureLocalResourceRoot(resolvedResult.artifactPath);
@@ -706,15 +709,14 @@ function resolvePreviewResult(
   tapeUri: Uri,
   result: ExecutionResult,
   previewArtifactPath?: string,
+  workspaceFolders: readonly Uri[] = [],
 ): ExecutionResult {
   if (previewArtifactPath === undefined) {
     return result;
   }
 
-  const artifactPath = path.resolve(
-    path.dirname(tapeUri.fsPath),
-    previewArtifactPath,
-  );
+  const workingDirectory = resolveWorkingDirectory(tapeUri, workspaceFolders);
+  const artifactPath = path.resolve(workingDirectory, previewArtifactPath);
   return {
     artifactPath,
     format: inferOutputFormat(artifactPath),

@@ -74,7 +74,7 @@ what category of completion to offer, then returns an appropriate list of
 | **ID** | CMP-003 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | When the cursor is at line start (no enclosing command node, or within an ERROR node at line start), the completion handler MUST return all VHS command keywords as CompletionItems: `Output`, `Set`, `Env`, `Sleep`, `Type`, `Backspace`, `Down`, `Enter`, `Escape`, `Left`, `Right`, `Space`, `Tab`, `Up`, `PageUp`, `PageDown`, `ScrollUp`, `ScrollDown`, `Hide`, `Show`, `Copy`, `Paste`, `Screenshot`, `Wait`, `Require`, `Source`, `Ctrl`, `Alt`, `Shift`. Each item MUST have `kind: CompletionItemKind::Keyword` and a brief `detail` description. |
+| **Statement** | When the cursor is at line start (no enclosing command node, within an ERROR node at line start, or inside a partially typed top-level command prefix at line start), the completion handler MUST return all VHS command keywords as CompletionItems: `Output`, `Set`, `Env`, `Sleep`, `Type`, `Backspace`, `Down`, `Enter`, `Escape`, `Left`, `Right`, `Space`, `Tab`, `Up`, `PageUp`, `PageDown`, `ScrollUp`, `ScrollDown`, `Hide`, `Show`, `Copy`, `Paste`, `Screenshot`, `Wait`, `Require`, `Source`, `Ctrl`, `Alt`, `Shift`. Each item MUST have `kind: CompletionItemKind::Keyword` and a brief `detail` description. |
 | **Verification** | Request completion at column 0 of an empty line; verify all command keywords are returned. |
 
 ### CMP-004 — Setting Name Completions
@@ -94,7 +94,7 @@ what category of completion to offer, then returns an appropriate list of
 | **ID** | CMP-005 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | When the cursor is inside a `SET_COMMAND` whose setting is `Theme` and positioned after the `THEME_KW` token, the completion handler MUST return theme names from the built-in theme registry (§8). Each item MUST have `kind: CompletionItemKind::EnumMember`, `detail: "VHS built-in theme"`, and `insertText` wrapping the theme name in double quotes if the name contains spaces (e.g., `"Catppuccin Mocha"`). |
+| **Statement** | When the cursor is inside a `SET_COMMAND` whose setting is `Theme` and positioned after the `THEME_KW` token, the completion handler MUST return theme names from the built-in theme registry (§8). Each item MUST have `kind: CompletionItemKind::EnumMember`, `detail: "VHS built-in theme"`, and `insertText` that wraps the theme name in double quotes whenever the value cannot be inserted as a single bare VHS token (for example names containing spaces or `+`, such as `"Catppuccin Mocha"` or `"Dark+"`). Bare-safe identifiers such as `Nord` MAY be inserted without quotes. |
 | **Verification** | Type `Set Theme` followed by a space and request completion; verify the list includes `Dracula`, `Catppuccin Mocha`, `Nord`, and at least 300 entries total. |
 
 ### CMP-006 — Setting Value Completions
@@ -153,7 +153,7 @@ what category of completion to offer, then returns an appropriate list of
 
 | Option | Description | Pros | Cons |
 | --- | --- | --- | --- |
-| **A: No trigger characters** | `triggerCharacters: []`; rely on client word-boundary automatic triggers and manual Ctrl+Space | Zero noise; simplest server logic; works universally | Requires manual trigger in some edge cases (e.g., after typing `Set Theme`) |
+| **A: No trigger characters** | `triggerCharacters: []`; rely on client word-boundary automatic triggers and manual Ctrl+Space | Zero noise; simplest server logic; works universally | Requires manual trigger in some edge cases, but line-start prefix completions must still work while typing partial command keywords |
 | **B: Space trigger** | `triggerCharacters: [" "]` | Auto-triggers after keyword → argument transitions | Extremely noisy; triggers on every space in the document including inside strings |
 | **C: Limited triggers** | `triggerCharacters: ["+"]` | Auto-triggers modifier key target completions | Incomplete; only helps one context; `+` in strings would false-trigger |
 
@@ -208,7 +208,7 @@ The context resolution algorithm maps cursor position to completion category:
 
 | Cursor Position | Enclosing Node | Completion Category | Items |
 | --- | --- | --- | --- |
-| Line start / empty line / inside ERROR at line start | None or SOURCE_FILE | Command keywords | CMP-003 |
+| Line start / empty line / inside ERROR at line start / partially typed command prefix at line start | None or SOURCE_FILE | Command keywords | CMP-003 |
 | After `Set` keyword, before setting name | SET_COMMAND | Setting names | CMP-004 |
 | After `Set Theme`, in value position | SET_COMMAND (Theme) | Theme names | CMP-005 |
 | After `Set CursorBlink`, in value position | SET_COMMAND (CursorBlink) | Boolean values | CMP-006 |

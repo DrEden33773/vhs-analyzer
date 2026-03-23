@@ -80,14 +80,17 @@ describe("discoverServerBinary", () => {
     expect(resolveOnPath).toHaveBeenCalledWith("vhs-analyzer");
   });
 
-  it("server_options_use_stdio_transport_and_process_environment", () => {
+  it("server_options_use_stdio_transport_and_disable_ansi_by_default", () => {
     const options = createServerOptions("/bin/vhs-analyzer", ["--log=debug"]);
 
     expect(options).toEqual({
       command: "/bin/vhs-analyzer",
       args: ["--log=debug"],
       options: {
-        env: process.env,
+        env: {
+          ...process.env,
+          NO_COLOR: "1",
+        },
       },
       transport: ClientTransportKind.stdio,
     });

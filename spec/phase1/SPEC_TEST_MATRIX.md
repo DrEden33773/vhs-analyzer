@@ -89,6 +89,7 @@ and verify contract compliance.
 | T-PAR-002 | Set command (integer) | `"Set FontSize 14\n"` | `SOURCE_FILE → SET_COMMAND[SET_KW, SETTING[FONTSIZE_KW, INTEGER]]` | PAR-006 | P0 |
 | T-PAR-003 | Set command (string) | `"Set Shell \"bash\"\n"` | `SOURCE_FILE → SET_COMMAND[SET_KW, SETTING[SHELL_KW, STRING]]` | PAR-006 | P0 |
 | T-PAR-004 | Set command (JSON theme) | `"Set Theme { \"name\": \"Dracula\" }\n"` | `SET_COMMAND` with `SETTING[THEME_KW, JSON]` | PAR-006 | P0 |
+| T-PAR-004A | Set command (bare theme identifier) | `"Set Theme Dracula\n"` | `SET_COMMAND` with `SETTING[THEME_KW, IDENT]` | PAR-006 | P0 |
 | T-PAR-005 | Set CursorBlink boolean | `"Set CursorBlink false\n"` | `SETTING[CURSORBLINK_KW, BOOLEAN]` | PAR-006 | P0 |
 | T-PAR-006 | Set LoopOffset with % | `"Set LoopOffset 50%\n"` | `SETTING[LOOPOFFSET_KW, LOOP_OFFSET_SUFFIX[FLOAT/INTEGER, PERCENT]]` | PAR-006 | P0 |
 | T-PAR-007 | Env command | `"Env HELLO \"WORLD\"\n"` | `ENV_COMMAND[ENV_KW, STRING/IDENT, STRING]` | PAR-006 | P0 |

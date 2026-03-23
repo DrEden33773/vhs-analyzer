@@ -305,6 +305,29 @@ async fn completion_returns_keywords_after_error_line() {
 }
 
 #[tokio::test(flavor = "current_thread")]
+async fn completion_returns_keywords_for_partial_line_start_prefix() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+
+    open_document(&mut service, &uri, "S").await;
+
+    let items =
+        completion_items(&completion_response(&mut service, &uri, Position::new(0, 1)).await);
+
+    assert!(
+        items.iter().any(|item| item.label == "Set"),
+        "expected partial prefix completion to include Set"
+    );
+    assert!(
+        items.iter().any(|item| item.label == "Sleep"),
+        "expected partial prefix completion to include Sleep"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
 async fn initialize_advertises_completion_provider_with_eager_defaults() {
     let (mut service, _) = LspService::new(VhsLanguageServer::new);
 
@@ -472,6 +495,26 @@ async fn completion_quotes_theme_names_with_spaces() {
         Some("\"Catppuccin Mocha\"")
     );
     assert_eq!(nord.insert_text.as_deref(), Some("Nord"));
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_quotes_theme_names_with_unsafe_bare_characters() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+
+    open_document(&mut service, &uri, "Set Theme ").await;
+
+    let items =
+        completion_items(&completion_response(&mut service, &uri, Position::new(0, 10)).await);
+    let dark_plus = items
+        .iter()
+        .find(|item| item.label == "Dark+")
+        .expect("expected Dark+ theme completion");
+
+    assert_eq!(dark_plus.insert_text.as_deref(), Some("\"Dark+\""));
 }
 
 #[tokio::test(flavor = "current_thread")]

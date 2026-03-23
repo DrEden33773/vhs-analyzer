@@ -284,8 +284,8 @@ fn setting_keyword_hover(kind: SyntaxKind) -> Option<String> {
             "Theme",
             "Set the color theme by name or JSON definition.",
             "string/JSON",
-            "Set Theme <string-or-json>",
-            "Set Theme \"Dracula\"\nSet Theme { \"name\": \"Dracula\" }",
+            "Set Theme <string-or-identifier-or-json>",
+            "Set Theme Dracula\nSet Theme \"Dracula\"\nSet Theme { \"name\": \"Dracula\" }",
         )),
         SyntaxKind::LOOPOFFSET_KW => Some(setting_hover(
             "LoopOffset",

@@ -30,9 +30,9 @@ module and test references. The Builder MUST update the "Impl Module" and
 | --- | --- | --- | --- | --- | --- | --- |
 | CMP-001 | completionProvider capability | P0 | `crates/vhs-analyzer-lsp/src/server.rs` | T-CMP-001, T-CMP-002 | LSP-002 (InitializeResult) | Completed |
 | CMP-002 | Completion context resolution algorithm | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-083, T-INT2-002 | PAR-001, PAR-007, HOV-006 | Completed |
-| CMP-003 | Command keyword completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-014, T-INT2-002 | PAR-001 (SyntaxKind) | Completed |
+| CMP-003 | Command keyword completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-010–T-CMP-015, T-INT2-002 | PAR-001 (SyntaxKind) | Completed |
 | CMP-004 | Setting name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-020–T-CMP-022 | PAR-007 (SetCommand) | Completed |
-| CMP-005 | Theme name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-030–T-CMP-034 | — | Completed |
+| CMP-005 | Theme name completions | P0 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-030–T-CMP-035 | — | Completed |
 | CMP-006 | Setting value completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-040–T-CMP-042 | PAR-007 (SetCommand) | Completed |
 | CMP-007 | Snippet templates | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-050–T-CMP-052 | — | Completed |
 | CMP-008 | Output extension completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-060 | PAR-007 (OutputCommand) | Completed |
@@ -56,6 +56,7 @@ module and test references. The Builder MUST update the "Impl Module" and
 | DIA-011 | Unified diagnostic pipeline | P0 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-090–T-DIA-092, T-INT2-001, T-INT2-002 | LSP-008 (publish_diagnostics) | Completed |
 | DIA-012 | Heavyweight check cancellation | P1 | `crates/vhs-analyzer-lsp/src/server.rs`; `crates/vhs-analyzer-lsp/src/diagnostics/heavyweight.rs` | T-DIA-091 | — | Completed |
 | DIA-013 | Invalid Screenshot extension | P0 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-030–T-DIA-032 | PAR-007 (ScreenshotCommand) | Completed |
+| DIA-014 | Unknown built-in theme name | P1 | `crates/vhs-analyzer-lsp/src/diagnostics/semantic.rs` | T-DIA-066–T-DIA-067 | PAR-007 (SetCommand) | Completed |
 
 ## 4. WS-3: Safety Traceability
 

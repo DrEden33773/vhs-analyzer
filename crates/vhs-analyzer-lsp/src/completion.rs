@@ -36,7 +36,7 @@ enum CompletionContext {
     TimeUnits,
 }
 
-static THEMES: LazyLock<Vec<&'static str>> = LazyLock::new(|| {
+pub(crate) static THEMES: LazyLock<Vec<&'static str>> = LazyLock::new(|| {
     include_str!("../../vhs-analyzer-core/data/themes.txt")
         .lines()
         .map(str::trim)
@@ -476,7 +476,7 @@ fn resolve_context(syntax: &SyntaxNode, source: &str, offset: usize) -> Option<C
         return None;
     }
 
-    if line_prefix_is_whitespace(source, offset) {
+    if line_prefix_accepts_command_keywords(source, offset) {
         return Some(CompletionContext::CommandKeywords);
     }
 
@@ -513,17 +513,13 @@ fn items_for_context(context: CompletionContext) -> Vec<CompletionItem> {
                 label: (*theme).to_owned(),
                 kind: Some(CompletionItemKind::ENUM_MEMBER),
                 detail: Some("VHS built-in theme".to_owned()),
-                insert_text: Some(if theme.contains(' ') {
-                    format!("\"{theme}\"")
-                } else {
-                    (*theme).to_owned()
-                }),
+                insert_text: Some(string_like_insert_text(theme)),
                 ..Default::default()
             })
             .collect(),
         CompletionContext::BooleanValues => items_from_specs(BOOLEAN_VALUES),
-        CompletionContext::WindowBarStyles => items_from_specs(WINDOWBAR_STYLES),
-        CompletionContext::ShellNames => items_from_specs(SHELL_NAMES),
+        CompletionContext::WindowBarStyles => string_like_items_from_specs(WINDOWBAR_STYLES),
+        CompletionContext::ShellNames => string_like_items_from_specs(SHELL_NAMES),
         CompletionContext::OutputExtensions => items_from_specs(OUTPUT_EXTENSIONS),
         CompletionContext::KeyTargets => key_target_items(),
         CompletionContext::TimeUnits => items_from_specs(TIME_UNITS),
@@ -550,6 +546,19 @@ fn items_from_specs(specs: &[CompletionSpec]) -> Vec<CompletionItem> {
             label: item.label.to_owned(),
             kind: Some(item.kind),
             detail: Some(item.detail.to_owned()),
+            ..Default::default()
+        })
+        .collect()
+}
+
+fn string_like_items_from_specs(specs: &[CompletionSpec]) -> Vec<CompletionItem> {
+    specs
+        .iter()
+        .map(|item| CompletionItem {
+            label: item.label.to_owned(),
+            kind: Some(item.kind),
+            detail: Some(item.detail.to_owned()),
+            insert_text: Some(string_like_insert_text(item.label)),
             ..Default::default()
         })
         .collect()
@@ -589,15 +598,45 @@ fn key_target_items() -> Vec<CompletionItem> {
     items
 }
 
-fn line_prefix_is_whitespace(source: &str, offset: usize) -> bool {
+fn line_prefix_accepts_command_keywords(source: &str, offset: usize) -> bool {
     let safe_offset = offset.min(source.len());
     let line_start = source[..safe_offset]
         .rfind(['\n', '\r'])
         .map_or(0, |index| index + 1);
+    let line_prefix = &source[line_start..safe_offset];
+    let trimmed_prefix = line_prefix.trim_start_matches(char::is_whitespace);
 
-    source[line_start..safe_offset]
+    if trimmed_prefix.is_empty() {
+        return true;
+    }
+
+    if trimmed_prefix.starts_with('#') {
+        return false;
+    }
+
+    trimmed_prefix
         .chars()
-        .all(char::is_whitespace)
+        .all(|character| character.is_ascii_alphabetic())
+}
+
+fn string_like_insert_text(value: &str) -> String {
+    if is_safe_bare_value(value) {
+        return value.to_owned();
+    }
+
+    format!("\"{value}\"")
+}
+
+fn is_safe_bare_value(value: &str) -> bool {
+    let mut characters = value.chars();
+    let Some(first) = characters.next() else {
+        return false;
+    };
+
+    first.is_ascii_alphabetic()
+        && characters.all(|character| {
+            character.is_ascii_alphanumeric() || matches!(character, '_' | '.' | '/' | '-' | '%')
+        })
 }
 
 fn is_comment_context(syntax: &SyntaxNode, offset: usize) -> bool {

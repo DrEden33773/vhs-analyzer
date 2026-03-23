@@ -132,6 +132,19 @@ impl ServerProcess {
         }));
     }
 
+    fn did_change_watched_files(&mut self) {
+        self.send_message(&json!({
+            "jsonrpc": "2.0",
+            "method": "workspace/didChangeWatchedFiles",
+            "params": {
+                "changes": [{
+                    "type": 2,
+                    "uri": "file:///workspace/demo.tape"
+                }]
+            }
+        }));
+    }
+
     fn wait_for_exit(&mut self, timeout: Duration) -> ExitStatus {
         let deadline = std::time::Instant::now() + timeout;
 
@@ -338,6 +351,24 @@ fn initialize_emits_logs_to_stderr_not_stdout() {
     assert!(
         stderr.contains("initialize"),
         "stderr should mention initialize, got: {stderr}"
+    );
+}
+
+#[test]
+fn watched_file_notifications_do_not_emit_the_default_not_implemented_warning() {
+    let mut server = ServerProcess::spawn();
+
+    let _ = server.initialize();
+    server.did_change_watched_files();
+    let _ = server.shutdown();
+    server.exit();
+    let status = server.wait_for_exit(Duration::from_secs(5));
+    assert!(status.success(), "server should exit successfully");
+
+    let stderr = server.read_stderr_to_string();
+    assert!(
+        !stderr.contains("workspace/didChangeWatchedFiles"),
+        "stderr should not contain the default didChangeWatchedFiles warning, got: {stderr}"
     );
 }
 

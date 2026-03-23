@@ -84,8 +84,8 @@ Webview with loading states, error display, and auto-refresh on file changes.
 | **ID** | PRV-004 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | The extension MUST determine the output artifact path by: (1) Parsing the `.tape` file text to find the first `Output` directive and extracting its path argument. (2) Resolving the path relative to the `.tape` file's directory. (3) If no `Output` directive is found, using the VHS default: `out.gif` in the working directory. The extension MUST support all VHS output formats: `.gif`, `.mp4`, `.webm`. |
-| **Verification** | File with `Output demo.gif` → preview shows `demo.gif`. File without `Output` → preview shows `out.gif`. |
+| **Statement** | The extension MUST determine the output artifact path by: (1) Parsing the `.tape` file text to find the first `Output` directive and extracting its path argument. (2) Resolving relative output paths against the same working directory used for the VHS child process, matching current VHS CLI behavior. (3) If no `Output` directive is found, using the VHS default: `out.gif` in the working directory. The extension MUST support all VHS output formats: `.gif`, `.mp4`, `.webm`. |
+| **Verification** | File with `Output demo.gif` → preview shows the artifact produced relative to the execution working directory. File without `Output` → preview shows `out.gif`. |
 
 ### PRV-005 — Auto-Refresh on Output File Change
 

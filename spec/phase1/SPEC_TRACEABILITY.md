@@ -48,7 +48,7 @@ from spec through code to test.
 | PAR-003 | No panics on any input | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-051, T-PAR-054 through T-PAR-058 (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | FC-PAR-03: strict one-command-per-line |
 | PAR-004 | Error localization (per-command isolation) | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-053, T-PAR-055, T-PAR-059 (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | — |
 | PAR-005 | Fuel-based infinite loop protection | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-056 (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | — |
-| PAR-006 | All VHS directives produce dedicated nodes | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-001 through T-PAR-031 (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | FC-PAR-04: Copy with optional string |
+| PAR-006 | All VHS directives produce dedicated nodes | P0 MUST | `crates/vhs-analyzer-core/src/parser.rs` | T-PAR-001 through T-PAR-031 + T-PAR-004A (`crates/vhs-analyzer-core/tests/parser_tests.rs`) | FC-PAR-04: Copy with optional string |
 | PAR-007 | Typed AST accessor layer | P1 SHOULD | `crates/vhs-analyzer-core/src/ast.rs` | T-PAR-070 through T-PAR-073 (`crates/vhs-analyzer-core/tests/ast_tests.rs`) | FC-PAR-02: hand-written for Phase 1 |
 
 ### 2.3 LSP Core (WS-3) — SPEC_LSP_CORE.md

@@ -186,7 +186,7 @@ and links in Phase 1 (some LSP clients render them poorly).
 | `TYPINGSPEED_KW` | **TypingSpeed** | time | Set default typing speed per character |
 | `LINEHEIGHT_KW` | **LineHeight** | float | Set line height multiplier |
 | `PADDING_KW` | **Padding** | float | Set terminal frame padding in pixels |
-| `THEME_KW` | **Theme** | string/JSON | Set color theme by name or JSON definition |
+| `THEME_KW` | **Theme** | string/identifier/JSON | Set color theme by name or JSON definition |
 | `LOOPOFFSET_KW` | **LoopOffset** | float[%] | Set GIF loop start frame offset |
 | `BORDERRADIUS_KW` | **BorderRadius** | integer | Set terminal window border radius in pixels |
 | `MARGIN_KW` | **Margin** | integer | Set video margin in pixels |

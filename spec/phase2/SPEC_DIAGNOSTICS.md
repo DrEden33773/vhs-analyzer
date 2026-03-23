@@ -175,6 +175,16 @@ and environment checks (file existence, `$PATH` program lookup).
 | **Statement** | If a `SCREENSHOT_COMMAND` path does not end with `.png` (case-insensitive), the server MUST emit an `Error` diagnostic on the `PATH` token range with message `"Invalid screenshot format. Supported: .png"` and code `"invalid-screenshot-extension"`. |
 | **Verification** | `Screenshot demo.png` → no error. `Screenshot demo.PNG` → no error (case-insensitive). `Screenshot demo.jpg` → Error. |
 
+### DIA-014 — Unknown Built-In Theme Name
+
+| Field | Value |
+| --- | --- |
+| **ID** | DIA-014 |
+| **Priority** | P1 (SHOULD) |
+| **Owner** | Architect → Builder |
+| **Statement** | If a `SET_COMMAND` for `Theme` uses a string-like built-in theme value (`IDENT` or quoted `STRING`) and that value is not present in the built-in theme registry, the server SHOULD emit an `Error` diagnostic on the value token range with message `"Unknown VHS theme '{name}'"` and code `"unknown-theme"`. JSON theme objects MUST NOT be validated against the built-in registry. Valid bare identifiers such as `Set Theme Dracula` MUST NOT be reported as parse errors. |
+| **Verification** | `Set Theme Dracula` → no parse or semantic error. `Set Theme "D"` → `unknown-theme` error. `Set Theme { "name": "Custom" }` → no `unknown-theme` error. |
+
 ## 5. Design Options Analysis
 
 ### 5.1 Diagnostic Pipeline Architecture
@@ -231,6 +241,7 @@ async-friendly when called from a spawned task. Per Rust Best Practices:
 | Missing Output directive | `missing-output` | Warning | Structural |
 | Invalid Output extension | `invalid-extension` | Error | Value validation |
 | Invalid Screenshot extension | `invalid-screenshot-extension` | Error | Value validation |
+| Unknown built-in theme | `unknown-theme` | Error | Value validation |
 | Duplicate Set | `duplicate-set` | Warning | Structural |
 | Invalid hex color | `invalid-hex-color` | Error | Value validation |
 | Numeric out of range | `value-out-of-range` | Error | Value validation |

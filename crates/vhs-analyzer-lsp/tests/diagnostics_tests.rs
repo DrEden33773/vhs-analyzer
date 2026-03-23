@@ -265,6 +265,51 @@ async fn missing_output_warning_clears_after_adding_output() {
 }
 
 #[tokio::test(flavor = "current_thread")]
+async fn bare_theme_identifier_is_accepted_without_parse_or_theme_diagnostics() {
+    let (mut service, mut socket) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+
+    let diagnostics = did_open_and_collect_diagnostics(
+        &mut service,
+        &mut socket,
+        "file:///workspace/theme-dracula.tape"
+            .parse()
+            .expect("valid URI"),
+        "Output demo.gif\nSet Theme Dracula\nType \"hello\"\n",
+    )
+    .await;
+
+    assert!(
+        diagnostics.diagnostics.is_empty(),
+        "expected no diagnostics for a valid bare built-in theme, got: {:?}",
+        diagnostics.diagnostics
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn unknown_theme_string_reports_unknown_theme_diagnostic() {
+    let (mut service, mut socket) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+
+    let diagnostics = did_open_and_collect_diagnostics(
+        &mut service,
+        &mut socket,
+        "file:///workspace/theme-unknown.tape"
+            .parse()
+            .expect("valid URI"),
+        "Output demo.gif\nSet Theme \"D\"\nType \"hello\"\n",
+    )
+    .await;
+
+    let diagnostic =
+        diagnostic_by_code(&diagnostics, "unknown-theme").expect("unknown-theme diagnostic");
+
+    assert_eq!(diagnostic.severity, Some(DiagnosticSeverity::ERROR));
+    assert_eq!(diagnostic.source.as_deref(), Some("vhs-analyzer"));
+    assert_eq!(diagnostic.message, "Unknown VHS theme 'D'");
+}
+
+#[tokio::test(flavor = "current_thread")]
 async fn output_pdf_extension_produces_an_invalid_extension_error() {
     let (mut service, mut socket) = LspService::new(VhsLanguageServer::new);
     let _ = initialize_service(&mut service).await;

@@ -103,7 +103,10 @@ export function createServerOptions(
     command,
     args: [...args],
     options: {
-      env: process.env,
+      env: {
+        ...process.env,
+        NO_COLOR: "1",
+      },
     },
     transport: ClientTransportKind.stdio as TransportKind,
   };

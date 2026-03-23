@@ -200,7 +200,7 @@ Setting =
   | 'TypingSpeed' Time
   | 'LineHeight' Float
   | 'Padding' Float
-  | 'Theme' (Json | String)
+  | 'Theme' (Json | String | Ident)
   | 'LoopOffset' LoopOffsetSuffix
   | 'Width' Integer
   | 'BorderRadius' Integer

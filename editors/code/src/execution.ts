@@ -435,7 +435,7 @@ export function resolveArtifactPath(
     return path.join(workingDirectory, defaultOutputFileName);
   }
 
-  return path.resolve(path.dirname(tapeUri.fsPath), outputPath);
+  return path.resolve(workingDirectory, outputPath);
 }
 
 function isWithinDirectory(directoryPath: string, filePath: string): boolean {

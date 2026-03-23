@@ -43,6 +43,7 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-012 | Keywords after newline | Completion at start of line after `Output demo.gif\n` | All VHS command keywords returned |
 | T-CMP-013 | Keywords inside ERROR node | Completion at line start where previous line has parse error | All VHS command keywords returned |
 | T-CMP-014 | Keyword detail text | Completion at empty line | Each keyword item has a non-empty `detail` description |
+| T-CMP-015 | Keywords after partial line-start prefix | `S` at line start → completion | Includes command keywords such as `Set` and `Sleep` |
 
 ### 2.3 Setting Name Completions
 
@@ -60,7 +61,8 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-031 | Dracula in list | `Set Theme` + space → completion | List contains `Dracula` |
 | T-CMP-032 | Catppuccin Mocha quoted | `Set Theme` + space → completion | `Catppuccin Mocha` has `insertText: "\"Catppuccin Mocha\""` (wrapped in quotes) |
 | T-CMP-033 | Nord unquoted | `Set Theme` + space → completion | `Nord` has `insertText: "Nord"` (no quotes, no spaces) |
-| T-CMP-034 | No themes for other settings | `Set FontSize` + space → completion | No theme name items returned |
+| T-CMP-034 | Dark+ quoted | `Set Theme` + space → completion | `Dark+` has `insertText: "\"Dark+\""` (wrapped in quotes) |
+| T-CMP-035 | No themes for other settings | `Set FontSize` + space → completion | No theme name items returned |
 
 ### 2.5 Setting Value Completions
 
@@ -165,6 +167,8 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-DIA-063 | Padding zero valid | `Set Padding 0` | No diagnostic (>= 0 allowed) |
 | T-DIA-064 | Padding negative | `Set Padding -5` | Error with code `value-out-of-range` |
 | T-DIA-065 | BorderRadius zero valid | `Set BorderRadius 0` | No diagnostic (>= 0 allowed) |
+| T-DIA-066 | Valid bare built-in theme | `Set Theme Dracula` | No parse error and no `unknown-theme` diagnostic |
+| T-DIA-067 | Unknown built-in theme | `Set Theme "D"` | Error with code `unknown-theme` |
 
 ### 3.8 Require Program Not Found (Heavyweight)
 

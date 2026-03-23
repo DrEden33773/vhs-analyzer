@@ -1,6 +1,6 @@
 //! Lightweight semantic diagnostics that run on every document change.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::LazyLock};
 
 use tower_lsp_server::ls_types::{
     Diagnostic, DiagnosticRelatedInformation, DiagnosticSeverity, Location, NumberOrString,
@@ -23,6 +23,13 @@ const NUMERIC_SETTING_PARSE_MESSAGES: &[&str] = &[
     "unexpected trailing tokens after Set command",
 ];
 const VALID_OUTPUT_EXTENSIONS: &[&str] = &["gif", "mp4", "webm", "ascii", "txt"];
+static THEMES: LazyLock<Vec<&'static str>> = LazyLock::new(|| {
+    include_str!("../../../vhs-analyzer-core/data/themes.txt")
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .collect()
+});
 
 #[derive(Debug, Default)]
 pub(super) struct LightweightAnalysis {
@@ -237,6 +244,7 @@ fn collect_set_diagnostics(
 
     match name_token.kind() {
         SyntaxKind::MARGINFILL_KW => validate_margin_fill(&value, source, analysis),
+        SyntaxKind::THEME_KW => validate_builtin_theme(&value, source, analysis),
         kind if numeric_constraint(kind).is_some() => {
             validate_numeric_setting(&name_token, &value, source, analysis);
         }
@@ -293,6 +301,27 @@ fn validate_margin_fill(value: &ExtractedText, source: &str, analysis: &mut Ligh
         code: Some(NumberOrString::String("invalid-hex-color".to_owned())),
         source: Some("vhs-analyzer".to_owned()),
         message: "Invalid hex color. Expected #RGB, #RRGGBB, or #RRGGBBAA".to_owned(),
+        ..Default::default()
+    });
+}
+
+fn validate_builtin_theme(value: &ExtractedText, source: &str, analysis: &mut LightweightAnalysis) {
+    let trimmed = value.text.trim();
+    if trimmed.starts_with('{') {
+        return;
+    }
+
+    let normalized = strip_matching_quotes(trimmed);
+    if normalized.is_empty() || THEMES.contains(&normalized) {
+        return;
+    }
+
+    analysis.diagnostics.push(Diagnostic {
+        range: value.range.into_lsp_range(source),
+        severity: Some(DiagnosticSeverity::ERROR),
+        code: Some(NumberOrString::String("unknown-theme".to_owned())),
+        source: Some("vhs-analyzer".to_owned()),
+        message: format!("Unknown VHS theme '{normalized}'"),
         ..Default::default()
     });
 }

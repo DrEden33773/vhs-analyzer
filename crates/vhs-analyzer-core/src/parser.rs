@@ -193,7 +193,12 @@ impl<'tokens> Parser<'tokens> {
             }
             SyntaxKind::THEME_KW => {
                 self.consume_required_matching(
-                    |value_kind| matches!(value_kind, SyntaxKind::JSON | SyntaxKind::STRING),
+                    |value_kind| {
+                        matches!(
+                            value_kind,
+                            SyntaxKind::JSON | SyntaxKind::STRING | SyntaxKind::IDENT
+                        )
+                    },
                     "expected theme value after Theme",
                 );
             }

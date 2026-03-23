@@ -162,6 +162,23 @@ fn parser_produces_set_command_for_json_theme() {
 }
 
 #[test]
+fn parser_produces_set_command_for_bare_theme_identifier() {
+    let parsed = parse("Set Theme Dracula\n");
+    assert!(parsed.errors().is_empty(), "{:?}", parsed.errors());
+
+    let root = parsed.syntax();
+    let command = only_child(&root);
+    let setting = only_child(&command);
+
+    assert_eq!(command.kind(), SyntaxKind::SET_COMMAND);
+    assert_eq!(setting.kind(), SyntaxKind::SETTING);
+    assert_eq!(
+        descendant_token_kinds(&setting),
+        &[SyntaxKind::THEME_KW, SyntaxKind::IDENT]
+    );
+}
+
+#[test]
 fn parser_produces_set_command_for_boolean_setting() {
     let parsed = parse("Set CursorBlink false\n");
     assert!(parsed.errors().is_empty(), "{:?}", parsed.errors());

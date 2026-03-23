@@ -128,6 +128,37 @@ describe("ExecutionManager", () => {
     });
   });
 
+  it("execution_resolves_relative_output_paths_against_the_working_directory", async () => {
+    const tapeUri = Uri.file("/workspace/nested/demo.tape");
+    const childProcess = new MockChildProcess();
+    const spawnProcess = vi.fn().mockReturnValue(childProcess);
+    const manager = new ExecutionManager({
+      getWorkspaceFolders: () => [Uri.file("/workspace")],
+      readTapeFile: vi.fn().mockResolvedValue("Output demo.gif"),
+      spawnProcess,
+    });
+
+    const runPromise = manager.run(tapeUri);
+    await flushMicrotasks();
+
+    expect(spawnProcess).toHaveBeenCalledWith("vhs", [tapeUri.fsPath], {
+      cwd: "/workspace",
+    });
+    expect(manager.getState(tapeUri)).toEqual({
+      artifactPath: "/workspace/demo.gif",
+      kind: "running",
+      tapeUri,
+    });
+
+    childProcess.exit(0);
+
+    await expect(runPromise).resolves.toEqual({
+      artifactPath: "/workspace/demo.gif",
+      format: "gif",
+      tapeUri,
+    });
+  });
+
   it("running_the_same_file_again_cancels_the_previous_process_before_restarting", async () => {
     const tapeUri = Uri.file("/workspace/demo.tape");
     const firstProcess = new MockChildProcess();
