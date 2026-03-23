@@ -608,14 +608,14 @@ fn time_unit_items(source: &str, offset: usize) -> Vec<CompletionItem> {
             kind: Some(item.kind),
             detail: Some(item.detail.to_owned()),
             filter_text: Some(format!("{}{}", context.numeric_prefix, item.label)),
-            insert_text: Some(item.label.to_owned()),
+            insert_text: Some(format!("{}{}", context.numeric_prefix, item.label)),
             text_edit: Some(CompletionTextEdit::Edit(TextEdit {
                 range: super::VhsLanguageServer::range_for_offsets(
                     source,
                     context.replace_start,
                     context.replace_end,
                 ),
-                new_text: item.label.to_owned(),
+                new_text: format!("{}{}", context.numeric_prefix, item.label),
             })),
             ..Default::default()
         })
@@ -833,7 +833,11 @@ fn duration_slot_context(source: &str, offset: usize) -> Option<DurationSlotCont
         .strip_prefix("Sleep")
         .and_then(strip_required_inline_whitespace)
     {
-        return parse_duration_slot_fragment(fragment, safe_offset);
+        return parse_duration_slot_fragment(
+            fragment,
+            line_start + line_prefix.len() - fragment.len(),
+            safe_offset,
+        );
     }
 
     if let Some(fragment) = trimmed_prefix
@@ -842,7 +846,11 @@ fn duration_slot_context(source: &str, offset: usize) -> Option<DurationSlotCont
         .and_then(|rest| rest.strip_prefix("TypingSpeed"))
         .and_then(strip_required_inline_whitespace)
     {
-        return parse_duration_slot_fragment(fragment, safe_offset);
+        return parse_duration_slot_fragment(
+            fragment,
+            line_start + line_prefix.len() - fragment.len(),
+            safe_offset,
+        );
     }
 
     let after_type = trimmed_prefix.strip_prefix("Type")?;
@@ -850,7 +858,11 @@ fn duration_slot_context(source: &str, offset: usize) -> Option<DurationSlotCont
     let after_at = after_type.strip_prefix('@')?;
     let fragment = after_at.trim_start_matches([' ', '\t']);
 
-    parse_duration_slot_fragment(fragment, safe_offset)
+    parse_duration_slot_fragment(
+        fragment,
+        line_start + line_prefix.len() - fragment.len(),
+        safe_offset,
+    )
 }
 
 fn strip_required_inline_whitespace(text: &str) -> Option<&str> {
@@ -858,7 +870,11 @@ fn strip_required_inline_whitespace(text: &str) -> Option<&str> {
     (trimmed.len() != text.len()).then_some(trimmed)
 }
 
-fn parse_duration_slot_fragment(fragment: &str, offset: usize) -> Option<DurationSlotContext> {
+fn parse_duration_slot_fragment(
+    fragment: &str,
+    fragment_start: usize,
+    offset: usize,
+) -> Option<DurationSlotContext> {
     let numeric_len = parse_numeric_prefix_len(fragment)?;
     let suffix = fragment.get(numeric_len..)?;
     if !matches!(suffix, "" | "m" | "ms" | "s") {
@@ -867,7 +883,7 @@ fn parse_duration_slot_fragment(fragment: &str, offset: usize) -> Option<Duratio
 
     Some(DurationSlotContext {
         numeric_prefix: fragment.get(..numeric_len)?.to_owned(),
-        replace_start: offset.saturating_sub(suffix.len()),
+        replace_start: fragment_start,
         replace_end: offset,
     })
 }

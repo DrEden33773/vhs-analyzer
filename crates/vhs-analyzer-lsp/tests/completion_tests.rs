@@ -1137,22 +1137,24 @@ async fn completion_manual_time_units_append_suffixes_at_numeric_end() {
         .expect("expected s time-unit completion");
 
     assert_eq!(milliseconds.filter_text.as_deref(), Some("500ms"));
+    assert_eq!(milliseconds.insert_text.as_deref(), Some("500ms"));
     assert_eq!(
         milliseconds.text_edit,
         Some(CompletionTextEdit::Edit(
             tower_lsp_server::ls_types::TextEdit {
-                range: Range::new(Position::new(0, 9), Position::new(0, 9)),
-                new_text: "ms".to_owned(),
+                range: Range::new(Position::new(0, 6), Position::new(0, 9)),
+                new_text: "500ms".to_owned(),
             }
         ))
     );
     assert_eq!(seconds.filter_text.as_deref(), Some("500s"));
+    assert_eq!(seconds.insert_text.as_deref(), Some("500s"));
     assert_eq!(
         seconds.text_edit,
         Some(CompletionTextEdit::Edit(
             tower_lsp_server::ls_types::TextEdit {
-                range: Range::new(Position::new(0, 9), Position::new(0, 9)),
-                new_text: "s".to_owned(),
+                range: Range::new(Position::new(0, 6), Position::new(0, 9)),
+                new_text: "500s".to_owned(),
             }
         ))
     );
@@ -1187,12 +1189,13 @@ async fn completion_manual_time_units_replace_partial_sleep_suffix() {
         .expect("expected ms time-unit completion");
 
     assert_eq!(milliseconds.filter_text.as_deref(), Some("1000ms"));
+    assert_eq!(milliseconds.insert_text.as_deref(), Some("1000ms"));
     assert_eq!(
         milliseconds.text_edit,
         Some(CompletionTextEdit::Edit(
             tower_lsp_server::ls_types::TextEdit {
-                range: Range::new(Position::new(0, 10), Position::new(0, 11)),
-                new_text: "ms".to_owned(),
+                range: Range::new(Position::new(0, 6), Position::new(0, 11)),
+                new_text: "1000ms".to_owned(),
             }
         ))
     );
@@ -1227,12 +1230,13 @@ async fn completion_manual_time_units_replace_complete_sleep_suffix() {
         .expect("expected ms time-unit completion");
 
     assert_eq!(milliseconds.filter_text.as_deref(), Some("1000ms"));
+    assert_eq!(milliseconds.insert_text.as_deref(), Some("1000ms"));
     assert_eq!(
         milliseconds.text_edit,
         Some(CompletionTextEdit::Edit(
             tower_lsp_server::ls_types::TextEdit {
-                range: Range::new(Position::new(0, 10), Position::new(0, 12)),
-                new_text: "ms".to_owned(),
+                range: Range::new(Position::new(0, 6), Position::new(0, 12)),
+                new_text: "1000ms".to_owned(),
             }
         ))
     );
@@ -1267,12 +1271,13 @@ async fn completion_manual_time_units_replace_partial_type_duration_suffix() {
         .expect("expected ms time-unit completion");
 
     assert_eq!(milliseconds.filter_text.as_deref(), Some("1000ms"));
+    assert_eq!(milliseconds.insert_text.as_deref(), Some("1000ms"));
     assert_eq!(
         milliseconds.text_edit,
         Some(CompletionTextEdit::Edit(
             tower_lsp_server::ls_types::TextEdit {
-                range: Range::new(Position::new(0, 9), Position::new(0, 10)),
-                new_text: "ms".to_owned(),
+                range: Range::new(Position::new(0, 5), Position::new(0, 10)),
+                new_text: "1000ms".to_owned(),
             }
         ))
     );
@@ -1307,12 +1312,13 @@ async fn completion_manual_time_units_replace_partial_typing_speed_suffix() {
         .expect("expected ms time-unit completion");
 
     assert_eq!(milliseconds.filter_text.as_deref(), Some("1000ms"));
+    assert_eq!(milliseconds.insert_text.as_deref(), Some("1000ms"));
     assert_eq!(
         milliseconds.text_edit,
         Some(CompletionTextEdit::Edit(
             tower_lsp_server::ls_types::TextEdit {
-                range: Range::new(Position::new(0, 20), Position::new(0, 21)),
-                new_text: "ms".to_owned(),
+                range: Range::new(Position::new(0, 16), Position::new(0, 21)),
+                new_text: "1000ms".to_owned(),
             }
         ))
     );

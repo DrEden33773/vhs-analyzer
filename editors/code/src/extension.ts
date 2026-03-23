@@ -409,7 +409,9 @@ export class ExtensionController {
       return;
     }
 
-    await commands.executeCommand("editor.action.triggerSuggest");
+    setTimeout(() => {
+      void commands.executeCommand("editor.action.triggerSuggest");
+    }, 0);
   }
 
   async deactivate(): Promise<void> {

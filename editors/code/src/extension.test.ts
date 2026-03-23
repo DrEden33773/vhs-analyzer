@@ -413,6 +413,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     expect(commands.executeCommand).toHaveBeenCalledWith(
       "editor.action.triggerSuggest",
@@ -455,6 +456,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     expect(commands.executeCommand).toHaveBeenCalledWith(
       "editor.action.triggerSuggest",
@@ -497,6 +499,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     __setActiveTextEditor({
       getText: () => 'Set Theme "Catppuccin "',
@@ -515,6 +518,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     expect(commands.executeCommand).toHaveBeenCalledTimes(2);
     expect(commands.executeCommand).toHaveBeenNthCalledWith(
@@ -563,6 +567,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     __setActiveTextEditor({
       getText: () => "Sleep 10",
@@ -581,6 +586,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     __setActiveTextEditor({
       getText: () => 'Type@10 "x"',
@@ -599,6 +605,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     __setActiveTextEditor({
       getText: () => "Set TypingSpeed 10",
@@ -617,6 +624,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     expect(commands.executeCommand).toHaveBeenCalledTimes(4);
     expect(commands.executeCommand).toHaveBeenNthCalledWith(
@@ -673,6 +681,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     __setActiveTextEditor({
       getText: () => 'Type@1000m "x"',
@@ -691,6 +700,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     __setActiveTextEditor({
       getText: () => "Set TypingSpeed 1000s",
@@ -709,6 +719,7 @@ describe("ExtensionController", () => {
       languageId: "tape",
       uri,
     });
+    await flushMicrotasks();
 
     expect(commands.executeCommand).toHaveBeenCalledTimes(3);
     expect(commands.executeCommand).toHaveBeenNthCalledWith(
