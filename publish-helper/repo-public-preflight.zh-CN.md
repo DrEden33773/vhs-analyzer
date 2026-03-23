@@ -13,38 +13,37 @@
 
 ## P0：必须在公开前完成
 
-- [ ] 新增根目录 `README.md`
+- [x] 新增根目录 `README.md`
   - 说明项目定位：Rust LSP + VS Code/Cursor 扩展
   - 说明与 `vhs` 官方 CLI 的关系
   - 链接 `editors/code/README.md`、`spec/README.md`、`STATUS.yaml`
   - 给出最短安装和开发入口
-- [ ] 新增 `CONTRIBUTING.md`
+- [x] 新增 `CONTRIBUTING.md`
   - 写清 `cargo` / `pnpm` 基本命令
   - 写清扩展开发建议使用 `vhs-analyzer.code-workspace`
   - 简要说明 `spec/` 驱动和变更协议
-- [ ] 新增 `SECURITY.md`
+- [x] 新增 `SECURITY.md`
   - 写明漏洞上报方式
   - 明确公开 issue 是否适合报告安全问题
-- [ ] 同步顶层状态文档
+- [x] 同步顶层状态文档
   - `ROADMAP.md`
   - `EXECUTION_TRACKER.md`
   - `spec/README.md`
-- [ ] 将扩展目录引用统一规范为 `editors/code`
+- [x] 将扩展目录引用统一规范为 `editors/code`
   - 对公开文档和冻结规范做路径一致性修订
   - 这属于文档修正，不改变行为契约
-- [ ] 决定是否完整公开以下目录
-  - `prompt/`
-  - `trace/`
-  - `errors/`
-  - 如果保留，建议解释这些目录的用途
+- [x] 决定是否完整公开以下目录
+  - `prompt/` 已保留，并在根 `README.md` 中说明用途
+  - `trace/` 已保留，并在根 `README.md` 中说明用途
+  - `errors/` 已完成清理，移除了低价值的旧排障产物
 
 ## P0：公开前快速检查
 
-- [ ] 再扫一遍仓库，确认没有密钥、PAT、账户信息或临时日志泄漏
-- [ ] 确认根目录 `LICENSE` 明确可见
-- [ ] 确认 `STATUS.yaml` 与 `trace/phase3/status.yaml` 一致
-- [ ] 确认对外文档不再把 Phase 2/3 写成未完成
-- [ ] 确认所有公开入口与文档都已指向 `editors/code/`
+- [x] 再扫一遍仓库，确认没有密钥、PAT、账户信息或临时日志泄漏
+- [x] 确认根目录 `LICENSE` 明确可见
+- [x] 确认 `STATUS.yaml` 与 `trace/phase3/status.yaml` 一致
+- [x] 确认对外文档不再把 Phase 2/3 写成未完成
+- [x] 确认所有公开入口与文档都已指向 `editors/code/`
 
 ## P1：建议在公开后尽快补上
 

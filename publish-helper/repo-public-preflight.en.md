@@ -17,41 +17,40 @@ status-consistency gaps.
 
 ## P0: Must Finish Before Going Public
 
-- [ ] Add a root `README.md`
+- [x] Add a root `README.md`
   - Explain the project shape: Rust LSP + VS Code/Cursor extension
   - Explain the relationship to the official `vhs` CLI
   - Link `editors/code/README.md`, `spec/README.md`, and `STATUS.yaml`
   - Provide the shortest install and development entrypoint
-- [ ] Add `CONTRIBUTING.md`
+- [x] Add `CONTRIBUTING.md`
   - Document the basic `cargo` and `pnpm` commands
   - Document that extension development should use
     `vhs-analyzer.code-workspace`
   - Briefly explain the `spec/`-first change protocol
-- [ ] Add `SECURITY.md`
+- [x] Add `SECURITY.md`
   - Define how to report vulnerabilities
   - Clarify whether public issues are appropriate for security reports
-- [ ] Sync top-level status documents
+- [x] Sync top-level status documents
   - `ROADMAP.md`
   - `EXECUTION_TRACKER.md`
   - `spec/README.md`
-- [ ] Normalize extension-path references to `editors/code`
+- [x] Normalize extension-path references to `editors/code`
   - Update public-facing docs and frozen specs for path consistency
   - Treat this as a documentation correction, not a behavior-contract change
-- [ ] Decide whether the following directories should remain public as-is
-  - `prompt/`
-  - `trace/`
-  - `errors/`
-  - If kept, explain why they exist
+- [x] Decide whether the following directories should remain public as-is
+  - `prompt/` kept and explained in the root `README.md`
+  - `trace/` kept and explained in the root `README.md`
+  - `errors/` cleaned up by removing the stale troubleshooting artifact
 
 ## P0: Quick Checks Before Flipping Visibility
 
-- [ ] Re-scan the repository for secrets, PATs, account details, or temporary
+- [x] Re-scan the repository for secrets, PATs, account details, or temporary
   logs
-- [ ] Confirm the root `LICENSE` is visible and correct
-- [ ] Confirm `STATUS.yaml` matches `trace/phase3/status.yaml`
-- [ ] Confirm outward-facing docs no longer describe Phase 2 or Phase 3 as
+- [x] Confirm the root `LICENSE` is visible and correct
+- [x] Confirm `STATUS.yaml` matches `trace/phase3/status.yaml`
+- [x] Confirm outward-facing docs no longer describe Phase 2 or Phase 3 as
   unfinished
-- [ ] Confirm all public entrypoints and docs point to `editors/code/`
+- [x] Confirm all public entrypoints and docs point to `editors/code/`
 
 ## P1: Add Soon After Going Public
 
