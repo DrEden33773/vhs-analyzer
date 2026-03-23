@@ -183,7 +183,7 @@ function createCodeLens(options: {
       command: options.command,
       title: options.title,
     },
-    isResolved: false,
+    isResolved: true,
     range: options.range,
   };
 }

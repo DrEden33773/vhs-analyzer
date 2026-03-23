@@ -49,6 +49,8 @@ describe("VhsCodeLensProvider", () => {
     expect(lenses).toHaveLength(3);
     expect(lenses[0]?.range.start.line).toBe(3);
     expect(lenses[1]?.range.start.line).toBe(3);
+    expect(lenses.every((lens) => lens.command !== undefined)).toBe(true);
+    expect(lenses.every((lens) => lens.isResolved !== false)).toBe(true);
   });
 
   it("codelens_defaults_to_line_zero_without_leading_comments", () => {
