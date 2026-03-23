@@ -6,11 +6,17 @@ alwaysApply: true
 
 # Markdown Output Quality Rules
 
-All `.md` files created or modified by any agent MUST comply with the
-project's `.markdownlint-cli2.jsonc` configuration. Do NOT modify the
-lint config to work around violations — fix the content instead.
+All `.md` files created or modified by any agent MUST comply with the project's `.markdownlint-cli2.jsonc` configuration. Do NOT modify the lint config to work around violations — fix the content instead.
 
 ## Key Rules to Follow
+
+### Paragraph Flow and Line Wrapping
+
+- Do not manually hard-wrap normal prose just to make source lines shorter.
+- Keep one rendered paragraph as one logical source line whenever possible.
+- Do not split a single sentence across multiple lines inside a paragraph or bullet unless Markdown syntax actually requires it.
+- Only insert line breaks where they express real structure, such as headings, lists, tables, blockquotes, and fenced code blocks.
+- Because `MD013` is disabled, prefer clean rendered paragraphs over visually aligned source wrapping.
 
 ### Headings (MD001, MD003, MD022, MD025)
 
@@ -37,12 +43,8 @@ lint config to work around violations — fix the content instead.
 
 - Use fenced code blocks (triple backticks), not indented blocks.
 - Always specify a language identifier after opening backticks.
-- **Prefer the most specific language tag** that accurately describes the
-  content. Common tags: `rust`, `typescript`, `json`, `html`, `css`,
-  `yaml`, `toml`, `bash`, `tape` (VHS tape syntax).
-- Use `text` ONLY as a fallback when the content has no recognizable
-  language — e.g., plain prose, pseudocode, ASCII diagrams, or mixed
-  notation that does not belong to any single language.
+- **Prefer the most specific language tag** that accurately describes the content. Common tags: `rust`, `typescript`, `json`, `html`, `css`, `yaml`, `toml`, `bash`, `tape` (VHS tape syntax).
+- Use `text` ONLY as a fallback when the content has no recognizable language — e.g., plain prose, pseudocode, ASCII diagrams, or mixed notation that does not belong to any single language.
 - Surround fenced code blocks with blank lines.
 
 ### Spacing and Whitespace (MD009, MD010, MD047)
@@ -73,7 +75,5 @@ When producing or editing `.md` files, verify:
 
 ## Project-Specific Overrides
 
-- **MD013 (line-length) is DISABLED** — spec files contain wide tables;
-  do not manually wrap long table rows.
-- **MD024 (no-duplicate-heading)** uses `siblings_only: true` — same heading
-  text is allowed at different nesting levels.
+- **MD013 (line-length) is DISABLED** — spec files contain wide tables; do not manually wrap long table rows or ordinary prose just to satisfy source-width aesthetics.
+- **MD024 (no-duplicate-heading)** uses `siblings_only: true` — same heading text is allowed at different nesting levels.
