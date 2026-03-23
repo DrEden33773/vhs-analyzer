@@ -28,9 +28,17 @@ All planned implementation phases are complete.
 - [`crates/vhs-analyzer-core`](crates/vhs-analyzer-core): lexer, parser, AST, formatting, and shared language logic
 - [`crates/vhs-analyzer-lsp`](crates/vhs-analyzer-lsp): `tower-lsp-server` binary for editor integration
 - [`editors/code`](editors/code): VS Code / Cursor extension
+- [`prompt`](prompt): archived phase kick files from the project's role-scoped Architect / Builder workflow
 - [`spec`](spec): frozen behavior and packaging contracts
 - [`trace`](trace): per-phase execution records and closeout history
 - [`publish-helper`](publish-helper): public-release and release-day checklists
+
+## Why `prompt/` and `trace/` Are Public
+
+The repository intentionally keeps some process artifacts visible:
+
+- [`prompt/`](prompt) preserves the role-scoped kick files used during the project's contract-first AI workflow. They are useful if you want to understand or reuse the delivery method, but they are not required to use the software.
+- [`trace/`](trace) preserves the per-phase execution archive that backs the thin root status indexes. It exists for auditability, historical context, and phase closeout traceability.
 
 ## Quick Start
 
