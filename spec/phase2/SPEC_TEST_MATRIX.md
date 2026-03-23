@@ -121,6 +121,7 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-095 | Time units after complete Sleep suffix | `Sleep 1000ms` → completion after trailing `s` | Returns `ms`, `s`; completion still targets only the suffix range |
 | T-CMP-096 | Time units after partial Type duration suffix | `Type@1000m "x"` → completion after `m` | Returns `ms`, `s` |
 | T-CMP-097 | Time units after partial TypingSpeed suffix | `Set TypingSpeed 1000m` → completion after `m` | Returns `ms`, `s` |
+| T-CMP-098 | Time unit responses marked incomplete | `Sleep 1` → completion after `1` | Response is a `CompletionList` with `isIncomplete = true` |
 
 ## 3. WS-2: Diagnostics Test Scenarios
 

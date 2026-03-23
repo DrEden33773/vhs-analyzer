@@ -134,8 +134,8 @@ what category of completion to offer, then returns an appropriate list of
 | **ID** | CMP-009 |
 | **Priority** | P2 (MAY) |
 | **Owner** | Architect → Builder |
-| **Statement** | When the cursor is inside a time-accepting duration slot (e.g., `Sleep`, `TypingSpeed`, duration override `@`) and positioned after a numeric literal or a partially typed unit suffix, the completion handler MAY return time unit suffixes: `ms` (milliseconds), `s` (seconds). This includes `Sleep 1`, `Sleep 10`, `Sleep 1000m`, `Sleep 1000ms`, `Type@1`, `Type@1000m`, and `Set TypingSpeed 1000m`. The handler MAY use source-line fallback heuristics when partially typed suffix text temporarily breaks the canonical AST token shape. Returned time-unit items SHOULD provide `filterText` and `textEdit` so that accepting a completion replaces only the current suffix fragment and preserves the already typed numeric prefix. |
-| **Verification** | Type `Sleep 1`, `Sleep 10`, `Sleep 1000m`, `Sleep 1000ms`, `Type@1`, `Type@1000m`, and `Set TypingSpeed 1000m`, then request completion; verify `ms` and `s` are offered in the supported duration-slot states and apply as suffix replacements instead of duplicating the numeric prefix. |
+| **Statement** | When the cursor is inside a time-accepting duration slot (e.g., `Sleep`, `TypingSpeed`, duration override `@`) and positioned after a numeric literal or a partially typed unit suffix, the completion handler MAY return time unit suffixes: `ms` (milliseconds), `s` (seconds). This includes `Sleep 1`, `Sleep 10`, `Sleep 1000m`, `Sleep 1000ms`, `Type@1`, `Type@1000m`, and `Set TypingSpeed 1000m`. The handler MAY use source-line fallback heuristics when partially typed suffix text temporarily breaks the canonical AST token shape. Returned time-unit items SHOULD provide `filterText` and `textEdit` so that accepting a completion replaces the full duration fragment with the updated literal, preserving the already typed numeric prefix. Time-unit completion responses SHOULD set `CompletionList.isIncomplete = true` so editors re-request the list as the numeric prefix or suffix fragment changes while the widget remains open. |
+| **Verification** | Type `Sleep 1`, `Sleep 10`, `Sleep 1000m`, `Sleep 1000ms`, `Type@1`, `Type@1000m`, and `Set TypingSpeed 1000m`, then request completion; verify `ms` and `s` are offered in the supported duration-slot states and apply as whole-fragment replacements instead of duplicating or truncating the numeric prefix. Verify time-unit completion responses are marked incomplete so the client refreshes them across subsequent digits. |
 
 ### CMP-010 — Modifier Key Target Completions
 
@@ -200,7 +200,11 @@ payload (300 theme names + 30 keywords + 20 settings) is approximately
 complexity without meaningful benefit for a dataset this small. Per the
 LSP specification: `resolveProvider` is intended for expensive per-item
 computation (e.g., fetching documentation from a database), which is not
-needed here since all data is static and cheap.
+needed here since all data is static and cheap. One targeted exception is
+`CMP-009`: time-unit responses SHOULD still use eager `CompletionList`
+items, but SHOULD mark the list as incomplete so the client re-requests
+fresh suffix edits as the user continues typing digits or partial unit
+fragments.
 
 ## 6. Completion Context Matrix
 

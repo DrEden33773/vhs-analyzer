@@ -473,7 +473,7 @@ pub(crate) fn completion_response(
     let context = resolve_context(syntax, source, offset)?;
 
     Some(CompletionResponse::List(CompletionList {
-        is_incomplete: false,
+        is_incomplete: context == CompletionContext::TimeUnits,
         items: items_for_context(context, syntax, source, offset),
     }))
 }

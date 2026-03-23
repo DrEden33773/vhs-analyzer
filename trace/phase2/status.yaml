@@ -53,9 +53,9 @@ requirement_ids:
   safety: [SAF-001, SAF-002, SAF-003, SAF-004, SAF-005, SAF-006, SAF-007]
 
 test_scenarios:
-  total: 75
+  total: 76
   by_category:
-    completion: 28
+    completion: 29
     diagnostics: 25
     safety: 18
     integration: 4
@@ -75,6 +75,7 @@ post_completion_revisions:
       - T-CMP-095
       - T-CMP-096
       - T-CMP-097
+      - T-CMP-098
     implementation_files:
       - crates/vhs-analyzer-lsp/src/completion.rs
       - crates/vhs-analyzer-lsp/tests/completion_tests.rs

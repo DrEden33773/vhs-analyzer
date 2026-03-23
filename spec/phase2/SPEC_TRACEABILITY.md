@@ -36,7 +36,7 @@ module and test references. The Builder MUST update the "Impl Module" and
 | CMP-006 | Setting value completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-040–T-CMP-042 + T-CMP-042A | PAR-007 (SetCommand) | Completed |
 | CMP-007 | Snippet templates | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-050–T-CMP-052 | — | Completed |
 | CMP-008 | Output extension completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-060 | PAR-007 (OutputCommand) | Completed |
-| CMP-009 | Time unit completions | P2 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-090–T-CMP-097 | — | Completed |
+| CMP-009 | Time unit completions | P2 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-090–T-CMP-098 | — | Completed |
 | CMP-010 | Modifier key target completions | P1 | `crates/vhs-analyzer-lsp/src/completion.rs` | T-CMP-070–T-CMP-072 | PAR-007 (CtrlCommand) | Completed |
 
 ## 3. WS-2: Diagnostics Traceability

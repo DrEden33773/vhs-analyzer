@@ -211,7 +211,8 @@ Builder appends one record per completed batch below this line.
 - Deliverables:
   - Expanded the Phase 2 completion contract so Theme completions now cover empty and partial quoted strings and preserve surrounding quotes via `textEdit`.
   - Expanded duration-slot completions to remain available after subsequent digits and partial suffix states such as `1000m` and `1000ms`, using suffix-range replacement semantics instead of duplicating numeric prefixes.
-  - Added 6 new Rust completion regression tests for quoted Theme prefix states and duration-slot suffix states, bringing `crates/vhs-analyzer-lsp/tests/completion_tests.rs` to 42 passing tests.
+  - Marked time-unit completion lists as incomplete so VS Code re-requests fresh edits while the widget remains open across subsequent digits.
+  - Added 7 new Rust completion regression tests for quoted Theme prefix states, duration-slot suffix states, and incomplete-list behavior, bringing `crates/vhs-analyzer-lsp/tests/completion_tests.rs` to 43 passing tests.
 - Quality gate:
   - `cargo fmt --all -- --check` passed.
   - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` passed.

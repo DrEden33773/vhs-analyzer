@@ -207,6 +207,14 @@ fn completion_items(response: &Response) -> Vec<CompletionItem> {
     maybe_completion_items(response).expect("completion response should contain completion items")
 }
 
+fn completion_list(response: &Response) -> CompletionResponse {
+    let result = response
+        .result()
+        .expect("completion response should contain a result");
+    serde_json::from_value::<CompletionResponse>(result.clone())
+        .expect("completion result should deserialize")
+}
+
 fn maybe_completion_items(response: &Response) -> Option<Vec<CompletionItem>> {
     let result = response
         .result()
@@ -1321,6 +1329,29 @@ async fn completion_manual_time_units_replace_partial_typing_speed_suffix() {
                 new_text: "1000ms".to_owned(),
             }
         ))
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_time_units_are_marked_incomplete() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+
+    open_document(&mut service, &uri, "Sleep 1").await;
+
+    let response = completion_response(&mut service, &uri, Position::new(0, 7)).await;
+    let completion = completion_list(&response);
+
+    let CompletionResponse::List(list) = completion else {
+        panic!("expected completion list response for time units");
+    };
+
+    assert!(
+        list.is_incomplete,
+        "expected time-unit completion list to be incomplete"
     );
 }
 
