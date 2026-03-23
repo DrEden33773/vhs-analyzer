@@ -8,3 +8,6 @@
 /.pnpm-store
 
 .DS_Store
+
+/tmp
+/temp
