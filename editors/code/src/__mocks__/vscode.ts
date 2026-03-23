@@ -151,8 +151,9 @@ const commandContexts = new Map<string, unknown>();
 const configurationEmitter = new EventEmitter<ConfigurationChangeEvent>();
 const colorThemeEmitter = new EventEmitter<{ kind: number }>();
 const textDocumentEmitter = new EventEmitter<{
-  document: { languageId: string; uri: Uri };
+  document: { getText?: () => string; languageId: string; uri: Uri };
   contentChanges: Array<{
+    range: Range;
     text: string;
   }>;
 }>();
@@ -492,14 +493,27 @@ export function __setActiveTextEditor(document: {
 
 export function __fireTextDocumentChange(document: {
   contentChanges?: Array<{
+    range?: Range;
     text: string;
   }>;
+  getText?: () => string;
   languageId: string;
   uri: Uri;
 }): void {
+  const activeEditorText =
+    window.activeTextEditor?.document.uri.toString() === document.uri.toString()
+      ? window.activeTextEditor.document.getText
+      : undefined;
+
   textDocumentEmitter.fire({
-    contentChanges: document.contentChanges ?? [],
-    document,
+    contentChanges: (document.contentChanges ?? []).map((change) => ({
+      range: change.range ?? new Range(0, 0, 0, 0),
+      text: change.text,
+    })),
+    document: {
+      ...document,
+      getText: document.getText ?? activeEditorText ?? (() => ""),
+    },
   });
 }
 

@@ -11,8 +11,9 @@ use tower::ServiceExt;
 use tower_lsp_server::LspService;
 use tower_lsp_server::jsonrpc::{Request, Response};
 use tower_lsp_server::ls_types::{
-    CompletionItem, CompletionItemKind, CompletionParams, CompletionResponse,
-    DidOpenTextDocumentParams, InsertTextFormat, PartialResultParams, Position,
+    CompletionContext as LspCompletionContext, CompletionItem, CompletionItemKind,
+    CompletionParams, CompletionResponse, CompletionTextEdit, CompletionTriggerKind,
+    DidOpenTextDocumentParams, InsertTextFormat, PartialResultParams, Position, Range,
     TextDocumentIdentifier, TextDocumentItem, TextDocumentPositionParams, Uri,
     WorkDoneProgressParams,
 };
@@ -167,6 +168,15 @@ async fn completion_response(
     uri: &Uri,
     position: Position,
 ) -> Response {
+    completion_response_with_context(service, uri, position, None).await
+}
+
+async fn completion_response_with_context(
+    service: &mut LspService<VhsLanguageServer>,
+    uri: &Uri,
+    position: Position,
+    context: Option<LspCompletionContext>,
+) -> Response {
     let request = Request::build("textDocument/completion")
         .params(
             serde_json::to_value(CompletionParams {
@@ -176,7 +186,7 @@ async fn completion_response(
                 },
                 work_done_progress_params: WorkDoneProgressParams::default(),
                 partial_result_params: PartialResultParams::default(),
-                context: None,
+                context,
             })
             .expect("completion params should serialize"),
         )
@@ -578,6 +588,65 @@ async fn completion_returns_theme_names_inside_empty_theme_string() {
     assert!(
         items.iter().any(|item| item.label == "Dracula"),
         "expected theme completions inside an empty quoted theme string"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_returns_theme_names_inside_empty_single_quoted_theme_string() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Set Theme ''";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response(&mut service, &uri, position_for_offset(source, 11)).await,
+    );
+
+    assert!(
+        items.iter().any(|item| item.label == "Dracula"),
+        "expected theme completions inside an empty single-quoted theme string"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_replaces_existing_theme_string_contents_without_adding_quotes() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Set Theme \"\"";
+
+    open_document(&mut service, &uri, source).await;
+
+    let items = completion_items(
+        &completion_response(&mut service, &uri, position_for_offset(source, 11)).await,
+    );
+    let catppuccin_mocha = items
+        .iter()
+        .find(|item| item.label == "Catppuccin Mocha")
+        .expect("expected Catppuccin Mocha theme completion");
+
+    assert_eq!(
+        catppuccin_mocha.filter_text.as_deref(),
+        Some("Catppuccin Mocha")
+    );
+    assert_eq!(
+        catppuccin_mocha.insert_text.as_deref(),
+        Some("Catppuccin Mocha")
+    );
+    assert_eq!(
+        catppuccin_mocha.text_edit,
+        Some(CompletionTextEdit::Edit(
+            tower_lsp_server::ls_types::TextEdit {
+                range: Range::new(Position::new(0, 11), Position::new(0, 11)),
+                new_text: "Catppuccin Mocha".to_owned(),
+            }
+        ))
     );
 }
 
@@ -987,6 +1056,59 @@ async fn completion_returns_time_units_after_first_typing_speed_digit() {
     assert!(
         items.iter().any(|item| item.label == "s"),
         "expected s time-unit completion after the first TypingSpeed digit"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
+async fn completion_manual_time_units_append_suffixes_at_numeric_end() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+
+    open_document(&mut service, &uri, "Sleep 500").await;
+
+    let items = completion_items(
+        &completion_response_with_context(
+            &mut service,
+            &uri,
+            Position::new(0, 9),
+            Some(LspCompletionContext {
+                trigger_kind: CompletionTriggerKind::INVOKED,
+                trigger_character: None,
+            }),
+        )
+        .await,
+    );
+    let milliseconds = items
+        .iter()
+        .find(|item| item.label == "ms")
+        .expect("expected ms time-unit completion");
+    let seconds = items
+        .iter()
+        .find(|item| item.label == "s")
+        .expect("expected s time-unit completion");
+
+    assert_eq!(milliseconds.filter_text.as_deref(), Some("500ms"));
+    assert_eq!(
+        milliseconds.text_edit,
+        Some(CompletionTextEdit::Edit(
+            tower_lsp_server::ls_types::TextEdit {
+                range: Range::new(Position::new(0, 9), Position::new(0, 9)),
+                new_text: "ms".to_owned(),
+            }
+        ))
+    );
+    assert_eq!(seconds.filter_text.as_deref(), Some("500s"));
+    assert_eq!(
+        seconds.text_edit,
+        Some(CompletionTextEdit::Edit(
+            tower_lsp_server::ls_types::TextEdit {
+                range: Range::new(Position::new(0, 9), Position::new(0, 9)),
+                new_text: "s".to_owned(),
+            }
+        ))
     );
 }
 

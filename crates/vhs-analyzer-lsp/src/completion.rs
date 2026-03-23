@@ -6,7 +6,8 @@
 use std::sync::LazyLock;
 
 use tower_lsp_server::ls_types::{
-    CompletionItem, CompletionItemKind, CompletionList, CompletionResponse, InsertTextFormat,
+    CompletionItem, CompletionItemKind, CompletionList, CompletionResponse, CompletionTextEdit,
+    InsertTextFormat, TextEdit,
 };
 use vhs_analyzer_core::ast::{OutputCommand, SetCommand};
 use vhs_analyzer_core::syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
@@ -467,7 +468,7 @@ pub(crate) fn completion_response(
 
     Some(CompletionResponse::List(CompletionList {
         is_incomplete: false,
-        items: items_for_context(context),
+        items: items_for_context(context, syntax, source, offset),
     }))
 }
 
@@ -503,27 +504,52 @@ fn resolve_context(syntax: &SyntaxNode, source: &str, offset: usize) -> Option<C
     None
 }
 
-fn items_for_context(context: CompletionContext) -> Vec<CompletionItem> {
+fn items_for_context(
+    context: CompletionContext,
+    syntax: &SyntaxNode,
+    source: &str,
+    offset: usize,
+) -> Vec<CompletionItem> {
     match context {
         CompletionContext::CommandKeywords => command_items(),
         CompletionContext::SettingNames => items_from_specs(SETTING_NAMES),
-        CompletionContext::ThemeNames => THEMES
-            .iter()
-            .map(|theme| CompletionItem {
-                label: (*theme).to_owned(),
-                kind: Some(CompletionItemKind::ENUM_MEMBER),
-                detail: Some("VHS built-in theme".to_owned()),
-                insert_text: Some(string_like_insert_text(theme)),
-                ..Default::default()
-            })
-            .collect(),
+        CompletionContext::ThemeNames => theme_items(syntax, source, offset),
         CompletionContext::BooleanValues => items_from_specs(BOOLEAN_VALUES),
         CompletionContext::WindowBarStyles => string_like_items_from_specs(WINDOWBAR_STYLES),
         CompletionContext::ShellNames => string_like_items_from_specs(SHELL_NAMES),
         CompletionContext::OutputExtensions => items_from_specs(OUTPUT_EXTENSIONS),
         CompletionContext::KeyTargets => key_target_items(),
-        CompletionContext::TimeUnits => items_from_specs(TIME_UNITS),
+        CompletionContext::TimeUnits => time_unit_items(syntax, source, offset),
     }
+}
+
+fn theme_items(syntax: &SyntaxNode, source: &str, offset: usize) -> Vec<CompletionItem> {
+    let quoted_edit_range = quoted_string_value_edit_range(syntax, source, offset);
+
+    THEMES
+        .iter()
+        .map(|theme| {
+            let mut item = CompletionItem {
+                label: (*theme).to_owned(),
+                kind: Some(CompletionItemKind::ENUM_MEMBER),
+                detail: Some("VHS built-in theme".to_owned()),
+                ..Default::default()
+            };
+
+            if let Some(range) = quoted_edit_range {
+                item.filter_text = Some((*theme).to_owned());
+                item.insert_text = Some((*theme).to_owned());
+                item.text_edit = Some(CompletionTextEdit::Edit(TextEdit {
+                    range,
+                    new_text: (*theme).to_owned(),
+                }));
+            } else {
+                item.insert_text = Some(string_like_insert_text(theme));
+            }
+
+            item
+        })
+        .collect()
 }
 
 fn command_items() -> Vec<CompletionItem> {
@@ -559,6 +585,30 @@ fn string_like_items_from_specs(specs: &[CompletionSpec]) -> Vec<CompletionItem>
             kind: Some(item.kind),
             detail: Some(item.detail.to_owned()),
             insert_text: Some(string_like_insert_text(item.label)),
+            ..Default::default()
+        })
+        .collect()
+}
+
+fn time_unit_items(syntax: &SyntaxNode, source: &str, offset: usize) -> Vec<CompletionItem> {
+    let Some((numeric_prefix, insert_offset)) = time_unit_edit_context(syntax, offset) else {
+        return items_from_specs(TIME_UNITS);
+    };
+    let insert_range =
+        super::VhsLanguageServer::range_for_offsets(source, insert_offset, insert_offset);
+
+    TIME_UNITS
+        .iter()
+        .map(|item| CompletionItem {
+            label: item.label.to_owned(),
+            kind: Some(item.kind),
+            detail: Some(item.detail.to_owned()),
+            filter_text: Some(format!("{numeric_prefix}{}", item.label)),
+            insert_text: Some(item.label.to_owned()),
+            text_edit: Some(CompletionTextEdit::Edit(TextEdit {
+                range: insert_range,
+                new_text: item.label.to_owned(),
+            })),
             ..Default::default()
         })
         .collect()
@@ -637,6 +687,39 @@ fn is_safe_bare_value(value: &str) -> bool {
         && characters.all(|character| {
             character.is_ascii_alphanumeric() || matches!(character, '_' | '.' | '/' | '%')
         })
+}
+
+fn quoted_string_value_edit_range(
+    syntax: &SyntaxNode,
+    source: &str,
+    offset: usize,
+) -> Option<tower_lsp_server::ls_types::Range> {
+    let token = pick_token(syntax, offset)?;
+    if token.kind() != SyntaxKind::STRING {
+        return None;
+    }
+
+    let text = token.text();
+    let delimiter = text.chars().next()?;
+    if !matches!(delimiter, '"' | '\'' | '`') {
+        return None;
+    }
+
+    let token_start = usize::try_from(u32::from(token.text_range().start())).ok()?;
+    let token_end = usize::try_from(u32::from(token.text_range().end())).ok()?;
+    let delimiter_width = delimiter.len_utf8();
+    let value_start = token_start.saturating_add(delimiter_width);
+    let value_end = if text.ends_with(delimiter) && text.len() >= delimiter_width * 2 {
+        token_end.saturating_sub(delimiter_width)
+    } else {
+        token_end
+    };
+
+    Some(super::VhsLanguageServer::range_for_offsets(
+        source,
+        value_start,
+        value_end,
+    ))
 }
 
 fn is_comment_context(syntax: &SyntaxNode, offset: usize) -> bool {
@@ -744,6 +827,16 @@ fn is_time_unit_position(syntax: &SyntaxNode, offset: usize) -> bool {
         .and_then(|set_command| set_command.setting())
         .and_then(|setting| setting.name_token())
         .is_some_and(|name_token| name_token.kind() == SyntaxKind::TYPINGSPEED_KW)
+}
+
+fn time_unit_edit_context(syntax: &SyntaxNode, offset: usize) -> Option<(String, usize)> {
+    let token = significant_token_at_or_before_offset(syntax, offset)?;
+    if !matches!(token.kind(), SyntaxKind::INTEGER | SyntaxKind::FLOAT) {
+        return None;
+    }
+
+    let insert_offset = usize::try_from(u32::from(token.text_range().end())).ok()?;
+    Some((token.text().to_owned(), insert_offset))
 }
 
 fn output_command_for_offset(syntax: &SyntaxNode, offset: usize) -> Option<OutputCommand> {

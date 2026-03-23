@@ -5,7 +5,7 @@ import {
   type ExtensionContext,
   type FileSystemWatcher,
   type OutputChannel,
-  type Position,
+  Position,
   type TextDocumentChangeEvent,
   Uri,
   commands,
@@ -140,7 +140,7 @@ export function shouldTriggerTargetedSuggest(
 ): boolean {
   if (
     context.insertedText === " " &&
-    /^\s*Set Theme $/u.test(context.linePrefix)
+    /^\s*Set\s+Theme $/u.test(context.linePrefix)
   ) {
     return true;
   }
@@ -153,7 +153,7 @@ export function shouldTriggerTargetedSuggest(
       context.insertedText === "''") &&
     (lastCharacter === '"' || lastCharacter === "'") &&
     context.lineSuffix.startsWith(lastCharacter) &&
-    /^\s*Set Theme\s+["']$/u.test(context.linePrefix)
+    /^\s*Set\s+Theme\s+["']$/u.test(context.linePrefix)
   ) {
     return true;
   }
@@ -163,10 +163,41 @@ export function shouldTriggerTargetedSuggest(
   }
 
   return (
-    /^\s*Sleep \d$/u.test(context.linePrefix) ||
+    /^\s*Sleep\s+\d$/u.test(context.linePrefix) ||
     /^\s*Type@\d$/u.test(context.linePrefix) ||
-    /^\s*Set TypingSpeed \d$/u.test(context.linePrefix)
+    /^\s*Set\s+TypingSpeed\s+\d$/u.test(context.linePrefix)
   );
+}
+
+function advancePosition(position: Position, text: string): Position {
+  let line = position.line;
+  let character = position.character;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const current = text[index];
+    if (current === undefined) {
+      break;
+    }
+
+    if (current === "\r") {
+      line += 1;
+      character = 0;
+      if (text[index + 1] === "\n") {
+        index += 1;
+      }
+      continue;
+    }
+
+    if (current === "\n") {
+      line += 1;
+      character = 0;
+      continue;
+    }
+
+    character += 1;
+  }
+
+  return new Position(line, character);
 }
 
 function lineContextAtPosition(
@@ -183,6 +214,37 @@ function lineContextAtPosition(
     linePrefix: line.slice(0, position.character),
     lineSuffix: line.slice(position.character),
   };
+}
+
+function suggestTriggerContextForChange(
+  documentText: string,
+  change: TextDocumentChangeEvent["contentChanges"][number],
+): SuggestTriggerContext | null {
+  const candidatePositions = [advancePosition(change.range.start, change.text)];
+
+  if (change.text === '""' || change.text === "''") {
+    candidatePositions.unshift(
+      advancePosition(change.range.start, change.text.slice(0, 1)),
+    );
+  }
+
+  for (const position of candidatePositions) {
+    const lineContext = lineContextAtPosition(documentText, position);
+    if (lineContext === null) {
+      continue;
+    }
+
+    const context = {
+      insertedText: change.text,
+      linePrefix: lineContext.linePrefix,
+      lineSuffix: lineContext.lineSuffix,
+    };
+    if (shouldTriggerTargetedSuggest(context)) {
+      return context;
+    }
+  }
+
+  return null;
 }
 
 export class ExtensionController {
@@ -293,10 +355,8 @@ export class ExtensionController {
     event: TextDocumentChangeEvent,
   ): Promise<void> {
     const activeEditor = window.activeTextEditor;
-    const selection = activeEditor?.selection;
     if (
       activeEditor === undefined ||
-      selection === undefined ||
       activeEditor.document.languageId !== "tape" ||
       activeEditor.document.uri.toString() !== event.document.uri.toString()
     ) {
@@ -308,21 +368,11 @@ export class ExtensionController {
       return;
     }
 
-    const lineContext = lineContextAtPosition(
-      activeEditor.document.getText(),
-      selection.active,
+    const suggestContext = suggestTriggerContextForChange(
+      event.document.getText(),
+      latestChange,
     );
-    if (lineContext === null) {
-      return;
-    }
-
-    if (
-      !shouldTriggerTargetedSuggest({
-        insertedText: latestChange.text,
-        linePrefix: lineContext.linePrefix,
-        lineSuffix: lineContext.lineSuffix,
-      })
-    ) {
+    if (suggestContext === null) {
       return;
     }
 

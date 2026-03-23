@@ -3,6 +3,7 @@ import type { ExtensionContext } from "vscode";
 
 import {
   Position,
+  Range,
   type ThemeColor,
   Uri,
   __fireConfigurationChange,
@@ -376,7 +377,7 @@ describe("ExtensionController", () => {
     expect(client.start).not.toHaveBeenCalled();
   });
 
-  it("targeted_suggest_triggers_after_set_theme_space", async () => {
+  it("targeted_suggest_triggers_after_set_theme_space_when_selection_lags", async () => {
     const context = createTypedContext({
       extensionPath: "/extension",
     });
@@ -397,12 +398,18 @@ describe("ExtensionController", () => {
     __setActiveTextEditor({
       getText: () => "Set Theme ",
       languageId: "tape",
-      selection: new Position(0, 10),
+      selection: new Position(0, 9),
       uri,
     });
 
     __fireTextDocumentChange({
-      contentChanges: [{ text: " " }],
+      contentChanges: [
+        {
+          range: new Range(0, 9, 0, 9),
+          text: " ",
+        },
+      ],
+      getText: () => "Set Theme ",
       languageId: "tape",
       uri,
     });
@@ -413,7 +420,7 @@ describe("ExtensionController", () => {
     );
   });
 
-  it("targeted_suggest_triggers_inside_empty_theme_quotes", async () => {
+  it("targeted_suggest_triggers_inside_empty_theme_quotes_from_autoclose_pair", async () => {
     const context = createTypedContext({
       extensionPath: "/extension",
     });
@@ -434,12 +441,18 @@ describe("ExtensionController", () => {
     __setActiveTextEditor({
       getText: () => 'Set Theme ""',
       languageId: "tape",
-      selection: new Position(0, 11),
+      selection: new Position(0, 10),
       uri,
     });
 
     __fireTextDocumentChange({
-      contentChanges: [{ text: '"' }],
+      contentChanges: [
+        {
+          range: new Range(0, 10, 0, 10),
+          text: '""',
+        },
+      ],
+      getText: () => 'Set Theme ""',
       languageId: "tape",
       uri,
     });
@@ -450,7 +463,7 @@ describe("ExtensionController", () => {
     );
   });
 
-  it("targeted_suggest_triggers_after_first_time_digit_in_supported_contexts", async () => {
+  it("targeted_suggest_triggers_after_first_time_digit_when_selection_lags", async () => {
     const context = createTypedContext({
       extensionPath: "/extension",
     });
@@ -472,11 +485,17 @@ describe("ExtensionController", () => {
     __setActiveTextEditor({
       getText: () => "Sleep 1",
       languageId: "tape",
-      selection: new Position(0, 7),
+      selection: new Position(0, 6),
       uri,
     });
     __fireTextDocumentChange({
-      contentChanges: [{ text: "1" }],
+      contentChanges: [
+        {
+          range: new Range(0, 6, 0, 6),
+          text: "1",
+        },
+      ],
+      getText: () => "Sleep 1",
       languageId: "tape",
       uri,
     });
@@ -484,11 +503,17 @@ describe("ExtensionController", () => {
     __setActiveTextEditor({
       getText: () => 'Type@1 "x"',
       languageId: "tape",
-      selection: new Position(0, 6),
+      selection: new Position(0, 5),
       uri,
     });
     __fireTextDocumentChange({
-      contentChanges: [{ text: "1" }],
+      contentChanges: [
+        {
+          range: new Range(0, 5, 0, 5),
+          text: "1",
+        },
+      ],
+      getText: () => 'Type@1 "x"',
       languageId: "tape",
       uri,
     });
@@ -496,11 +521,17 @@ describe("ExtensionController", () => {
     __setActiveTextEditor({
       getText: () => "Set TypingSpeed 1",
       languageId: "tape",
-      selection: new Position(0, 17),
+      selection: new Position(0, 16),
       uri,
     });
     __fireTextDocumentChange({
-      contentChanges: [{ text: "1" }],
+      contentChanges: [
+        {
+          range: new Range(0, 16, 0, 16),
+          text: "1",
+        },
+      ],
+      getText: () => "Set TypingSpeed 1",
       languageId: "tape",
       uri,
     });
