@@ -33,7 +33,7 @@ Progress score (all phases): see `trace/` archives for current per-phase detail
 
 Current automated tests: `287`
 
-## 4. Pending Tasks with Planned LLM Ownership
+## 4. Delivery Record by LLM Ownership
 
 ### 4.1 Architect-Owned (Claude)
 

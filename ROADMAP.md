@@ -1,6 +1,6 @@
 # VHS-Analyzer: The Definitive Language Server & Extension for Tape
 
-**Version:** 1.0 | **Date:** March 2026 | **Status:** Strategic Kickoff
+**Version:** 1.0 | **Date:** March 2026 | **Status:** Delivery Complete
 
 ---
 
@@ -40,9 +40,9 @@ Our objective is to build a production-grade, highly resilient Language Server a
 Based on Scout's architectural research, we have locked in the following 5 technical decisions:
 
 1. **Parser & AST Strategy: `rowan` (Lossless Syntax Tree)**
-   * We will build a handcrafted lexer and recursive descent parser using [`rowan`](https://github.com/rust-analyzer/rowan) (the exact foundation of `rust-analyzer`; v0.16.1, 11M+ downloads, actively maintained).
+   * We built a handcrafted lexer and recursive descent parser using [`rowan`](https://github.com/rust-analyzer/rowan) (the exact foundation of `rust-analyzer`; v0.16.1, 11M+ downloads, actively maintained).
    * *Why:* It provides extreme error resiliency. Even when the user's `.tape` file is partially written or contains syntax errors, the AST will not collapse, allowing the LSP to continue providing accurate autocomplete and hover features.
-   * *Reference:* matklad's [Resilient LL Parsing Tutorial](https://matklad.github.io/2023/05/21/resilient-ll-parsing-tutorial.html) provides the authoritative implementation blueprint for this exact architecture. The official [`tree-sitter-vhs` grammar.js](https://github.com/charmbracelet/tree-sitter-vhs/blob/main/grammar.js) serves as the ground-truth specification for the VHS tape language and will be used to validate our parser's correctness.
+   * *Reference:* matklad's [Resilient LL Parsing Tutorial](https://matklad.github.io/2023/05/21/resilient-ll-parsing-tutorial.html) provides the authoritative implementation blueprint for this exact architecture. The official [`tree-sitter-vhs` grammar.js](https://github.com/charmbracelet/tree-sitter-vhs/blob/main/grammar.js) serves as the ground-truth specification for the VHS tape language and was used to validate our parser's correctness.
 
 2. **LSP Framework: [`tower-lsp-server`](https://github.com/tower-lsp-community/tower-lsp-server) (Async Architecture)**
    * We use `tower-lsp-server` (v0.23.0), the actively maintained community fork of the now-unmaintained `tower-lsp`. Notable adopters include [oxc](https://github.com/oxc-project/oxc). It uses native `async fn` in traits (Rust 1.75+), eliminating the `async_trait` macro dependency.
@@ -50,26 +50,26 @@ Based on Scout's architectural research, we have locked in the following 5 techn
 
 3. **Preview Mechanism: On-Demand Native Rendering**
    * *Why:* Pure frontend mock rendering cannot accurately represent a user's local shell state.
-   * *Solution:* The VSCode client will provide integrated commands and CodeLens (`▶ Run this tape`). Execution triggers the native `vhs` CLI in the background, piping output to the editor's panel, and auto-refreshing a side-by-side Webview containing the rendered GIF/MP4 upon completion.
+   * *Solution:* The VS Code extension provides integrated commands and CodeLens (`▶ Run this tape`). Execution triggers the native `vhs` CLI in the background, pipes output to the editor's panel, and auto-refreshes a side-by-side Webview containing the rendered GIF/MP4 upon completion.
    * *Runtime Dependencies:* VHS itself requires `ttyd` (terminal emulation) and `ffmpeg` (video encoding). The extension should detect and surface missing dependencies via LSP diagnostics at startup, rather than failing silently at render time.
 
 4. **Distribution Strategy: Target-Platform "Fat" VSIX**
    * *Why:* To guarantee a deterministic, zero-setup installation.
-   * *Solution:* CI will cross-compile the Rust LSP binary for Windows, macOS (Intel/Apple Silicon), and Linux, bundling them directly into platform-specific VSIX packages. No runtime downloads required. A universal "no-server" fallback VSIX should also be published for unsupported architectures (e.g., RISC-V, LoongArch).
+   * *Solution:* CI cross-compiles the Rust LSP binary for Windows, macOS (Intel/Apple Silicon), and Linux, bundling it directly into platform-specific VSIX packages. No runtime downloads are required. A universal "no-server" fallback VSIX is part of the packaging strategy for unsupported architectures (e.g., RISC-V, LoongArch).
    * *CI Reference:* rust-analyzer's [`release.yaml`](https://github.com/rust-lang/rust-analyzer/blob/main/.github/workflows/release.yaml) is the canonical template for this exact workflow — GitHub Actions matrix build + `cross` tool + `vsce package --target`.
 
 5. **Security & Validation: Proactive Safety Checks**
    * *Why:* `.tape` files execute real shell commands via `ttyd`.
-   * *Solution:* The LSP will feature deep diagnostic rules to warn users about potentially destructive shell commands (e.g., `rm -rf`, `mkfs`) inside `Type` directives, acting as an essential safety net for downloaded or generated scripts.
+   * *Solution:* The LSP features deep diagnostic rules that warn users about potentially destructive shell commands (e.g., `rm -rf`, `mkfs`) inside `Type` directives, acting as an essential safety net for downloaded or generated scripts.
 
 ---
 
-## 3. AI Collaboration Roadmap
+## 3. AI Collaboration Delivery Record
 
-Following the proven `eden-skills` Agentic Engineering Workflow, we will leverage **Claude** (Architect / High Reasoning) and **GPT / Claude / Gemini** (Builder / High Speed Code Gen).
+Following the proven `eden-skills` Agentic Engineering Workflow, the project was delivered through a contract-first Architect / Builder split using **Claude** plus fast Builder passes from **GPT / Claude / Gemini** across different phases.
 
 **Repository Location:** Hosted under the personal namespace [`DrEden33773/vhs-analyzer`](https://github.com/DrEden33773/vhs-analyzer) to align with hardcore systems engineering, while serving as a strategic top-of-funnel for the `AI-Eden` organization.
-**Go-to-Market Strategy:** Build in **Private** for maximum velocity during Parser/LSP scaffolding. Flip to **Public** at the *end* of `Phase 1 & 2` / *early* `Phase 3` (once Hover and Diagnostics are demo-able in VSCode), launching with a "Show, don't tell" VHS-recorded demo GIF in the Charmbracelet community.
+**Release Posture:** The core implementation was built in private for maximum iteration speed. All three planned phases are now complete. Repository-public preflight and extension release-day preparation are tracked in [`publish-helper/`](publish-helper/README.md).
 
 ### Phase 1: The LSP Foundation (`vhs-analyzer`)
 
@@ -107,9 +107,9 @@ Following the proven `eden-skills` Agentic Engineering Workflow, we will leverag
 
 ---
 
-## 4. Next Steps (Action Items)
+## 4. Implemented Milestones
 
-Operational progress for these items will be tracked in `STATUS.yaml` and `EXECUTION_TRACKER.md`.
+Operational status for these milestones is tracked in `STATUS.yaml` and `EXECUTION_TRACKER.md`.
 
 ### Pre-Phase 1: Project Initialization
 
