@@ -237,7 +237,7 @@ jobs:
         working-directory: editors/code
         run: |
           mkdir -p server
-          cp "../binary/${{ matrix.binary_name }}" "server/${{ matrix.binary_name }}"
+          cp "../../binary/${{ matrix.binary_name }}" "server/${{ matrix.binary_name }}"
           chmod +x "server/${{ matrix.binary_name }}"
 
       - name: Package VSIX
