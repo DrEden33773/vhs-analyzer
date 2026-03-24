@@ -324,7 +324,7 @@ jobs:
             prerelease_flag+=(--pre-release)
           fi
 
-          for vsix in release-assets/*.vsix; do
+          for vsix in "${{ github.workspace }}"/release-assets/*.vsix; do
             pnpm --dir editors/code exec vsce publish --pat "${VSCE_PAT}" --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}"
             npx ovsx -p "${OVSX_PAT}" publish --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}"
           done
