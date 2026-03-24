@@ -240,14 +240,23 @@ jobs:
           cp "../../binary/${{ matrix.binary_name }}" "server/${{ matrix.binary_name }}"
           chmod +x "server/${{ matrix.binary_name }}"
 
+      - name: Detect pre-release
+        id: pre_release
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            echo "flag=--pre-release" >> "$GITHUB_OUTPUT"
+          else
+            echo "flag=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Package VSIX
         working-directory: editors/code
         run: |
           mkdir -p ../release-assets
           if [ "${{ matrix.include_binary }}" = "true" ]; then
-            pnpm exec vsce package --target "${{ matrix.vsce_target }}" --no-dependencies --out "../release-assets/vhs-analyzer-${{ steps.package_meta.outputs.version }}-${{ matrix.package_suffix }}.vsix"
+            pnpm exec vsce package --target "${{ matrix.vsce_target }}" --no-dependencies ${{ steps.pre_release.outputs.flag }} --out "../release-assets/vhs-analyzer-${{ steps.package_meta.outputs.version }}-${{ matrix.package_suffix }}.vsix"
           else
-            pnpm exec vsce package --no-dependencies --out "../release-assets/vhs-analyzer-${{ steps.package_meta.outputs.version }}-${{ matrix.package_suffix }}.vsix"
+            pnpm exec vsce package --no-dependencies ${{ steps.pre_release.outputs.flag }} --out "../release-assets/vhs-analyzer-${{ steps.package_meta.outputs.version }}-${{ matrix.package_suffix }}.vsix"
           fi
 
       - name: Upload VSIX artifact
