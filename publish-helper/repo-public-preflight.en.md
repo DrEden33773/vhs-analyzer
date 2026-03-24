@@ -1,5 +1,7 @@
 # One-Hour Checklist Before Making the Repository Public
 
+Status: **completed** — repository is public.
+
 ## Goal
 
 Before switching the `vhs-analyzer` repository to public, finish the smallest
@@ -68,28 +70,6 @@ status-consistency gaps.
 - [ ] A broader community-governance document set
 - [ ] Fine-grained maintainer ownership rules
 - [ ] Heavier marketing or automation assets
-
-## Suggested One-Hour Order
-
-1. Root `README.md`
-2. `CONTRIBUTING.md`
-3. `SECURITY.md`
-4. Top-level status document sync
-5. Extension path normalization
-6. Decide the public strategy for `prompt/`, `trace/`, and `errors/`
-
-## Real Risks You Should Not Ignore
-
-- No root `README.md`:
-  the GitHub landing page will look like an internal engineering repository,
-  not a public product project.
-- Status documents disagree:
-  outside readers will question whether the project is actually finished.
-- No `SECURITY.md`:
-  there is no clear path for responsible disclosure after the repo goes public.
-- Mixed historical path names:
-  new contributors will look for the extension code in the wrong directory and
-  get lost immediately.
 
 ## Reference Files
 
