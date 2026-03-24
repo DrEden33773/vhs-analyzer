@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1
+
+- Fixed release workflow: build LSP binary before integration tests, replace
+  retired macOS 13 runner with macOS 14 cross-compilation, correct artifact
+  paths in package and publish jobs, and align pre-release flags between
+  packaging and publishing stages.
+- Upgraded the extension icon to a higher-quality 8x supersampled render.
+
 ## 0.1.0
 
 - First public release baseline for VHS Analyzer.

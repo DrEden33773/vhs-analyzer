@@ -332,18 +332,9 @@ jobs:
             prerelease_flag+=(--pre-release)
           fi
 
-          failed=0
           for vsix in "${{ github.workspace }}"/release-assets/*.vsix; do
-            pnpm --dir editors/code exec vsce publish --pat "${VSCE_PAT}" --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}" || {
-              echo "::warning::VS Code Marketplace publish failed for $(basename "$vsix") — version may already exist"
-              failed=$((failed + 1))
-            }
+            pnpm --dir editors/code exec vsce publish --pat "${VSCE_PAT}" --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}"
           done
-          total=$(ls -1 "${{ github.workspace }}"/release-assets/*.vsix | wc -l)
-          if [ "$failed" -eq "$total" ]; then
-            echo "::error::All VSIX publishes to VS Code Marketplace failed"
-            exit 1
-          fi
 
       - name: Publish to Open VSX
         env:
@@ -355,9 +346,7 @@ jobs:
           fi
 
           for vsix in "${{ github.workspace }}"/release-assets/*.vsix; do
-            npx ovsx -p "${OVSX_PAT}" publish --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}" || {
-              echo "::warning::Open VSX publish failed for $(basename "$vsix") — version may already exist"
-            }
+            npx ovsx -p "${OVSX_PAT}" publish --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}"
           done
 
       - name: Create GitHub Release
