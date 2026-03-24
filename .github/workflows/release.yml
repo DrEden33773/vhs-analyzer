@@ -323,9 +323,8 @@ jobs:
           path: release-assets
           pattern: vsix-*
 
-      - name: Publish to VSCode Marketplace and Open VSX
+      - name: Publish to VS Code Marketplace
         env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           prerelease_flag=()
@@ -335,7 +334,21 @@ jobs:
 
           for vsix in "${{ github.workspace }}"/release-assets/*.vsix; do
             pnpm --dir editors/code exec vsce publish --pat "${VSCE_PAT}" --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}"
-            npx ovsx -p "${OVSX_PAT}" publish --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}"
+          done
+
+      - name: Publish to Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          prerelease_flag=()
+          if [ "${{ steps.release_meta.outputs.is_prerelease }}" = "true" ]; then
+            prerelease_flag+=(--pre-release)
+          fi
+
+          for vsix in "${{ github.workspace }}"/release-assets/*.vsix; do
+            npx ovsx -p "${OVSX_PAT}" publish --packagePath "$vsix" --no-dependencies "${prerelease_flag[@]}" || {
+              echo "::warning::Open VSX publish failed for $(basename "$vsix") — version may already exist"
+            }
           done
 
       - name: Create GitHub Release
