@@ -1,0 +1,28 @@
+[project]
+name = "icon-generator"
+version = "0.1.0"
+description = "Programmatic icon generator for the vhs-analyzer VS Code extension"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = ["pillow>=11.2.1"]
+
+[dependency-groups]
+dev = ["pyright>=1.1.400", "ruff>=0.11.12"]
+
+[tool.pyright]
+pythonVersion = "3.14"
+typeCheckingMode = "standard"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D",
+    "COM812",
+    "ISC001",
+    "T201",
+    "PLR0913",
+]

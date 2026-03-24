@@ -11,3 +11,6 @@
 
 /tmp
 /temp
+
+/icon-generator/.venv
+/icon-generator/output
