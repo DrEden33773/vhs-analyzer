@@ -6,6 +6,10 @@
   "publisher": "DrEden33773",
   "license": "MIT",
   "icon": "icon.png",
+  "homepage": "https://github.com/DrEden33773/vhs-analyzer",
+  "bugs": {
+    "url": "https://github.com/DrEden33773/vhs-analyzer/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/DrEden33773/vhs-analyzer"
