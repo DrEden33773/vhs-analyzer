@@ -310,6 +310,28 @@ async fn unknown_theme_string_reports_unknown_theme_diagnostic() {
 }
 
 #[tokio::test(flavor = "current_thread")]
+async fn json_theme_does_not_report_unknown_theme_diagnostic() {
+    let (mut service, mut socket) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+
+    let diagnostics = did_open_and_collect_diagnostics(
+        &mut service,
+        &mut socket,
+        "file:///workspace/theme-json.tape"
+            .parse()
+            .expect("valid URI"),
+        "Output demo.gif\nSet Theme { \"name\": \"Custom\" }\nType \"hello\"\n",
+    )
+    .await;
+
+    assert!(
+        diagnostic_by_code(&diagnostics, "unknown-theme").is_none(),
+        "expected Theme JSON to remain legal without unknown-theme diagnostics, got: {:?}",
+        diagnostics.diagnostics
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
 async fn output_pdf_extension_produces_an_invalid_extension_error() {
     let (mut service, mut socket) = LspService::new(VhsLanguageServer::new);
     let _ = initialize_service(&mut service).await;

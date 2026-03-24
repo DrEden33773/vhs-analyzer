@@ -218,3 +218,38 @@ Builder appends one record per completed batch below this line.
   - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` passed.
   - `cargo test -p vhs-analyzer-lsp --test completion_tests` passed.
   - `cargo test --workspace --all-targets --locked` passed.
+
+### Post-completion Revision — 2026-03-24 (Theme JSON Opaque Handling)
+
+- Status: Completed
+- Approval: User-approved frozen-spec revision for Theme JSON behavior
+- Scope: Keep official `Set Theme { ... }` syntax legal while treating existing Theme JSON values as opaque for completion and exempt from built-in theme validation.
+- Files:
+  - `crates/vhs-analyzer-lsp/src/completion.rs`
+  - `crates/vhs-analyzer-lsp/tests/completion_tests.rs`
+  - `crates/vhs-analyzer-lsp/tests/diagnostics_tests.rs`
+  - `crates/vhs-analyzer-core/tests/formatting_tests.rs`
+  - `spec/phase2/SPEC_COMPLETION.md`
+  - `spec/phase2/SPEC_TEST_MATRIX.md`
+  - `spec/phase2/SPEC_TRACEABILITY.md`
+  - `trace/phase2/status.yaml`
+  - `trace/phase2/tracker.md`
+- Planned verification:
+  - `cargo fmt --all -- --check`
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+  - `cargo test -p vhs-analyzer-lsp --test completion_tests`
+  - `cargo test -p vhs-analyzer-lsp --test diagnostics_tests`
+  - `cargo test -p vhs-analyzer-core --test formatting_tests`
+  - `cargo test --workspace --all-targets --locked`
+- Deliverables:
+  - Refined `CMP-005` so Theme-name completion remains available for bare and quoted Theme values but stops once the existing value token is JSON.
+  - Added a completion regression proving manual completion inside or after `Set Theme { "name": "Dracula" }` does not surface built-in theme suggestions.
+  - Added a diagnostic regression proving Theme JSON remains legal and does not emit `unknown-theme`.
+  - Added a formatter regression proving outer VHS spacing is normalized while Theme JSON content itself is preserved verbatim.
+- Quality gate:
+  - `cargo fmt --all -- --check` passed.
+  - `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` passed.
+  - `cargo test -p vhs-analyzer-lsp --test completion_tests` passed.
+  - `cargo test -p vhs-analyzer-lsp --test diagnostics_tests` passed.
+  - `cargo test -p vhs-analyzer-core --test formatting_tests` passed.
+  - `cargo test --workspace --all-targets --locked` passed.

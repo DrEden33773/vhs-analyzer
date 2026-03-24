@@ -48,19 +48,69 @@ spec_files:
   - spec/phase2/SPEC_TRACEABILITY.md
 
 requirement_ids:
-  completion: [CMP-001, CMP-002, CMP-003, CMP-004, CMP-005, CMP-006, CMP-007, CMP-008, CMP-009, CMP-010]
-  diagnostics: [DIA-001, DIA-002, DIA-003, DIA-004, DIA-005, DIA-006, DIA-007, DIA-008, DIA-009, DIA-010, DIA-011, DIA-012, DIA-013]
+  completion:
+    [
+      CMP-001,
+      CMP-002,
+      CMP-003,
+      CMP-004,
+      CMP-005,
+      CMP-006,
+      CMP-007,
+      CMP-008,
+      CMP-009,
+      CMP-010,
+    ]
+  diagnostics:
+    [
+      DIA-001,
+      DIA-002,
+      DIA-003,
+      DIA-004,
+      DIA-005,
+      DIA-006,
+      DIA-007,
+      DIA-008,
+      DIA-009,
+      DIA-010,
+      DIA-011,
+      DIA-012,
+      DIA-013,
+      DIA-014,
+    ]
   safety: [SAF-001, SAF-002, SAF-003, SAF-004, SAF-005, SAF-006, SAF-007]
 
 test_scenarios:
-  total: 76
+  total: 78
   by_category:
-    completion: 29
-    diagnostics: 25
+    completion: 30
+    diagnostics: 26
     safety: 18
     integration: 4
 
 post_completion_revisions:
+  - date: "2026-03-24"
+    status: completed
+    approved_by_user: true
+    scope: "Treat Theme JSON as a legal opaque value for completion and diagnostics"
+    requirements_touched: [CMP-005, DIA-014]
+    test_ids:
+      - T-CMP-034F
+      - T-DIA-068
+    implementation_files:
+      - crates/vhs-analyzer-lsp/src/completion.rs
+      - crates/vhs-analyzer-lsp/tests/completion_tests.rs
+      - crates/vhs-analyzer-lsp/tests/diagnostics_tests.rs
+      - crates/vhs-analyzer-core/tests/formatting_tests.rs
+      - spec/phase2/SPEC_COMPLETION.md
+      - spec/phase2/SPEC_TEST_MATRIX.md
+      - spec/phase2/SPEC_TRACEABILITY.md
+      - trace/phase2/status.yaml
+      - trace/phase2/tracker.md
+    quality_gate:
+      cargo_fmt_all_check: pass
+      cargo_clippy_workspace_all_targets_all_features_locked: pass
+      cargo_test_workspace_all_targets_locked: pass
   - date: "2026-03-24"
     status: completed
     approved_by_user: true
@@ -93,7 +143,8 @@ batches:
   batch1:
     name: "Lightweight Diagnostic Rules (WS-2 partial)"
     work_packages: [WS-2]
-    requirements: [DIA-001, DIA-002, DIA-003, DIA-004, DIA-005, DIA-006, DIA-007, DIA-013]
+    requirements:
+      [DIA-001, DIA-002, DIA-003, DIA-004, DIA-005, DIA-006, DIA-007, DIA-013]
     test_ids: "T-DIA-001~T-DIA-065"
     crate: vhs-analyzer-lsp
     status: completed
@@ -111,7 +162,8 @@ batches:
   batch2:
     name: "Safety Engine (WS-3)"
     work_packages: [WS-3]
-    requirements: [SAF-001, SAF-002, SAF-003, SAF-004, SAF-005, SAF-006, SAF-007]
+    requirements:
+      [SAF-001, SAF-002, SAF-003, SAF-004, SAF-005, SAF-006, SAF-007]
     test_ids: "T-SAF-*"
     crate: vhs-analyzer-lsp
     depends_on: [batch1]
@@ -149,7 +201,19 @@ batches:
   batch4:
     name: "Completion Provider (WS-1)"
     work_packages: [WS-1]
-    requirements: [CMP-001, CMP-002, CMP-003, CMP-004, CMP-005, CMP-006, CMP-007, CMP-008, CMP-009, CMP-010]
+    requirements:
+      [
+        CMP-001,
+        CMP-002,
+        CMP-003,
+        CMP-004,
+        CMP-005,
+        CMP-006,
+        CMP-007,
+        CMP-008,
+        CMP-009,
+        CMP-010,
+      ]
     test_ids: "T-CMP-*"
     crate: vhs-analyzer-lsp
     depends_on: [batch3]

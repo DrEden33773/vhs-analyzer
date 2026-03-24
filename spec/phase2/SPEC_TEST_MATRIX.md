@@ -3,7 +3,7 @@
 **Phase:** 2 — Intelligence & Diagnostics
 **Status:** Stage B (CONTRACT_FROZEN)
 **Owner:** Architect → Builder
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-24
 
 ---
 
@@ -67,6 +67,7 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-CMP-034C | Theme names inside empty single-quoted string | `Set Theme ''` → completion with cursor between quotes | Theme names returned with the same value-completion behavior as the bare value position |
 | T-CMP-034D | Theme names inside partial quoted string | `Set Theme "D"` → completion with cursor after `D` | Theme names returned and filtered as Theme completions, not generic word suggestions |
 | T-CMP-034E | Quoted Theme acceptance preserves quotes | Accept `Catppuccin Mocha` inside `Set Theme ""` | Completion uses `textEdit` so only the quoted contents are replaced; surrounding quotes stay intact |
+| T-CMP-034F | No theme completions inside Theme JSON | `Set Theme { "name": "Dracula" }` → completion inside JSON value | No theme-name completion items returned |
 | T-CMP-035 | No themes for other settings | `Set FontSize` + space → completion | No theme name items returned |
 
 ### 2.5 Setting Value Completions
@@ -189,6 +190,7 @@ output. The Builder MUST implement tests covering every scenario listed here.
 | T-DIA-065 | BorderRadius zero valid | `Set BorderRadius 0` | No diagnostic (>= 0 allowed) |
 | T-DIA-066 | Valid bare built-in theme | `Set Theme Dracula` | No parse error and no `unknown-theme` diagnostic |
 | T-DIA-067 | Unknown built-in theme | `Set Theme "D"` | Error with code `unknown-theme` |
+| T-DIA-068 | JSON theme bypasses built-in registry validation | `Set Theme { "name": "Custom" }` | No `unknown-theme` diagnostic |
 
 ### 3.8 Require Program Not Found (Heavyweight)
 

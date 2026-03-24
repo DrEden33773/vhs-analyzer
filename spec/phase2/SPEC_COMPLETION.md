@@ -94,8 +94,8 @@ what category of completion to offer, then returns an appropriate list of
 | **ID** | CMP-005 |
 | **Priority** | P0 (MUST) |
 | **Owner** | Architect → Builder |
-| **Statement** | When the cursor is inside a `SET_COMMAND` whose setting is `Theme` and positioned after the `THEME_KW` token, the completion handler MUST return theme names from the built-in theme registry (§8). This requirement covers the bare value position (`Set Theme `), empty quoted strings (`Set Theme ""`, `Set Theme ''`), and partially typed quoted values such as `Set Theme "D"`. Each item MUST have `kind: CompletionItemKind::EnumMember` and `detail: "VHS built-in theme"`. In a bare value position, items MUST use `insertText` that wraps the theme name in double quotes whenever the value cannot be inserted as a single bare VHS token (for example names containing spaces, `+`, or `-`, such as `"Catppuccin Mocha"`, `"Dark+"`, or `"catppuccin-frappe"`). Bare-safe identifiers such as `Nord` MAY be inserted without quotes. When the cursor is already inside a quoted theme string, items MUST use `textEdit` to replace only the string contents and preserve the surrounding quote characters. |
-| **Verification** | Type `Set Theme` followed by a space and request completion; verify the list includes `Dracula`, `Catppuccin Mocha`, `Nord`, and at least 300 entries total. Place the cursor inside `Set Theme ""`, `Set Theme ''`, and `Set Theme "D"` and request completion; verify theme names are still returned. Accept `Catppuccin Mocha` inside `Set Theme ""`; verify the string contents become `Catppuccin Mocha` while the surrounding quotes remain unchanged. |
+| **Statement** | When the cursor is inside a `SET_COMMAND` whose setting is `Theme` and positioned after the `THEME_KW` token, the completion handler MUST return theme names from the built-in theme registry (§8). This requirement covers the bare value position (`Set Theme `), empty quoted strings (`Set Theme ""`, `Set Theme ''`), and partially typed quoted values such as `Set Theme "D"`. Each item MUST have `kind: CompletionItemKind::EnumMember` and `detail: "VHS built-in theme"`. In a bare value position, items MUST use `insertText` that wraps the theme name in double quotes whenever the value cannot be inserted as a single bare VHS token (for example names containing spaces, `+`, or `-`, such as `"Catppuccin Mocha"`, `"Dark+"`, or `"catppuccin-frappe"`). Bare-safe identifiers such as `Nord` MAY be inserted without quotes. When the cursor is already inside a quoted theme string, items MUST use `textEdit` to replace only the string contents and preserve the surrounding quote characters. This requirement does not apply once the `Theme` value token is a JSON literal; existing `Set Theme { ... }` values MUST be treated as opaque and MUST NOT produce theme-name completions inside or after that JSON literal. |
+| **Verification** | Type `Set Theme` followed by a space and request completion; verify the list includes `Dracula`, `Catppuccin Mocha`, `Nord`, and at least 300 entries total. Place the cursor inside `Set Theme ""`, `Set Theme ''`, and `Set Theme "D"` and request completion; verify theme names are still returned. Accept `Catppuccin Mocha` inside `Set Theme ""`; verify the string contents become `Catppuccin Mocha` while the surrounding quotes remain unchanged. Place the cursor inside `Set Theme { "name": "Dracula" }` and request completion; verify no theme-name completions are returned. |
 
 ### CMP-006 — Setting Value Completions
 
@@ -216,6 +216,7 @@ The context resolution algorithm maps cursor position to completion category:
 | After `Set` keyword, before setting name | SET_COMMAND | Setting names | CMP-004 |
 | After `Set Theme`, in bare value position | SET_COMMAND (Theme) | Theme names | CMP-005 |
 | Inside quoted `Set Theme` string (empty or partial) | SET_COMMAND (Theme) | Theme names with quote-preserving replacement | CMP-005 |
+| Inside or after an existing `Set Theme` JSON literal | SET_COMMAND (Theme, JSON value) | None | No completions |
 | After `Set CursorBlink`, in value position | SET_COMMAND (CursorBlink) | Boolean values | CMP-006 |
 | After `Set WindowBar`, in value position | SET_COMMAND (WindowBar) | Window bar styles | CMP-006 |
 | After `Set Shell`, in value position | SET_COMMAND (Shell) | Shell names | CMP-006 |
@@ -248,7 +249,10 @@ fn resolve_completion_context(root: &SyntaxNode, source: &str, offset: TextSize)
             if setting_kw is None or offset <= setting_kw.text_range().start():
                 return SettingNames
             match setting_kw.kind():
-                THEME_KW    -> return ThemeNames  // bare, empty quoted, and partial quoted values
+                THEME_KW:
+                    if existing_value_token(node).kind() == JSON:
+                        return NoCompletion
+                    return ThemeNames
                 CURSORBLINK_KW -> return BooleanValues
                 WINDOWBAR_KW -> return WindowBarStyles
                 SHELL_KW    -> return ShellNames
@@ -301,7 +305,8 @@ bare value position. Theme names without spaces (e.g., `Dracula`) SHOULD
 be inserted without quotes in bare position. When completion is requested
 inside an already quoted Theme string, the Builder MUST use `textEdit` to
 replace only the quoted contents so accepting a completion never creates
-double or mixed quote layers. The Builder MUST maintain a
+double or mixed quote layers. Existing Theme JSON values are legal VHS
+syntax but MUST be treated as opaque by completion. The Builder MUST maintain a
 `data/themes.txt` file (one theme name per line, `#`-prefixed lines are
 comments) derived from the upstream VHS THEMES.md. The file is embedded at
 compile time via `include_str!("../data/themes.txt")` and parsed once via

@@ -118,6 +118,14 @@ fn formatter_removes_spaces_around_at_in_type_duration() {
 }
 
 #[test]
+fn formatter_preserves_theme_json_verbatim_while_normalizing_outer_spacing() {
+    assert_formats_to(
+        "Set   Theme   { \"name\" : \"Dracula\", \"palette\": { \"bg\" : \"#000000\" } }   \n",
+        "Set Theme { \"name\" : \"Dracula\", \"palette\": { \"bg\" : \"#000000\" } }\n",
+    );
+}
+
+#[test]
 fn formatter_collapses_consecutive_blank_lines_to_one() {
     assert_formats_to("Type \"a\"\n\n\n\nEnter\n", "Type \"a\"\n\nEnter\n");
 }

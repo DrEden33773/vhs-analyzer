@@ -9,7 +9,7 @@ use tower_lsp_server::ls_types::{
     CompletionItem, CompletionItemKind, CompletionList, CompletionResponse, CompletionTextEdit,
     InsertTextFormat, TextEdit,
 };
-use vhs_analyzer_core::ast::{OutputCommand, SetCommand};
+use vhs_analyzer_core::ast::{OutputCommand, SetCommand, Setting};
 use vhs_analyzer_core::syntax::{SyntaxKind, SyntaxNode, SyntaxToken};
 
 struct CompletionSpec {
@@ -753,11 +753,18 @@ fn setting_value_context(syntax: &SyntaxNode, offset: usize) -> Option<Completio
     }
 
     match name_token.kind() {
-        SyntaxKind::THEME_KW => Some(CompletionContext::ThemeNames),
+        SyntaxKind::THEME_KW => theme_value_context(&setting),
         SyntaxKind::CURSORBLINK_KW => Some(CompletionContext::BooleanValues),
         SyntaxKind::WINDOWBAR_KW => Some(CompletionContext::WindowBarStyles),
         SyntaxKind::SHELL_KW => Some(CompletionContext::ShellNames),
         _ => None,
+    }
+}
+
+fn theme_value_context(setting: &Setting) -> Option<CompletionContext> {
+    match setting.value_token().map(|token| token.kind()) {
+        Some(SyntaxKind::JSON) => None,
+        _ => Some(CompletionContext::ThemeNames),
     }
 }
 

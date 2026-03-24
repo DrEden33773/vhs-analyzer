@@ -680,6 +680,43 @@ async fn completion_replaces_existing_theme_string_contents_without_adding_quote
 }
 
 #[tokio::test(flavor = "current_thread")]
+async fn completion_returns_no_theme_names_inside_theme_json_value() {
+    let (mut service, _) = LspService::new(VhsLanguageServer::new);
+    let _ = initialize_service(&mut service).await;
+    let uri: Uri = "file:///workspace/completion-test.tape"
+        .parse()
+        .expect("valid URI");
+    let source = "Set Theme { \"name\": \"Dracula\" }";
+    let inside_json = source
+        .find("Dracula")
+        .expect("expected Dracula inside theme JSON")
+        + 1;
+
+    open_document(&mut service, &uri, source).await;
+
+    let inside_items = maybe_completion_items(
+        &completion_response(&mut service, &uri, position_for_offset(source, inside_json)).await,
+    );
+    let end_items = maybe_completion_items(
+        &completion_response(
+            &mut service,
+            &uri,
+            position_for_offset(source, source.len()),
+        )
+        .await,
+    );
+
+    assert!(
+        inside_items.is_none(),
+        "expected no theme completions inside a Theme JSON value"
+    );
+    assert!(
+        end_items.is_none(),
+        "expected no theme completions after an existing Theme JSON value"
+    );
+}
+
+#[tokio::test(flavor = "current_thread")]
 async fn completion_returns_boolean_values_after_set_cursor_blink() {
     let (mut service, _) = LspService::new(VhsLanguageServer::new);
     let _ = initialize_service(&mut service).await;
