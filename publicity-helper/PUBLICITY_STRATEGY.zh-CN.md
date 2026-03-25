@@ -97,7 +97,7 @@ VHS 上游（charmbracelet/vhs）有 ~19K stars，用户基数大，但编辑器
 
 ```text
 Day 0-2   准备阶段
-          ├─ 录制 Demo GIF（用 VHS 录制展示 vhs-analyzer 的视频）
+          ├─ 录制 Demo GIF
           ├─ 截取功能截图集
           ├─ 更新 README（嵌入 GIF + 截图）
           ├─ 创建 examples/ 目录

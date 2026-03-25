@@ -97,7 +97,7 @@ The core target audience lives here. Reach them first.
 
 ```text
 Day 0-2   Preparation
-          ├─ Record Demo GIF (use VHS to record vhs-analyzer in action)
+          ├─ Record Demo GIF
           ├─ Capture feature screenshots
           ├─ Update README (embed GIF + screenshots)
           ├─ Create examples/ directory
